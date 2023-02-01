@@ -1,0 +1,63 @@
+
+// Option page form media button
+.fwplistivo-media-button {
+  height: auto;
+  position: relative;
+  display: inline-block;
+  .fwplistivo-upload {
+    display: block;
+    height: 100px;
+    width: 100px;
+    img {
+      height: 100%;
+      width: 100%;
+      background: none;
+      box-shadow: none;
+      border: 1px solid #eee;
+      box-sizing: border-box;
+      padding: 3px;
+      box-shadow: 1px 1px 5px #ddd;
+    }
+    &.button {
+      height: unset;
+    }
+  }
+  .fwplistivo-remove {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: unset;
+    height: 20px;
+    width: 20px;
+    text-align: center;
+    border-radius: 10px;
+    background: #fff;
+    color: #333;
+    text-decoration: none;
+    font-size: 10px;
+    line-height: 20px;
+    overflow: hidden;
+    box-shadow: 1px 0px 5px #ddd;
+    transition: all .7s ease;
+    opacity: 0;
+    visibility: hidden;
+  }
+  &:hover .fwplistivo-remove {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+.fwp-video-player-wraper {
+  width: 100%;
+  height: auto;
+  margin: auto;
+  display: block;
+  position: relative;
+  max-width: 400px;
+}
+
+.fwp-videojs-record-field, .fwp-videojs-playing-field {
+  width: 100%;
+  // min-height: 99%;
+  max-height: 100%;
+}
