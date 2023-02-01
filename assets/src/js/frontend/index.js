@@ -1,5 +1,5 @@
 import Swal from "sweetalert2";
-import got from 'got';
+import { toast } from 'toast-notification-alert';
 
 
 ( function ( $ ) {
@@ -18,10 +18,13 @@ import got from 'got';
 				submit						: 'Submit',
 				request_failed				: 'Request failed',
 				give_your_old_password		: 'Give here your old password',
+				you_paused					: 'Pause your Retainer',
+				you_unpaused				: 'Your unpaused Retainer',
 				...i18n
 			}
 			this.init();this.toOpenEdit();this.inputEventListner();
 			this.cancelSubscription();this.changePassword();
+			this.toggleStatus();
 			// console.log( 'frontend init...' );
 		}
 		init() {
@@ -133,7 +136,7 @@ import got from 'got';
 			}
 		}
 		toOpenEdit() {
-			var i, el;
+			const thisClass = this;var i, el;
 			document.querySelectorAll( '[id^=basic-editopen-]' ).forEach( ( pen ) => {
 				pen.addEventListener( 'click', ( e ) => {
 					el = pen.previousElementSibling;
@@ -147,7 +150,7 @@ import got from 'got';
 			} );
 		}
 		inputEventListner() {
-			var i, el;
+			const thisClass = this;var i, el;
 			document.querySelectorAll( 'input' ).forEach( ( input ) => {
 				input.addEventListener( 'change', ( e ) => {
 					el = input.nextElementSibling;
@@ -156,9 +159,54 @@ import got from 'got';
 						i = el.querySelector( 'i' );
 						if( i ) {i.classList.remove( 'fa-circle-notch' );i.classList.add( 'fa-spinner', 'fa-spin' );}
 						//  | fa-times | afa-check |   | 
+						var formdata = new FormData();
+						formdata.append( 'action', 'futurewordpress/project/action/singlefield' );
+						formdata.append( 'field', el.name );
+						formdata.append( 'value', el.value );
+						formdata.append( '_nonce', thisClass.ajaxNonce );
+						thisClass.sendToServer( formdata );
 					} else {}
 				} );
 			} );
+		}
+		toggleStatus() {
+			document.querySelectorAll( '.fwp-form-checkbox-pause-subscribe' ).forEach( ( el, ei ) => {
+				
+				el.addEventListener( 'change', ( event ) => {
+					var formdata = new FormData();
+						formdata.append( 'action', 'futurewordpress/project/action/singlefield' );
+						formdata.append( 'field', el.name );
+						formdata.append( 'value', el.value );
+						formdata.append( '_nonce', thisClass.ajaxNonce );
+						// thisClass.sendToServer( formdata );
+					Swal.fire({
+						title: ( el.checked ) ? thisClass.i18n.you_paused : thisClass.i18n.you_un_paused
+					});
+				} );
+			} );
+		}
+		sendToServer( data ) {
+			const thisClass = this;var message;
+			$.ajax({
+				url: thisClass.ajaxUrl,
+				type: "POST",
+				data: data,    
+				cache: false,
+				contentType: false,
+				processData: false,
+				success: function( json ) {
+					// console.log( json );
+					message = ( json.data.message ) ? json.data.message : json.data;
+					if( json.success ) {
+						toast.show({title: message, position: 'bottomright', type: 'info'});
+					} else {
+						toast.show({title: message, position: 'bottomright', type: 'warn'});
+					}
+				},
+				error: function( err ) {
+					console.log( err.responseText );
+				}
+			});
 		}
 	}
 	new FutureWordPress_Frontend();

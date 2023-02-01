@@ -165,7 +165,7 @@
                     <div class="col-lg-9 col-xl-9 align-items-center">
                       <div class="row col-12">
                         <div class="col-sm-3 form-check form-check-custom form-check-solid form-switch">
-                          <input class="form-check-input" type="checkbox" checked />
+                          <input class="form-check-input fwp-form-checkbox-pause-subscribe" type="checkbox" checked />
                         </div>
                         <div class="col-sm-9">
                           <button type="button" class="btn btn-light-danger fw-bold btn-sm fwp-sweetalert-field" data-config="<?php echo esc_attr( json_encode( [
@@ -211,6 +211,20 @@
                   
                   <!--begin::Form row-->
                   <div class="row mb-8">
+                    <label class="col-lg-3 col-form-label"><?php esc_html_e( 'Email Address', 'we-make-content-crm' ); ?></label>
+                    <div class="col-lg-9">
+                      <div class="input-group mb-5">
+                        <input type="text" class="form-control form-control-lg form-control-solid" placeholder="example@gmail.com" aria-label="example@gmail.com" aria-describedby="basic-editopen-contact" oldautocomplete="remove" autocomplete="off" disabled>
+                        <span class="input-group-text" id="basic-editopen-contact">
+                          <i class="fas fa-pencil-alt fs-4"></i>
+                        </span>
+                      </div>
+                      <div class="form-text"><?php esc_html_e( 'Your conatct number is necessery in case if you need to communicate with you.', 'we-make-content-crm' ); ?> <a href="#" class="fw-bold"><?php esc_html_e( 'Learn more', 'we-make-content-crm' ); ?></a>. </div>
+                    </div>
+                  </div>
+                  <!--end::Form row-->
+                  <!--begin::Form row-->
+                  <div class="row mb-8">
                     <label class="col-lg-3 col-form-label"><?php esc_html_e( 'Contact Number', 'we-make-content-crm' ); ?></label>
                     <div class="col-lg-9">
                       <div class="input-group mb-5">
@@ -246,7 +260,7 @@
                     <div class="col-lg-9">
                       <div class="input-group input-group-solid mb-5">
                         <span class="input-group-text" id="basic-pre-addons-1"><?php echo esc_html( 'https://www.instagram.com/' ); ?></span>
-                        <input type="text" class="form-control" id="basic-url-1" aria-describedby="basic-addon3" value="" placeholder="<?php echo esc_url( '@username' ); ?>" disabled>
+                        <input type="text" class="form-control form-control-solid" id="basic-url-1" aria-describedby="basic-addon3" value="" placeholder="<?php echo esc_url( '@username' ); ?>" disabled>
                         <span class="input-group-text" id="basic-editopen-instagram">
                           <i class="fas fa-pencil-alt fs-4"></i>
                         </span>
@@ -260,7 +274,7 @@
                     <div class="col-lg-9">
                       <div class="input-group input-group-solid mb-5">
                         <span class="input-group-text" id="basic-pre-addons-2"><?php echo esc_html( 'https://www.tiktok.com/' ); ?></span>
-                        <input type="text" class="form-control" id="basic-url-2" aria-describedby="basic-addon3" value="" placeholder="<?php echo esc_url( '@username' ); ?>" disabled>
+                        <input type="text" class="form-control form-control-solid" id="basic-url-2" aria-describedby="basic-addon3" value="" placeholder="<?php echo esc_url( '@username' ); ?>" disabled>
                         <span class="input-group-text" id="basic-editopen-tiktok">
                           <i class="fas fa-pencil-alt fs-4"></i>
                         </span>
@@ -274,7 +288,7 @@
                     <div class="col-lg-9">
                       <div class="input-group input-group-solid mb-5">
                         <span class="input-group-text" id="basic-pre-addons-3"><?php echo esc_html( 'https://youtube.com/' ); ?></span>
-                        <input type="text" class="form-control" id="basic-url-3" aria-describedby="basic-addon3" value="" placeholder="<?php echo esc_url( '@username' ); ?>" disabled>
+                        <input type="text" class="form-control form-control-solid" id="basic-url-3" aria-describedby="basic-addon3" value="" placeholder="<?php echo esc_url( '@username' ); ?>" disabled>
                         <span class="input-group-text" id="basic-editopen-youtube">
                           <i class="fas fa-pencil-alt fs-4"></i>
                         </span>

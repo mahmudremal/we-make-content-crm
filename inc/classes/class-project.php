@@ -18,6 +18,7 @@ class Project {
 		Assets::get_instance();
 		Core::get_instance();
 		Helpers::get_instance();
+		Dashboard::get_instance();
 		// Widgets::get_instance();
 		// Notices::get_instance();
 		// Admin::get_instance();

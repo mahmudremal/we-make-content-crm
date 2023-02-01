@@ -44,8 +44,10 @@ class Assets {
 		// wp_register_style( 'bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css', [], false, 'all' );
 
 		wp_register_style( 'WeMakeContentCMS', WEMAKECONTENTCMS_BUILD_CSS_URI . '/frontend.css', [], $this->filemtime( WEMAKECONTENTCMS_BUILD_CSS_DIR_PATH . '/frontend.css' ), 'all' );
+		wp_register_style( 'WeMakeContentCMS-library', WEMAKECONTENTCMS_BUILD_LIB_URI . '/css/frontend-library.css', [], false, 'all' );
 
 		// Enqueue Styles.
+		wp_enqueue_style( 'WeMakeContentCMS-library' );
 		wp_enqueue_style( 'WeMakeContentCMS' );
 		// if( $this->allow_enqueue() ) {}
 
@@ -148,9 +150,14 @@ class Assets {
 		// if( ! in_array( $curr_page, [ 'edit.php', 'post.php' ] ) || 'shop_order' !== $post->post_type ) {return;}
 		wp_register_style( 'WeMakeContentCMSBackendCSS', WEMAKECONTENTCMS_BUILD_CSS_URI . '/backend.css', [], $this->filemtime( WEMAKECONTENTCMS_BUILD_CSS_DIR_PATH . '/backend.css' ), 'all' );
 		wp_register_script( 'WeMakeContentCMSBackendJS', WEMAKECONTENTCMS_BUILD_JS_URI . '/backend.js', [ 'jquery' ], $this->filemtime( WEMAKECONTENTCMS_BUILD_JS_DIR_PATH . '/backend.js' ), true );
+		// wp_register_style( 'WeMakeContentCMSBackend', 'https://templates.iqonic.design/product/qompac-ui/html/dist/assets/css/qompac-ui.min.css?v=1.0.1', [], false, 'all' );
+		wp_register_style( 'WeMakeContentCMSBackend', WEMAKECONTENTCMS_BUILD_LIB_URI . '/css/backend-library.css', [], false, 'all' );
 		
 		wp_enqueue_style( 'WeMakeContentCMSBackendCSS' );
 		wp_enqueue_script( 'WeMakeContentCMSBackendJS' );
+		if( isset( $_GET[ 'page' ] ) && in_array( $_GET[ 'page' ], apply_filters( 'futurewordpress/project/admin/allowedpage', [] ) ) ) {
+			wp_enqueue_style( 'WeMakeContentCMSBackend' );
+		}
 
 		wp_localize_script( 'WeMakeContentCMSBackendJS', 'fwpSiteConfig', apply_filters( 'futurewordpress/project/javascript/siteconfig', [] ) );
 	}
@@ -176,7 +183,8 @@ class Assets {
 				'confirming'								=> __( 'Confirming', 'we-make-content-crm' ),
 				'request_failed'							=> __( 'Request failed', 'we-make-content-crm' ),
 				'submit'									=> __( 'Submit', 'we-make-content-crm' ),
-				'give_your_old_password'						=> __( 'Give here your old password', 'we-make-content-crm' ),
+				'give_your_old_password'					=> __( 'Give here your old password', 'we-make-content-crm' ),
+				'you_paused'								=> __( 'Pause your Retainer', 'we-make-content-crm' ),
 			],
 		], (array) $args );
 	}

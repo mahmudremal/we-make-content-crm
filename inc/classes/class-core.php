@@ -20,6 +20,7 @@ class Core {
 
 		add_action( 'wp_ajax_futurewordpress/project/action/cancelsubscription', [ $this, 'cancelSubscription' ], 10, 0 );
 		add_action( 'wp_ajax_futurewordpress/project/action/changepassword', [ $this, 'cancelSubscription' ], 10, 0 );
+		add_action( 'wp_ajax_futurewordpress/project/action/singlefield', [ $this, 'cancelSubscription' ], 10, 0 );
 	}
 	public function requestDashboard() {
 		// print_r( $_POST );
@@ -36,4 +37,5 @@ class Core {
 	public function cancelSubscription() {
 		wp_send_json_success( __( 'Message recieved but doesn\'t proceed.', 'domain' ), 200 );
 	}
+	public function singleField() {}
 }
