@@ -134,6 +134,33 @@ class Menus {
 				],
 			]
 		];
+		$args['docs'] 		= [
+			'title'							=> __( 'Documentation', 'we-make-content-crm' ),
+			'description'				=> __( 'Documentation feature and their links can be change from here. If you leave blank anything then these "Learn More" never display.', 'we-make-content-crm' ) . $this->commontags( true ),
+			'fields'						=> [
+				[
+					'id' 						=> 'docs-title',
+					'label'					=> __( 'docs title', 'we-make-content-crm' ),
+					'description'		=> __( 'The title on dahsboard page. make sure you user tags properly.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> sprintf( __( 'Client Dashoard | %s | %s', 'we-make-content-crm' ), '{username}', '{sitename}' )
+				],
+				[
+					'id' 						=> 'docs-yearstart',
+					'label'					=> __( 'Year Starts', 'we-make-content-crm' ),
+					'description'		=> __( 'The Year range on docs starts from.', 'we-make-content-crm' ),
+					'type'					=> 'number',
+					'default'				=> date( 'Y' )
+				],
+				[
+					'id' 						=> 'docs-yearend',
+					'label'					=> __( 'Yeah Ends with', 'we-make-content-crm' ),
+					'description'		=> __( 'The Year range on docs ends on.', 'we-make-content-crm' ),
+					'type'					=> 'number',
+					'default'				=> ( date( 'Y' ) + 3 )
+				],
+			]
+		];
 		return $args;
 	}
 	/**

@@ -11,6 +11,16 @@
         }
         .dashboard__body-start {
           display: block;
+          .card-block.card-height {
+            max-width: unset;
+          }
+          .notice, .notice ~ .updated  {
+            display: none;
+          }
+          .card-full-width {
+            width: 100%;
+            max-width: unset;
+          }
         }
       }
     }
@@ -18,5 +28,17 @@
     &.folded #wpcontent {
       margin-left: 36px;
     }
+    &.fwp-full-screen {
+      #wpadminbar, #adminmenumain {
+        display: none;
+      }
+      #wpcontent, #wpfooter {
+        margin-left: auto;
+      }
+    }
   }
+}
+.iq-banner ~ #wpbody #wpbody-content .dashboard__body-start #page_layout {
+  // width: 90%;
+  margin-top: -8rem;
 }

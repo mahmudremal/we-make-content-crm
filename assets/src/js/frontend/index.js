@@ -19,12 +19,13 @@ import { toast } from 'toast-notification-alert';
 				request_failed				: 'Request failed',
 				give_your_old_password		: 'Give here your old password',
 				you_paused					: 'Pause your Retainer',
-				you_unpaused				: 'Your unpaused Retainer',
+				you_un_paused				: 'Your unpaused Retainer',
 				...i18n
 			}
 			this.init();this.toOpenEdit();this.inputEventListner();
 			this.cancelSubscription();this.changePassword();
-			this.toggleStatus();
+			this.toggleStatus();this.passwordToggle();
+			// this.accordion();
 			// console.log( 'frontend init...' );
 		}
 		init() {
@@ -54,7 +55,14 @@ import { toast } from 'toast-notification-alert';
 			node = document.querySelector( '.fwp-sweetalert-field:not([data-handled])' );
 			if( node ) {
 				node.addEventListener( 'click', ( event ) => {
-					  Swal.fire({
+					const swalWithBootstrapButtons = Swal.mixin({
+						customClass: {
+							confirmButton			: 'btn btn-danger',
+							cancelButton			: 'btn btn-primary'
+						},
+						buttonsStyling: false
+					})
+					swalWithBootstrapButtons.fire({
 						title: 'Attantion!',
 						text: thisClass.i18n.confirm_cancel_subscribe,
 						icon: 'warning',
@@ -142,8 +150,8 @@ import { toast } from 'toast-notification-alert';
 					el = pen.previousElementSibling;
 					if( el.hasAttribute( 'disabled' ) ) {
 						el.removeAttribute( 'disabled' );el.classList.remove( 'form-control-solid' );
-						i = pen.querySelector( 'i' );
-						if( i ) {i.classList.remove( 'fa-pencil-alt' );i.classList.add( 'fa-circle-notch' );}
+						i = pen.querySelector( 'i' );if( i ) {i.classList.remove( 'fa-pencil-alt' );i.classList.add( 'fa-circle-notch' );}
+						if( el.parentElement ) {el.parentElement.classList.remove( 'input-group-solid' );}
 						// fa-circle-notch | fa-times | afa-check | fa-spinner  | 'fa-spin'
 					} else {}
 				} );
@@ -154,6 +162,7 @@ import { toast } from 'toast-notification-alert';
 			document.querySelectorAll( 'input' ).forEach( ( input ) => {
 				input.addEventListener( 'change', ( e ) => {
 					el = input.nextElementSibling;
+					// console.log( [ el, input, this ] );
 					if( el && el.classList.contains( 'input-group-text' ) ) {
 						// input.setAttribute( 'disabled' );
 						i = el.querySelector( 'i' );
@@ -161,8 +170,8 @@ import { toast } from 'toast-notification-alert';
 						//  | fa-times | afa-check |   | 
 						var formdata = new FormData();
 						formdata.append( 'action', 'futurewordpress/project/action/singlefield' );
-						formdata.append( 'field', el.name );
-						formdata.append( 'value', el.value );
+						formdata.append( 'field', input.name );
+						formdata.append( 'value', input.value );
 						formdata.append( '_nonce', thisClass.ajaxNonce );
 						thisClass.sendToServer( formdata );
 					} else {}
@@ -170,8 +179,8 @@ import { toast } from 'toast-notification-alert';
 			} );
 		}
 		toggleStatus() {
+			const thisClass = this;
 			document.querySelectorAll( '.fwp-form-checkbox-pause-subscribe' ).forEach( ( el, ei ) => {
-				
 				el.addEventListener( 'change', ( event ) => {
 					var formdata = new FormData();
 						formdata.append( 'action', 'futurewordpress/project/action/singlefield' );
@@ -179,11 +188,44 @@ import { toast } from 'toast-notification-alert';
 						formdata.append( 'value', el.value );
 						formdata.append( '_nonce', thisClass.ajaxNonce );
 						// thisClass.sendToServer( formdata );
-					Swal.fire({
-						title: ( el.checked ) ? thisClass.i18n.you_paused : thisClass.i18n.you_un_paused
-					});
+					// toast.show({title: ( el.checked ) ? thisClass.i18n.you_paused : thisClass.i18n.you_un_paused, position: 'topright', type: ( el.checked ) ? 'info' : 'alert' });
+					Swal.fire( { position: 'top-end', icon: 'success', title: ( el.checked ) ? thisClass.i18n.you_paused : thisClass.i18n.you_un_paused, showConfirmButton: false, timer: 1500 } );
 				} );
 			} );
+		}
+		accordion() {
+			document.querySelectorAll( '.accordion' ).forEach( ( al, ai ) => {
+				al.querySelectorAll( '.accordion-header' ).forEach( ( el, ei ) => {
+						el.addEventListener( 'toggle', ( event ) => {
+								let node = document.querySelector( el.dataset.bsTarget );
+								if( node ) {
+										node.classList.toggle( 'show' );
+								}
+						} );
+				} );
+			} );
+		
+		}
+		datatable() {
+			const thisClass = this;
+			document.querySelectorAll( '#kt_datatable_content_library' ).forEach( ( el, ei ) => {
+				$( el ).DataTable( {
+					ajax: thisClass.ajaxUrl + '?action=futurewordpress/project/database/contents&_nonce=' + thisClass.ajaxNonce
+				} );
+			} );
+		
+		}
+		passwordToggle() {
+			document.querySelectorAll( '.input-group-text.password-toggle' ).forEach( ( el, ei ) => {
+				el.addEventListener( 'click', ( event ) => {
+						el.classList.toggle( 'showing' );
+						ei = el.nextElementSibling;
+						if( ei ) {
+								ei.type = ( ei.type == 'text' ) ? 'password' : 'text';
+						}
+				} );
+			} );
+		
 		}
 		sendToServer( data ) {
 			const thisClass = this;var message;
@@ -210,4 +252,4 @@ import { toast } from 'toast-notification-alert';
 		}
 	}
 	new FutureWordPress_Frontend();
-} )( ( typeof jQuery !== 'undefined' ) ? jQuery : false );
+} )( jQuery );

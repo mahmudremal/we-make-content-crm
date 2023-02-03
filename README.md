@@ -1,7 +1,5 @@
-# Woocommerce Checkout Video Submittion Idea
-### Hola 👋
-This WP theme is created for woocommerce checkout form, where the purpose is, when user want to submit their order, then they have a possiblity to submit a short length video with order notes. So simple. Right ;)
-
+# WoordPress CRM based on facebook leads
+This pugin created for gathering leads from facebook and working on it with calendly, google spreadsheet and more.
 ### Hi, I'm Remal Mahmud, currently working on something freelance projects 😉
 ### Connect with me:
 

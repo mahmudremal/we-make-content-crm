@@ -1,7 +1,7 @@
 // https://kinsta.com/blog/http-status-codes/
 // Scripts
 // import './frontend';
-import './backend';
+import './backend/index';
 // import './backend/notice';
 // import './backend/buttons';
 // import './modules/qrcode';

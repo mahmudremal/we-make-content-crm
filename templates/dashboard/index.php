@@ -11,11 +11,13 @@ $user_profile = get_query_var( 'user_profile' );$errorHappens = false;
 // if( get_current_user_id() == $user_profile ) {}
 // print_r( get_userdata( $user_profile ) );
 
-// get_user_by( 'id | ID | slug | email | login ', $user_profile ): 
-print_r( get_user_by( 'slug', $user_profile ) );
-
+// 'id | ID | slug | email | login ', $user_profile
 $userInfo = get_user_by( apply_filters( 'futurewordpress/project/system/getoption', 'permalink-userby', 'id' ), $user_profile );
-
+$userMeta = array_map( function( $a ){ return $a[0]; }, get_user_meta( $userInfo->ID ) );
+$userInfo = (object) wp_parse_args( $userInfo, [
+  'id'            => '',
+  'meta'          => (object) apply_filters( 'futurewordpress/project/usermeta/defaults', (array) $userMeta )
+] );
 if( $errorHappens ) :
   // http_response_code( 404 );
   // status_header( 404, 'Course not found' );

@@ -31,6 +31,9 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 		add_filter( 'futurewordpress/project/system/getoption', [ $this, 'getOption' ], 10, 2 );
 		add_filter( 'futurewordpress/project/system/isactive', [ $this, 'isActive' ], 10, 1 );
 
+		add_filter( 'futurewordpress/project/database/countries', [ $this, 'databaseCountries' ], 10, 2 );
+		add_filter( 'futurewordpress/project/database/countryflags', [ $this, 'countryFlags' ], 10, 1 );
+
 
 		add_filter( 'futurewordpress/project/filter/server/time', [ $this, 'serverTime' ], 10, 2 );
 		add_filter( 'futurewordpress/project/filesystem/filemtime', [ $this, 'filemtime' ], 10, 2 );
@@ -125,7 +128,7 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 	}
 	public function uploadFile() {
 		if( ! function_exists( 'WC' ) ) {wp_send_json_error( __( 'Woo not installed', 'we-make-content-crm' ), 200 );}
-		check_ajax_referer( 'futurewordpress_project_nonce', '_nonce' );
+		check_ajax_referer( 'futurewordpress/project/verify/nonce', '_nonce' );
 
 		if( isset( $_FILES[ 'blobFile' ] ) || isset( $_FILES[ 'file' ] ) ) {
 			$file = isset( $_FILES[ 'blobFile' ] ) ? $_FILES[ 'blobFile' ] : $_FILES[ 'file' ];
@@ -168,7 +171,7 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 
 	}
 	public function removeFile() {
-		check_ajax_referer( 'futurewordpress_project_nonce', '_nonce' );
+		check_ajax_referer( 'futurewordpress/project/verify/nonce', '_nonce' );
 		$fileInfo = isset( $_POST[ 'fileinfo' ] ) ? (array) json_decode( str_replace( "\\", "", $_POST[ 'fileinfo' ] ) ) : [];
 
 		// if( isset( $fileInfo[ 'full_path' ] ) ) {$_POST[ 'todelete' ] = $fileInfo[ 'full_path' ];}
@@ -184,7 +187,7 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 		}
 	}
 	public function downloadFile() {
-		check_ajax_referer( 'futurewordpress_project_nonce', '_nonce' );
+		check_ajax_referer( 'futurewordpress/project/verify/nonce', '_nonce' );
 		$order_id = isset( $_GET[ 'order_id' ] ) ? $_GET[ 'order_id' ] : false;$fileInfo = [];
 		$meta = get_post_meta( $order_id, 'checkout_video_clip', true );
 		if( $meta && !empty( $meta ) && isset( $meta[ 'name' ] ) ) {$fileInfo = $meta;}
@@ -195,6 +198,20 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 			print_r( $fileInfo );
 			wp_die( __( 'File not found', 'we-make-content-crm' ), __( '404 not found', 'we-make-content-crm' ) );
 		}
+	}
+	public function databaseCountries( $countries, $specific = false ) {
+		if( function_exists( 'WC' ) ) {
+			$countries = WC()->countries->get_countries();
+			if( isset( $countries[ 'IL' ] ) ) {
+				unset( $countries[ 'IL' ] );
+			}
+		}
+		return ( $specific !== false && isset( $countries[ $specific ] ) ) ? $countries[ $specific ] : $countries;
+	}
+	public function countryFlags( $country ) {
+		$country = empty( $country ) ? false : $country;
+		// https://countryflagsapi.com/svg/
+		return ( $country ) ? 'https://flagpedia.net/data/flags/icon/36x27/' . strtolower( $country ) . '.webp' : false;
 	}
 
 }

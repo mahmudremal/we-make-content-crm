@@ -38,7 +38,7 @@ class Assets {
 
 	public function register_styles() {
 		// Register styles.
-		// wp_register_style( 'bootstrap-css', WEMAKECONTENTCMS_BUILD_LIB_URI . '/css/bootstrap.min.css', [], false, 'all' );
+		wp_register_style( 'bootstrap', WEMAKECONTENTCMS_BUILD_LIB_URI . '/css/bootstrap.min.css', [], false, 'all' );
 		// wp_register_style( 'slick-css', WEMAKECONTENTCMS_BUILD_LIB_URI . '/css/slick.css', [], false, 'all' );
 		// wp_register_style( 'slick-theme-css', WEMAKECONTENTCMS_BUILD_LIB_URI . '/css/slick-theme.css', ['slick-css'], false, 'all' );
 		// wp_register_style( 'bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css', [], false, 'all' );
@@ -63,17 +63,20 @@ class Assets {
 		wp_register_script( 'WeMakeContentCMS', WEMAKECONTENTCMS_BUILD_JS_URI . '/frontend.js', ['jquery'], $this->filemtime( WEMAKECONTENTCMS_BUILD_JS_DIR_PATH . '/frontend.js' ), true );
 		// wp_register_script( 'single-js', WEMAKECONTENTCMS_BUILD_JS_URI . '/single.js', ['jquery', 'slick-js'], $this->filemtime( WEMAKECONTENTCMS_BUILD_JS_DIR_PATH . '/single.js' ), true );
 		// wp_register_script( 'author-js', WEMAKECONTENTCMS_BUILD_JS_URI . '/author.js', ['jquery'], $this->filemtime( WEMAKECONTENTCMS_BUILD_JS_DIR_PATH . '/author.js' ), true );
-		// wp_register_script( 'bootstrap', WEMAKECONTENTCMS_BUILD_LIB_URI . '/js/bootstrap.min.js', ['jquery'], false, true );
+		wp_register_script( 'bootstrap', WEMAKECONTENTCMS_BUILD_LIB_URI . '/js/bootstrap.min.js', ['jquery'], false, true );
 		// wp_register_script( 'bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js', ['jquery'], false, true );
 		wp_register_script( 'prismjs', 'https://preview.keenthemes.com/start/assets/plugins/custom/prismjs/prismjs.bundle.js', ['jquery'], false, true );
+		wp_register_script( 'datatables', 'https://preview.keenthemes.com/start/assets/plugins/custom/datatables/datatables.bundle.js', ['jquery'], false, true );
 		wp_register_script( 'popperjs', 'https://unpkg.com/@popperjs/core@2', ['jquery'], false, true );
 		wp_register_script( 'plugins-bundle', WEMAKECONTENTCMS_BUILD_LIB_URI . '/js/keenthemes.plugins.bundle.js', ['jquery'], false, true );
 		wp_register_script( 'scripts-bundle', WEMAKECONTENTCMS_BUILD_LIB_URI . '/js/keenthemes.scripts.bundle', ['jquery'], false, true );
 
 		// Enqueue Scripts.
 		// Both of is_order_received_page() and is_wc_endpoint_url( 'order-received' ) will work to check if you are on the thankyou page in the frontend.
+		wp_enqueue_script( 'datatables' );
 		wp_enqueue_script( 'WeMakeContentCMS' );
-		// wp_enqueue_script( 'prismjs' );wp_enqueue_script( 'popperjs' );wp_enqueue_script( 'bootstrap' );
+		// wp_enqueue_script( 'prismjs' );wp_enqueue_script( 'popperjs' )
+		;wp_enqueue_script( 'bootstrap' );
 		// if( $this->allow_enqueue() ) {}
 		
 		// wp_enqueue_script( 'bootstrap-js' );
@@ -150,13 +153,15 @@ class Assets {
 		// if( ! in_array( $curr_page, [ 'edit.php', 'post.php' ] ) || 'shop_order' !== $post->post_type ) {return;}
 		wp_register_style( 'WeMakeContentCMSBackendCSS', WEMAKECONTENTCMS_BUILD_CSS_URI . '/backend.css', [], $this->filemtime( WEMAKECONTENTCMS_BUILD_CSS_DIR_PATH . '/backend.css' ), 'all' );
 		wp_register_script( 'WeMakeContentCMSBackendJS', WEMAKECONTENTCMS_BUILD_JS_URI . '/backend.js', [ 'jquery' ], $this->filemtime( WEMAKECONTENTCMS_BUILD_JS_DIR_PATH . '/backend.js' ), true );
+
 		// wp_register_style( 'WeMakeContentCMSBackend', 'https://templates.iqonic.design/product/qompac-ui/html/dist/assets/css/qompac-ui.min.css?v=1.0.1', [], false, 'all' );
 		wp_register_style( 'WeMakeContentCMSBackend', WEMAKECONTENTCMS_BUILD_LIB_URI . '/css/backend-library.css', [], false, 'all' );
+		wp_register_script( 'WeMakeContentCMSBackend', WEMAKECONTENTCMS_BUILD_JS_URI . '/backend-library.js', [ 'jquery' ], $this->filemtime( WEMAKECONTENTCMS_BUILD_JS_DIR_PATH . '/backend-library.js' ), true );
 		
 		wp_enqueue_style( 'WeMakeContentCMSBackendCSS' );
 		wp_enqueue_script( 'WeMakeContentCMSBackendJS' );
 		if( isset( $_GET[ 'page' ] ) && in_array( $_GET[ 'page' ], apply_filters( 'futurewordpress/project/admin/allowedpage', [] ) ) ) {
-			wp_enqueue_style( 'WeMakeContentCMSBackend' );
+			wp_enqueue_style( 'WeMakeContentCMSBackend' );wp_enqueue_script( 'WeMakeContentCMSBackend' );
 		}
 
 		wp_localize_script( 'WeMakeContentCMSBackendJS', 'fwpSiteConfig', apply_filters( 'futurewordpress/project/javascript/siteconfig', [] ) );
@@ -167,24 +172,28 @@ class Assets {
 	public function siteConfig( $args ) {
 		return wp_parse_args( [
 			'ajaxUrl'    		=> admin_url( 'admin-ajax.php' ),
-			'ajax_nonce' 		=> wp_create_nonce( 'futurewordpress_project_nonce' ),
+			'ajax_nonce' 		=> wp_create_nonce( 'futurewordpress/project/verify/nonce' ),
+			'is_admin' 			=> is_admin(),
 			'buildPath'  		=> WEMAKECONTENTCMS_BUILD_URI,
 			'i18n'					=> [
-				'sureToSubmit'								=> __( 'Want to submit it? You can retake.', 'we-make-content-crm' ),
+				'sureToSubmit'							=> __( 'Want to submit it? You can retake.', 'we-make-content-crm' ),
 				'uploading'									=> __( 'Uploading', 'we-make-content-crm' ),
 				'click_here'								=> __( 'Click here', 'we-make-content-crm' ),
-				'video_exceed_dur_limit'					=> __( 'Video exceed it\'s duration limit.', 'we-make-content-crm' ),
-				'file_exceed_siz_limit'						=> __( 'Filesize exceed it maximum limit 30MB.', 'we-make-content-crm' ),
-				'audio_exceed_dur_limit'					=> __( 'Audio exceed it\'s duration limit.', 'we-make-content-crm' ),
-				'invalid_file_formate'						=> __( 'Invalid file formate.', 'we-make-content-crm' ),
-				'device_error'								=> __( 'Device Error', 'we-make-content-crm' ),
-				'confirm_cancel_subscribe'					=> __( 'Do you really want to cancel this Subscription?', 'we-make-content-crm' ),
-				'i_confirm_it'								=> __( 'Yes I confirm it', 'we-make-content-crm' ),
+				'video_exceed_dur_limit'		=> __( 'Video exceed it\'s duration limit.', 'we-make-content-crm' ),
+				'file_exceed_siz_limit'			=> __( 'Filesize exceed it maximum limit 30MB.', 'we-make-content-crm' ),
+				'audio_exceed_dur_limit'		=> __( 'Audio exceed it\'s duration limit.', 'we-make-content-crm' ),
+				'invalid_file_formate'			=> __( 'Invalid file formate.', 'we-make-content-crm' ),
+				'device_error'							=> __( 'Device Error', 'we-make-content-crm' ),
+				'confirm_cancel_subscribe'	=> __( 'Do you really want to cancel this Subscription?', 'we-make-content-crm' ),
+				'i_confirm_it'							=> __( 'Yes I confirm it', 'we-make-content-crm' ),
 				'confirming'								=> __( 'Confirming', 'we-make-content-crm' ),
-				'request_failed'							=> __( 'Request failed', 'we-make-content-crm' ),
-				'submit'									=> __( 'Submit', 'we-make-content-crm' ),
-				'give_your_old_password'					=> __( 'Give here your old password', 'we-make-content-crm' ),
-				'you_paused'								=> __( 'Pause your Retainer', 'we-make-content-crm' ),
+				'request_failed'						=> __( 'Request failed', 'we-make-content-crm' ),
+				'submit'										=> __( 'Submit', 'we-make-content-crm' ),
+				'give_your_old_password'		=> __( 'Give here your old password', 'we-make-content-crm' ),
+				'you_paused'								=> __( 'Pauses the retainer', 'we-make-content-crm' ),
+				'you_un_paused'							=> __( 'Unpauses the retainer', 'we-make-content-crm' ),
+				'are_u_sure'								=> __( 'Are you sure?', 'we-make-content-crm' ),
+				'sure_to_delete'						=> __( 'Are you sure about this deletation. Once you permit to delete, this user data will be removed from database forever. This can\'t be Undone', 'we-make-content-crm' ),
 			],
 		], (array) $args );
 	}

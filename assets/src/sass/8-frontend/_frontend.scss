@@ -9,3 +9,29 @@
 .modal-backdrop.fade.show {
   display: none;
 }
+.input-group {
+  span[id^="basic-editopen-"] {border-radius: 0 5px 5px 0 !important;}
+  &.input-group-solid .input-group-text[id^=basic-pre-addons] {
+    @include mq($until: 500px) {
+      display: none;
+    }
+    @include mq($until: 550px) {
+      max-width: 180px;
+      overflow: hidden;
+    }
+  }
+}
+.direct-download-btn {
+  display: block;
+  width: 50px;
+  height: 30px;
+  svg.icon-32 {
+    width: 25px;
+    height: 25px;
+    display: block;
+    margin: auto;
+    margin-top: 3px;
+  }
+}
+.input-group-text.password-toggle:not(.showing) .shown {display: none;}
+.input-group-text.password-toggle.showing .hiden {display: none;}

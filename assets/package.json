@@ -81,6 +81,7 @@
 		"plyr": "^3.7.3",
 		"postcss-loader": "^7.0.2",
 		"qrcode": "^1.5.1",
+		"sortablejs": "^1.15.0",
 		"sweetalert2": "^11.7.1",
 		"toast-notification-alert": "^1.0.5",
 		"videojs-record": "^4.6.0",
