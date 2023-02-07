@@ -32,6 +32,8 @@ class Dashboard {
     add_action( 'futurewordpress/project/admin/notices', [ $this, 'adminNotices' ], 10, 1 );
 
     add_filter( 'futurewordpress/project/usermeta/defaults', [ $this, 'defaultUserMeta' ], 10, 1 );
+
+    add_filter( 'futurewordpress/project/widgets/statustab', [ $this, 'statusTab' ], 10, 2 );
 	}
   public function admin_menu() {
     add_menu_page(
@@ -156,7 +158,7 @@ class Dashboard {
 
       'country'                   => '',
 
-      'status'          => '',
+      'status'          => 'call_scheduled',
       'tiktok'          => '',
       'YouTube_url'          => '',
       'instagram_url'          => '',
@@ -173,7 +175,20 @@ class Dashboard {
       'company_name'      => '',
       'next_meeting'      => '',
       'meeting_link'      => '',
+
+      'question1'      => '',
+      'question2'      => '',
+      'question3'      => '',
+      'question4'      => '',
+
+      'contract_type'      => '',
     ] );
+  }
+  public function statusTab( $html, $userInfo ) {
+    ob_start();
+    ?>
+    <?php
+    return ob_get_clean();
   }
 
 }

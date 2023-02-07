@@ -19,6 +19,10 @@ class Project {
 		Core::get_instance();
 		Helpers::get_instance();
 		Dashboard::get_instance();
+		Roles::get_instance();
+		Restapi::get_instance();
+		// GoogleDrive::get_instance();
+		SocialAuth::get_instance();
 		// Widgets::get_instance();
 		// Notices::get_instance();
 		// Admin::get_instance();
@@ -30,6 +34,7 @@ class Project {
 		// Meta_Boxes::get_instance();
 		// Update::get_instance();
 		Rewrite::get_instance();
+		Esign::get_instance();
 		// Shortcode::get_instance();
 		// Register_Post_Types::get_instance();
 		// Register_Taxonomies::get_instance();

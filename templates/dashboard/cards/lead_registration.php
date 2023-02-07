@@ -4,15 +4,23 @@
  * 
  * @package WeMakeContentCMS
  */
-is_user_logged_in() || auth_redirect();
+$userInfo = get_user_by( 'id', hex2bin( get_query_var( 'lead_registration' ) ) );
+// if( is_user_logged_in() ) {
+//   $user_slug = apply_filters( 'futurewordpress/project/system/getoption', 'permalink-dashboard', 'dashboard' ) . '/' . ( ( apply_filters( 'futurewordpress/project/system/getoption', 'permalink-userby', 'id' ) == 'id' ) ? $userInfo->ID : $userInfo->data->user_login );
+//   wp_redirect( site_url( $user_slug ) );
+// }
 
 
-$user_profile = get_query_var( 'user_profile' );$errorHappens = false;
+$userMeta = array_map( function( $a ){ return $a[0]; }, (array) get_user_meta( $userInfo->ID ) );
+$userInfo = (object) wp_parse_args( $userInfo, [
+  'id'            => '',
+  'meta'          => (object) apply_filters( 'futurewordpress/project/usermeta/defaults', (array) $userMeta )
+] );
+$errorHappens = false;
 // if( get_current_user_id() == $user_profile ) {}
-// print_r( get_userdata( $user_profile ) );
+// print_r( $userInfo );
 
 // 'id | ID | slug | email | login ', $user_profile
-$userInfo = get_user_by( apply_filters( 'futurewordpress/project/system/getoption', 'permalink-userby', 'id' ), $user_profile );
 
 if( is_wp_error( $userInfo ) || $errorHappens ) :
   http_response_code( 404 );
@@ -20,13 +28,8 @@ if( is_wp_error( $userInfo ) || $errorHappens ) :
   add_filter( 'pre_get_document_title', function( $title ) {global $errorHappens;return $errorHappens;}, 10, 1 );
   wp_die( $errorHappens, __( 'Error Happens', 'we-make-content-crm' ) );
 else :
-  $userMeta = array_map( function( $a ){ return $a[0]; }, (array) get_user_meta( $userInfo->ID ) );
-  $userInfo = (object) wp_parse_args( $userInfo, [
-    'id'            => '',
-    'meta'          => (object) apply_filters( 'futurewordpress/project/usermeta/defaults', (array) $userMeta )
-  ] );
   add_filter( 'pre_get_document_title', function( $title ) {
-    $title = apply_filters( 'futurewordpress/project/system/getoption', 'dashboard-title', __( 'User Dashbord', 'we-make-content-crm' ) );
+    $title = apply_filters( 'futurewordpress/project/system/getoption', 'dashboard-title', __( 'Registration Field', 'we-make-content-crm' ) );
     return $title;
   }, 10, 1 );
   get_header();

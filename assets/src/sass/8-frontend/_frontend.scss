@@ -35,3 +35,37 @@
 }
 .input-group-text.password-toggle:not(.showing) .shown {display: none;}
 .input-group-text.password-toggle.showing .hiden {display: none;}
+
+div.wpforms-container-full .wpforms-form .wpforms-field {
+  margin-left: auto;
+  padding: 10px;
+  input, select {
+    min-width: 100%;
+    width: 100%;
+    border-radius: 5px !important;
+    border: .5px solid #8d8d8d !important;
+    padding: 5px 10px;
+    margin: auto;
+  }
+  textarea{
+    height: 200px;
+  }
+  .wpforms-field-label {
+    color: #333;
+    font-size: 16px;
+    margin-bottom: 5px;
+    text-decoration: none;
+  }
+  &.wpforms-field-name {
+    width: 100%;
+    display: block;
+    .wpforms-field-row {
+      display: block;
+      min-width: 100%;
+      .wpforms-field-row-block {
+        padding: 10px !important;
+        margin-left: 0 !important;
+      }
+    }
+  }
+}

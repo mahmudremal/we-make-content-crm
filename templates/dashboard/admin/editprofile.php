@@ -1,11 +1,13 @@
 <?php
-$dashboard_permalink = apply_filters( 'futurewordpress/project/system/getoption', 'permalink-dashboard', 'dashboard' );
-$dashboard_permalink = site_url( $dashboard_permalink );
+
 if( empty( $args[ 'split' ][2] ) ) {
     wp_die( __( 'User didn\'t identified. Maybe you\'re visiting on an currupted URL.', 'we-make-content-crm' ), __( 'Error Idetified', 'we-make-content-crm' ) );
 }
 $userStatuses = apply_filters( 'futurewordpress/project/action/statuses', [
     'no-action'             => __( 'No action fetched', 'we-make-content-crm' )
+], false );
+$userContracts = apply_filters( 'futurewordpress/project/action/contracts', [
+    'no-action'             => __( 'No Contract fetched', 'we-make-content-crm' )
 ], false );
 $userCountries = apply_filters( 'futurewordpress/project/database/countries', [
     'no-country'			=> __( 'No Country Found', 'we-make-content-crm' )
@@ -13,12 +15,14 @@ $userCountries = apply_filters( 'futurewordpress/project/database/countries', [
 $userInfo = get_user_by( 'id', $args[ 'split' ][2] );
 // $userMeta = get_user_meta( $userInfo->ID, null, true );
 // foreach( $userMeta as $meta_key => $meta_value ) {$userMeta[ $meta_key ] = $meta_value[0];}
-$userMeta = array_map( function( $a ){ return $a[0]; }, get_user_meta( $userInfo->ID ) );
+$userMeta = array_map( function( $a ){ return $a[0]; }, (array) get_user_meta( $userInfo->ID ) );
 $userInfo = (object) wp_parse_args( $userInfo, [
     'id'            => '',
     'meta'          => (object) apply_filters( 'futurewordpress/project/usermeta/defaults', (array) $userMeta )
 ] );
 $is_edit_profile = ( ! empty( $args[ 'split' ][2] ) );
+
+// print_r( $userInfo );
 ?>
 <div>
     <form class="row" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="post">
@@ -30,7 +34,7 @@ $is_edit_profile = ( ! empty( $args[ 'split' ][2] ) );
                 <div class="card-header">
                     <div class="d-flex justify-content-between">
                         <div class="d-flex align-items-center">
-                            <h4 class="px-3"><?php esc_html_e( 'General', 'domain' ); ?></h4>
+                            <h4 class="px-3"><?php esc_html_e( 'General', 'we-make-content-crm' ); ?></h4>
                         </div>
                     </div>
                 </div>
@@ -48,14 +52,14 @@ $is_edit_profile = ( ! empty( $args[ 'split' ][2] ) );
                             </div>
                             <div class="img-extension mt-3">
                                 <div class="d-inline-block align-items-center">
-                                    <span><?php echo wp_kses_post( sprintf( __( 'Only %s allowed', 'domain' ), '</span><a href="javascript:void(0);">.jpg</a><a href="javascript:void(0);">.png</a><a href="javascript:void(0);">.jpeg</a><span>' ) ); ?></span>
+                                    <span><?php echo wp_kses_post( sprintf( __( 'Only %s allowed', 'we-make-content-crm' ), '</span><a href="javascript:void(0);">.jpg</a><a href="javascript:void(0);">.png</a><a href="javascript:void(0);">.jpeg</a><span>' ) ); ?></span>
                                 </div>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label"><?php esc_html_e( 'Status:', 'domain' ); ?></label>
+                            <label class="form-label"><?php esc_html_e( 'Status:', 'we-make-content-crm' ); ?></label>
                             <select name="userinfo[status]" class="selectpicker form-control" data-style="py-0">
-                                <option><?php esc_html_e( 'Select a Status', 'domain' ); ?></option>
+                                <option><?php esc_html_e( 'Select a Status', 'we-make-content-crm' ); ?></option>
                                 <?php foreach( $userStatuses as $status_key => $status_text ) : ?>
                                     <option value="<?php echo esc_attr( $status_key ); ?>" <?php echo esc_attr( ( $status_key == $userInfo->meta->status ) ? 'selected' : '' ); ?>><?php echo esc_html( $status_text ); ?></option>
                                 <?php endforeach; ?>
@@ -70,15 +74,24 @@ $is_edit_profile = ( ! empty( $args[ 'split' ][2] ) );
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="monthly_retainer"><?php esc_html_e( 'Monthly Retainer:', 'domain' ); ?></label>
+                            <label class="form-label"><?php esc_html_e( 'Contract type:', 'we-make-content-crm' ); ?></label>
+                            <select name="userinfo[contract]" class="selectpicker form-control" data-style="py-0">
+                                <option><?php esc_html_e( 'Select a type', 'we-make-content-crm' ); ?></option>
+                                <?php foreach( $userContracts as $contract_key => $contract_text ) : ?>
+                                    <option value="<?php echo esc_attr( $contract_key ); ?>" <?php echo esc_attr( ( $contract_key == $userInfo->meta->contract_type ) ? 'selected' : '' ); ?>><?php echo esc_html( $contract_text ); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="monthly_retainer"><?php esc_html_e( 'Monthly Retainer:', 'we-make-content-crm' ); ?></label>
                             <input type="text" class="form-control" id="monthly_retainer" name="userinfo[monthly_retainer]" value="<?php echo esc_attr( $userInfo->meta->monthly_retainer ); ?>" placeholder="$2000">
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="content_calendar"><?php esc_html_e( 'Content Calendar:', 'domain' ); ?></label>
+                            <label class="form-label" for="content_calendar"><?php esc_html_e( 'Content Calendar:', 'we-make-content-crm' ); ?></label>
                             <input type="text" class="form-control" id="content_calendar" name="userinfo[content_calendar]" value="<?php echo esc_url( $userInfo->meta->content_calendar ); ?>" placeholder="Celandly URI">
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="content_library"><?php esc_html_e( 'Content Library:', 'domain' ); ?></label>
+                            <label class="form-label" for="content_library"><?php esc_html_e( 'Content Library:', 'we-make-content-crm' ); ?></label>
                             <input type="text" class="form-control" id="content_library" name="userinfo[content_library]" value="<?php echo esc_url( $userInfo->meta->content_library ); ?>" placeholder="Content Library URI">
                         </div>
                     </div>
@@ -87,25 +100,14 @@ $is_edit_profile = ( ! empty( $args[ 'split' ][2] ) );
             <div class="card card-full-width">
                 <div class="card-header d-flex justify-content-between">
                     <div class="header-title">
-                    <h4 class="card-title">Add New User</h4>
+                    <h4 class="card-title"><?php esc_html_e( 'Quick Actions:', 'we-make-content-crm' ); ?></h4>
                     </div>
                 </div>
                 <div class="card-body">
                     <div class="form-group">
-                        <label class="form-label" for="tiktok"><?php esc_html_e( 'TikTok URL:', 'domain' ); ?></label>
-                        <input type="text" class="form-control" id="tiktok" name="userinfo[tiktok]" value="<?php echo esc_attr( $userInfo->meta->tiktok ); ?>" placeholder="<?php esc_attr_e( 'TikTok URL', 'we-make-content-crm' ); ?>">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="YouTube_url"><?php esc_html_e( 'YouTube Url:', 'domain' ); ?></label>
-                        <input type="text" class="form-control" id="YouTube_url" name="userinfo[YouTube_url]" value="<?php echo esc_attr( $userInfo->meta->YouTube_url ); ?>" placeholder="<?php esc_attr_e( 'YouTube URL', 'we-make-content-crm' ); ?>">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="instagram_url"><?php esc_html_e( 'Instagram Url:', 'domain' ); ?></label>
-                        <input type="text" class="form-control" id="instagram_url" name="userinfo[instagram_url]" value="<?php echo esc_attr( $userInfo->meta->instagram_url ); ?>" placeholder="<?php esc_attr_e( 'Instagram Url', 'we-make-content-crm' ); ?>">
-                    </div>
-                    <div class="form-group mb-0">
-                        <label class="form-label" for="website"><?php esc_html_e( 'Website Url:', 'domain' ); ?></label>
-                        <input type="text" class="form-control" id="website" name="userinfo[website]" value="<?php echo esc_attr( $userInfo->meta->website ); ?>" placeholder="<?php esc_attr_e( 'Website URL', 'we-make-content-crm' ); ?>">
+                        <a class="btn btn-primary btn-outline mt-2" href="<?php echo esc_url( apply_filters( 'futurewordpress/project/user/dashboardpermalink', $userInfo->ID, $userInfo->data->user_nicename ) ); ?>" role="button" target="_blank"><?php esc_html_e( 'View Frontend', 'we-make-content-crm' ); ?></a>
+                        <button type="button" class="btn btn-danger btn-outline mt-2 delete-lead-user" data-id="<?php echo esc_attr( $userInfo->ID ); ?>" data-user-info="<?php echo esc_attr( json_encode( [ 'displayname' => $userInfo->display_name, 'role' => $userInfo->user_role ] ) ); ?>" role="button"><?php esc_html_e( 'Delete Account', 'we-make-content-crm' ); ?></button>
+                        <button type="button" class="btn btn-success btn-outline mt-2 lead-send-registration" data-id="<?php echo esc_attr( $userInfo->ID ); ?>" data-user-info="<?php echo esc_attr( $userInfo->display_name ); ?>" role="button"><?php esc_html_e( 'Mail Registration', 'we-make-content-crm' ); ?></button>
                     </div>
                 </div>
             </div>
@@ -196,13 +198,38 @@ $is_edit_profile = ( ! empty( $args[ 'split' ][2] ) );
                         <div class="row">
                             <div class="form-group col-md-6">
                                 <label class="form-label" for="next_meeting"><?php esc_html_e( 'Meeting Time:', 'we-make-content-crm' ); ?></label>
-                                <input type="datetime-local" class="form-control calendar-picker" id="next_meeting" name="userinfo[next_meeting]" value="<?php echo esc_attr( $userInfo->meta->next_meeting ); ?>" placeholder="<?php esc_attr_e( 'Meeting time', 'we-make-content-crm' ); ?>">
+                                <input type="text" class="form-control calen dar-picker" id="next_meeting" name="userinfo[next_meeting]" value="<?php echo esc_attr( $userInfo->meta->next_meeting ); ?>" placeholder="<?php esc_attr_e( 'Meeting time', 'we-make-content-crm' ); ?>">
                             </div>
                             <div class="form-group col-md-6">
                                 <label class="form-label" for="meeting_link"><?php esc_html_e( 'Meeting Link:', 'we-make-content-crm' ); ?></label>
                                 <input type="url" class="form-control" id="meeting_link" name="userinfo[meeting_link]" value="<?php echo esc_attr( $userInfo->meta->meeting_link ); ?>" placeholder="<?php esc_attr_e( 'Meeting Link', 'we-make-content-crm' ); ?>">
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-full-width">
+                <div class="card-header d-flex justify-content-between">
+                    <div class="header-title">
+                    <h4 class="card-title"><?php esc_html_e( 'Social Profile:', 'we-make-content-crm' ); ?></h4>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label class="form-label" for="tiktok"><?php esc_html_e( 'TikTok Handle:', 'we-make-content-crm' ); ?></label>
+                        <input type="text" class="form-control" id="tiktok" name="userinfo[tiktok]" value="<?php echo esc_attr( $userInfo->meta->tiktok ); ?>" placeholder="<?php esc_attr_e( 'TikTok URL', 'we-make-content-crm' ); ?>">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="YouTube_url"><?php esc_html_e( 'YouTube Handle:', 'we-make-content-crm' ); ?></label>
+                        <input type="text" class="form-control" id="YouTube_url" name="userinfo[YouTube_url]" value="<?php echo esc_attr( $userInfo->meta->YouTube_url ); ?>" placeholder="<?php esc_attr_e( 'YouTube URL', 'we-make-content-crm' ); ?>">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="instagram_url"><?php esc_html_e( 'Instagram Handle:', 'we-make-content-crm' ); ?></label>
+                        <input type="text" class="form-control" id="instagram_url" name="userinfo[instagram_url]" value="<?php echo esc_attr( $userInfo->meta->instagram_url ); ?>" placeholder="<?php esc_attr_e( 'Instagram Url', 'we-make-content-crm' ); ?>">
+                    </div>
+                    <div class="form-group mb-0">
+                        <label class="form-label" for="website"><?php esc_html_e( 'Website Url:', 'we-make-content-crm' ); ?></label>
+                        <input type="text" class="form-control" id="website" name="userinfo[website]" value="<?php echo esc_attr( $userInfo->meta->website ); ?>" placeholder="<?php esc_attr_e( 'Website URL', 'we-make-content-crm' ); ?>">
                     </div>
                 </div>
             </div>

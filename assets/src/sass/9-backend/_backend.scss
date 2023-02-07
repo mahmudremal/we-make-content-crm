@@ -42,3 +42,32 @@
   // width: 90%;
   margin-top: -8rem;
 }
+.popup-action-menu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  height: 100vh;
+  width: 100vw;
+  background: #33333338;
+  z-index: 9999;
+  vertical-align: middle;
+  .popup-action-wrap {
+    margin: auto;
+    display: block;
+    position: relative;
+    top: calc(50% - 50px);
+    .list {
+      padding: 5px;
+      margin: auto;
+      margin-top: 10px;
+      .list-item {
+        cursor: pointer;
+        &:hover {
+          background: #f0f0f1;
+          border-radius: 5px;
+        }
+      }
+    }
+  }
+}

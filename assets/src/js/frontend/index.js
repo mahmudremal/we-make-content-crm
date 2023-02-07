@@ -25,6 +25,7 @@ import { toast } from 'toast-notification-alert';
 			this.init();this.toOpenEdit();this.inputEventListner();
 			this.cancelSubscription();this.changePassword();
 			this.toggleStatus();this.passwordToggle();
+			// this.fetchDataWidthContract();
 			// this.accordion();
 			// console.log( 'frontend init...' );
 		}
@@ -167,14 +168,14 @@ import { toast } from 'toast-notification-alert';
 						// input.setAttribute( 'disabled' );
 						i = el.querySelector( 'i' );
 						if( i ) {i.classList.remove( 'fa-circle-notch' );i.classList.add( 'fa-spinner', 'fa-spin' );}
-						//  | fa-times | afa-check |   | 
+						//  | fa-times | fa-check |   | 
 						var formdata = new FormData();
 						formdata.append( 'action', 'futurewordpress/project/action/singlefield' );
 						formdata.append( 'field', input.name );
 						formdata.append( 'value', input.value );
 						formdata.append( '_nonce', thisClass.ajaxNonce );
-						thisClass.sendToServer( formdata );
-					} else {}
+						thisClass.sendToServer( formdata, (i)?i:false );
+					}
 				} );
 			} );
 		}
@@ -186,10 +187,11 @@ import { toast } from 'toast-notification-alert';
 						formdata.append( 'action', 'futurewordpress/project/action/singlefield' );
 						formdata.append( 'field', el.name );
 						formdata.append( 'value', el.value );
+						formdata.append( 'userid', el.value );
 						formdata.append( '_nonce', thisClass.ajaxNonce );
 						// thisClass.sendToServer( formdata );
 					// toast.show({title: ( el.checked ) ? thisClass.i18n.you_paused : thisClass.i18n.you_un_paused, position: 'topright', type: ( el.checked ) ? 'info' : 'alert' });
-					Swal.fire( { position: 'top-end', icon: 'success', title: ( el.checked ) ? thisClass.i18n.you_paused : thisClass.i18n.you_un_paused, showConfirmButton: false, timer: 1500 } );
+					Swal.fire( { position: 'top-end', icon: 'success', title: ( el.checked ) ? thisClass.i18n.you_paused : thisClass.i18n.you_un_paused, showConfirmButton: false, timer: 3500 } );
 				} );
 			} );
 		}
@@ -227,7 +229,20 @@ import { toast } from 'toast-notification-alert';
 			} );
 		
 		}
-		sendToServer( data ) {
+		fetchDataWidthContract() {
+			document.querySelectorAll( '.document-sign-page *' ).forEach( ( e ) => {
+				var replacer = {
+						'client_name': 'Remal Mahmud',
+						'client_address': 'Bangladesh',
+						'todays_date': '20 Dec 2022',
+						'retainer_amount': '280$',
+				};
+				Object.keys( replacer ).forEach(function( lsi ) {
+						e.textContent = e.textContent.replace( '{{' + lsi + '}}', replacer[ lsi ] );
+				} );
+			} );
+		}
+		sendToServer( data, i = false ) {
 			const thisClass = this;var message;
 			$.ajax({
 				url: thisClass.ajaxUrl,
@@ -241,14 +256,21 @@ import { toast } from 'toast-notification-alert';
 					message = ( json.data.message ) ? json.data.message : json.data;
 					if( json.success ) {
 						toast.show({title: message, position: 'bottomright', type: 'info'});
+						if( i ) {i.classList.remove( 'fa-spinner', 'fa-spin' );i.classList.add( 'fa-check' );}
 					} else {
 						toast.show({title: message, position: 'bottomright', type: 'warn'});
+						if( i ) {i.classList.remove( 'fa-spinner', 'fa-spin' );i.classList.add( 'fa-times' );}
 					}
 				},
 				error: function( err ) {
-					console.log( err.responseText );
+					console.log( err.responseText );toast.show({title: err.responseText, position: 'bottomright', type: 'alert'});
+					if( i ) {i.classList.remove( 'fa-spinner', 'fa-spin' );i.classList.add( 'fa-times' );}
 				}
 			});
+		}
+		addEventListener( elem, event ) {
+			
+			elem.dispatchEvent( new Event( 'fuck' ) )
 		}
 	}
 	new FutureWordPress_Frontend();

@@ -161,20 +161,21 @@ class Option {
 		switch( $field['type'] ) {
 
 			case 'text':
+			case 'url':
 			case 'password':
 			case 'number':
 			case 'date':
 			case 'time':
 			case 'color':
-				$html .= '<input id="' . esc_attr( $field['id'] ) . '" type="' . $field['type'] . '" name="' . esc_attr( $option_name ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" value="' . $data . '"/>' . "\n";
+				$html .= '<input id="' . esc_attr( $field['id'] ) . '" type="' . $field['type'] . '" name="' . esc_attr( $option_name ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" value="' . $data . '"' . $this->attributes( $field ) . '/>' . "\n";
 			break;
 
 			case 'text_secret':
-				$html .= '<input id="' . esc_attr( $field['id'] ) . '" type="text" name="' . esc_attr( $option_name ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" value=""/>' . "\n";
+				$html .= '<input id="' . esc_attr( $field['id'] ) . '" type="text" name="' . esc_attr( $option_name ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" value="" ' . $this->attributes( $field ) . '/>' . "\n";
 			break;
 
 			case 'textarea':
-				$html .= '<textarea id="' . esc_attr( $field['id'] ) . '" rows="5" cols="50" name="' . esc_attr( $option_name ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '">' . $data . '</textarea><br/>'. "\n";
+				$html .= '<textarea id="' . esc_attr( $field['id'] ) . '" rows="5" cols="50" name="' . esc_attr( $option_name ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" ' . $this->attributes( $field ) . '>' . $data . '</textarea><br/>'. "\n";
 			break;
 
 			case 'checkbox':
@@ -182,7 +183,7 @@ class Option {
 				if( ( $data && 'on' == $data ) || $field[ 'default' ] == true ) {
 					$checked = 'checked="checked"';
 				}
-				$html .= '<input id="' . esc_attr( $field['id'] ) . '" type="' . $field['type'] . '" name="' . esc_attr( $option_name ) . '" ' . $checked . '/>' . "\n";
+				$html .= '<input id="' . esc_attr( $field['id'] ) . '" type="' . $field['type'] . '" name="' . esc_attr( $option_name ) . '" ' . $checked . ' ' . $this->attributes( $field ) . '/>' . "\n";
 			break;
 
 			case 'checkbox_multi':
@@ -200,12 +201,12 @@ class Option {
 					$checked = false;
 					if( $k == $data ) {$checked = true;}
 					if( ! $checked && $k == $field[ 'default' ] ) {$checked = true;}
-					$html .= '<label for="' . esc_attr( $field['id'] . '_' . $k ) . '"><input type="radio" ' . checked( $checked, true, false ) . ' name="' . esc_attr( $option_name ) . '" value="' . esc_attr( $k ) . '" id="' . esc_attr( $field['id'] . '_' . $k ) . '" /> ' . $v . '</label> ';
+					$html .= '<label for="' . esc_attr( $field['id'] . '_' . $k ) . '"><input type="radio" ' . checked( $checked, true, false ) . ' name="' . esc_attr( $option_name ) . '" value="' . esc_attr( $k ) . '" id="' . esc_attr( $field['id'] . '_' . $k ) . '" ' . $this->attributes( $field ) . '/> ' . $v . '</label> ';
 				}
 			break;
 
 			case 'select':
-				$html .= '<select name="' . esc_attr( $option_name ) . '" id="' . esc_attr( $field['id'] ) . '">';
+				$html .= '<select name="' . esc_attr( $option_name ) . '" id="' . esc_attr( $field['id'] ) . '" ' . $this->attributes( $field ) . '>';
 				foreach( $field['options'] as $k => $v ) {
 					$selected = false;
 					if( $k == $data ) {$selected = true;}
@@ -216,7 +217,7 @@ class Option {
 			break;
 
 			case 'select_multi':
-				$html .= '<select name="' . esc_attr( $option_name ) . '[]" id="' . esc_attr( $field['id'] ) . '" multiple="multiple">';
+				$html .= '<select name="' . esc_attr( $option_name ) . '[]" id="' . esc_attr( $field['id'] ) . '" multiple="multiple" ' . $this->attributes( $field ) . '>';
 				foreach( $field['options'] as $k => $v ) {
 					$selected = false;
 					if( in_array( $k, $data ) ) {
@@ -274,31 +275,31 @@ class Option {
 	public function settings_page() {
 		// Build page HTML output
 		// If you don't need tabbed navigation just strip out everything between the <!-- Tab navigation --> tags.
-	?>
+		?>
 	  <div class="wrap" id="<?php echo $this->general->slug; ?>">
 	  	<h2><?php echo wp_kses_post( $this->general->page_header ); ?></h2>
 	  	<p><?php echo wp_kses_post( $this->general->page_subheader ); ?></p>
 
-		<!-- Tab navigation starts -->
-		<h2 class="nav-tab-wrapper settings-tabs hide-if-no-js">
-			<?php
-			foreach( $this->settings as $section => $data ) {
-				echo '<a href="#' . $section . '" class="nav-tab">' . $data['title'] . '</a>';
-			}
-			?>
-		</h2>
-		<?php $this->do_script_for_tabbed_nav(); ?>
-		<!-- Tab navigation ends -->
+			<!-- Tab navigation starts -->
+			<h2 class="nav-tab-wrapper settings-tabs hide-if-no-js">
+				<?php
+				foreach( $this->settings as $section => $data ) {
+					echo '<a href="#' . $section . '" class="nav-tab">' . $data['title'] . '</a>';
+				}
+				?>
+			</h2>
+			<?php $this->do_script_for_tabbed_nav(); ?>
+			<!-- Tab navigation ends -->
 
-		<form action="options.php" method="POST">
-	        <?php settings_fields( $this->general->slug ); ?>
-	        <div class="settings-container">
-	        <?php do_settings_sections( $this->general->slug ); ?>
-	    	</div>
-	        <?php submit_button(); ?>
-		</form>
-	</div>
-	<?php
+			<form action="options.php" method="POST">
+						<?php settings_fields( $this->general->slug ); ?>
+						<div class="settings-container">
+						<?php do_settings_sections( $this->general->slug ); ?>
+					</div>
+						<?php submit_button(); ?>
+			</form>
+		</div>
+		<?php
 	}
 
 	/**
@@ -336,5 +337,13 @@ class Option {
 		});
 		</script>
 	<?php
+	}
+	public function attributes( $field ) {
+		if( ! isset( $field[ 'attr' ] ) || ! is_array( $field[ 'attr' ] ) || count( $field[ 'attr' ] ) < 1 ) {return '';}
+		$html = '';
+		foreach( $field[ 'attr' ] as $attr => $value ) {
+			$html .= $attr . '="' . $value . '" ';
+		}
+		return $html;
 	}
 }

@@ -1,7 +1,5 @@
 <?php
-$dashboard_permalink = apply_filters( 'futurewordpress/project/system/getoption', 'permalink-dashboard', 'dashboard' );
-$dashboard_permalink = site_url( $dashboard_permalink );
-$subscribers = get_users( [ 'role__in' => [ 'subscriber' ] ] ); // 'author', 
+$subscribers = get_users( [ 'role__in' => [ 'lead' ] ] ); // 'author',  subscriber
 $date_formate = get_option( 'date_format' );
 // print_r( $subscribers );wp_die();
 ?>
@@ -25,50 +23,73 @@ $date_formate = get_option( 'date_format' );
                                 </tr>
                             </thead>
                             <tbody>
+                                <?php if( count( $subscribers ) <= 0 ) : ?>
+                                    <tr>
+                                        <td colspan="7"><img src="<?php echo esc_url( WEMAKECONTENTCMS_BUILD_URI . '/icons/not-found.svg' ); ?>" alt="<?php esc_attr_e( 'Noting found', 'we-make-content-crm' ); ?>" style="width: 100%;height: auto;max-height: 400px;"></td>
+                                    </tr>
+                                <?php endif; ?>
                                 <?php foreach( $subscribers as $subscriber ) :
                                     $userInfo = $subscriber;
-                                    $userMeta = array_map( function( $a ){ return $a[0]; }, get_user_meta( $userInfo->ID ) );
+                                    $userMeta = array_map( function( $a ){ return $a[0]; }, (array) get_user_meta( $userInfo->ID ) );
                                     $userInfo = (object) wp_parse_args( $userInfo, [
                                         'id'            => '',
                                         'meta'          => (object) wp_parse_args( $userMeta, apply_filters( 'futurewordpress/project/usermeta/defaults', (array) $userMeta ) )
                                     ] );
+                                    // print_r( $userInfo );
                                     ?>
-                                <tr>
-                                    <td class="text-dark"><?php echo esc_html( $userInfo->meta->email ); ?></td>
+                                <tr id="lead-<?php echo esc_html( $userInfo->ID ); ?>">
+                                    <td class="text-dark"><?php echo esc_html( empty( $userInfo->meta->email ) ? $userInfo->data->user_email : $userInfo->meta->email ); ?></td>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <!-- <img class="rounded img-fluid avatar-60 me-3" src="https://templates.iqonic.design/product/qompac-ui/html/dist/assets/images/avatars/14.png" alt="" loading="lazy"> -->
+                                            <img class="rounded img-fluid avatar-60 me-3" src="<?php echo esc_url( get_avatar_url( $user->ID, ['size' => '100'] ) ); ?>" alt="" loading="lazy">
                                             <div class="media-support-info">
                                             <h5 class="iq-sub-label"><?php echo esc_html( $userInfo->meta->first_name . ' ' . $userInfo->meta->last_name ); ?></h5>
-                                            <!-- <p class="mb-0">@<?php echo esc_html( $userInfo->user_nicename ); ?></p>
+                                            <p class="mb-0">@<?php echo esc_html( $userInfo->data->user_nicename ); ?></p>
                                             <?php $flag = apply_filters( 'futurewordpress/project/database/countryflags', get_user_meta( $userInfo->ID, 'country', true ) );if( $flag ) : ?>
                                             <img width="18" class="me-2" src="<?php echo esc_url( $flag ); ?>"/>
-                                            <?php endif;echo esc_html( $userInfo->meta->country ); ?> -->
+                                            <?php endif;echo esc_html( $userInfo->meta->country ); ?>
                                             </div>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td id="lead-status-<?php echo esc_html( $userInfo->ID ); ?>">
                                         <?php $status = apply_filters( 'futurewordpress/project/action/statuses', [], $userInfo->meta->status ); ?>
                                         <?php $status = is_string( $status ) ? $status : ''; ?>
                                         <span class="badge bg-soft-success p-2 text-success"><?php echo esc_html( $status ); ?></span>
+                                        <?php // echo apply_filters( 'futurewordpress/project/widgets/statustab', '', $userInfo ); ?>
+                                        
+                                        <button type="button" class="btn btn-sm btn-icon btn-color-primary btn-active-light-primary leadstatusswitcher" data-value="<?php echo esc_attr( $userInfo->ID ); ?>">
+                                            <!--begin::Svg Icon | path: icons/duotune/general/gen024.svg-->
+                                            <span class="svg-icon svg-icon-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24">
+                                                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                <rect x="5" y="5" width="5" height="5" rx="1" fill="#000000"></rect>
+                                                <rect x="14" y="5" width="5" height="5" rx="1" fill="#000000" opacity="0.3"></rect>
+                                                <rect x="5" y="14" width="5" height="5" rx="1" fill="#000000" opacity="0.3"></rect>
+                                                <rect x="14" y="14" width="5" height="5" rx="1" fill="#000000" opacity="0.3"></rect>
+                                                </g>
+                                            </svg>
+                                            </span>
+                                            <!--end::Svg Icon-->
+                                        </button>
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <div class="media-support-info">
                                                 <?php if( ! empty( $userInfo->meta->next_meeting ) ) : ?>
-                                                <h5 class="iq-sub-label"><?php echo esc_html( date( 'Y-F-d H:i', strtotime( $userInfo->meta->next_meeting ) ) ); ?></h5>
+                                                    <!-- <?php // echo esc_html( date( 'M-d H:i', strtotime( $userInfo->meta->next_meeting ) ) ); ?> -->
+                                                <h5 class="iq-sub-label"><?php echo esc_html( $userInfo->meta->next_meeting ); ?></h5>
                                                 <?php endif; ?>
                                                 <?php if( ! empty( $userInfo->meta->meeting_link ) ) : ?>
-                                                <a class="mb-0" href="<?php echo esc_url( $userInfo->meta->meeting_link ); ?>">@<?php esc_html_e( 'Meeting link', 'domain' ); ?></a>
+                                                <a class="mb-0" href="<?php echo esc_url( $userInfo->meta->meeting_link ); ?>" target="_blank">@<?php esc_html_e( 'Meeting link', 'we-make-content-crm' ); ?></a>
                                                 <?php endif; ?>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="text-dark"><?php echo esc_html( $userInfo->meta->monthly_retainer ); ?></td>
-                                    <td class="text-dark"><?php echo esc_html( 'Contract Option' ); ?></td>
+                                    <td class="text-dark"><?php echo esc_html( $userInfo->meta->contract_type ); ?></td>
                                     <td>
                                         <div class="d-flex justify-content-evenly">
-                                            <a class="btn btn-primary btn-icon btn-sm rounded-pill" href="<?php echo esc_url( $dashboard_permalink . '/' . $userInfo->ID . '/' ); ?>" role="button">
+                                            <a class="btn btn-primary btn-icon btn-sm rounded-pill" href="<?php echo esc_url( apply_filters( 'futurewordpress/project/user/dashboardpermalink', $userInfo->ID, $userInfo->data->user_nicename ) ); ?>" role="button" target="_blank">
                                                 <span class="btn-inner">
                                                     <svg class="icon-32" width="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                         <path opacity="0.4" d="M21.101 9.58786H19.8979V8.41162C19.8979 7.90945 19.4952 7.5 18.999 7.5C18.5038 7.5 18.1 7.90945 18.1 8.41162V9.58786H16.899C16.4027 9.58786 16 9.99731 16 10.4995C16 11.0016 16.4027 11.4111 16.899 11.4111H18.1V12.5884C18.1 13.0906 18.5038 13.5 18.999 13.5C19.4952 13.5 19.8979 13.0906 19.8979 12.5884V11.4111H21.101C21.5962 11.4111 22 11.0016 22 10.4995C22 9.99731 21.5962 9.58786 21.101 9.58786Z" fill="currentColor"></path>

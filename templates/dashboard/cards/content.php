@@ -52,7 +52,13 @@
                         <input type="text" class="form-control" aria-label="<?php esc_attr_e( 'Amount (to the nearest dollar)', 'we-make-content-crm' ); ?>" value="<?php echo esc_attr( $userInfo->meta->monthly_retainer ); ?>" readonly>
                         <!-- <span class="input-group-text"><?php esc_html_e( '.00', 'we-make-content-crm' ); ?></span> -->
                       </div>
-                      <div class="form-text"><?php esc_html_e( 'Your Monthly retainer that could be chaged anytime. Once you\'vr changed this amount, will be sync with your stripe account.', 'we-make-content-crm' ); ?> <a href="#" class="fw-bold"><?php esc_html_e( 'Learn more', 'we-make-content-crm' ); ?></a>. </div>
+                      <?php if( $text = apply_filters( 'futurewordpress/project/system/getoption', 'docs-monthlyretainer', false ) ) : ?>
+                      <div class="form-text"><?php echo wp_kses_post( $text ); ?> 
+                        <?php if( $url = apply_filters( 'futurewordpress/project/system/getoption', 'docs-monthlyretainerurl', false ) ) : ?>
+                        <a href="<?php echo esc_url( $url ); ?>" class="fw-bold"><?php esc_html_e( 'Learn more', 'we-make-content-crm' ); ?></a>.
+                        <?php endif; ?>
+                      </div>
+                      <?php endif; ?>
                     </div>
                   </div>
                   <!--end::Form row-->
@@ -61,7 +67,13 @@
                     <label class="col-lg-3 col-form-label"><?php esc_html_e( 'Content Calendar', 'we-make-content-crm' ); ?></label>
                     <div class="col-lg-9">
                       <a href="<?php echo esc_url( empty( $userInfo->meta->content_calendar ) ? '#' : $userInfo->meta->content_calendar ); ?>"  target="<?php echo esc_url( empty( $userInfo->meta->content_calendar ) ? '_self' : '_blank' ); ?>" class="btn btn-light-success fw-bold btn-sm"><?php esc_html_e( 'Open calendly', 'we-make-content-crm' ); ?></a>
-                      <div class="form-text py-2"> <?php esc_html_e( 'See your content calendar on Calendly.', 'we-make-content-crm' ); ?> <a href="#" class="fw-boldk"><?php esc_html_e( 'Learn more', 'we-make-content-crm' ); ?></a>. </div>
+                      <?php if( $text = apply_filters( 'futurewordpress/project/system/getoption', 'docs-contentcalendly', false ) ) : ?>
+                      <div class="form-text py-2"><?php echo wp_kses_post( $text ); ?> 
+                        <?php if( $url = apply_filters( 'futurewordpress/project/system/getoption', 'docs-contentcalendlyurl', false ) ) : ?>
+                        <a href="<?php echo esc_url( $url ); ?>" class="fw-boldk"><?php esc_html_e( 'Learn more', 'we-make-content-crm' ); ?></a>.
+                        <?php endif; ?>
+                      </div>
+                      <?php endif; ?>
                     </div>
                   </div>
                   <!--end::Form row-->
@@ -71,8 +83,14 @@
                     <div class="col-lg-9">
 
                     <a href="<?php echo esc_url( empty( $userInfo->meta->content_library ) ? '#' : $userInfo->meta->content_library ); ?>" class="btn btn-light-primary fw-bold btn-sm" target="<?php echo esc_url( empty( $userInfo->meta->content_library ) ? '_self' : '_blank' ); ?>"><?php esc_html_e( 'Open Library', 'we-make-content-crm' ); ?></a>
-                    <div class="form-text"> <?php esc_html_e( 'Open content library from here.', 'we-make-content-crm' ); ?> <a href="#" class="fw-bold"><?php esc_html_e( 'Learn more', 'we-make-content-crm' ); ?></a>. </div>
-                      
+                    
+                    <?php if( $text = apply_filters( 'futurewordpress/project/system/getoption', 'docs-contentlibrary', false ) ) : ?>
+                      <div class="form-text"><?php echo wp_kses_post( $text ); ?> 
+                        <?php if( $url = apply_filters( 'futurewordpress/project/system/getoption', 'docs-contentlibraryurl', false ) ) : ?>
+                        <a href="<?php echo esc_url( $url ); ?>" class="fw-bold"><?php esc_html_e( 'Learn more', 'we-make-content-crm' ); ?></a>.
+                        <?php endif; ?>
+                      </div>
+                      <?php endif; ?>
                     </div>
                   </div>
                   <!--end::Form row-->
@@ -131,7 +149,14 @@
                     <label class="col-lg-3 col-form-label"><?php esc_html_e( 'Client Raw Video Archive', 'we-make-content-crm' ); ?></label>
                     <div class="col-lg-9">
                       <button type="button" class="btn btn-light-primary fw-bold btn-sm" data-bs-toggle="modal" data-bs-target="#clientVideoArchiveModel"><?php esc_html_e( 'Open Popup', 'we-make-content-crm' ); ?></button>
-                      <div class="form-text py-2"> <?php esc_html_e( 'All of the video files are here. Click on the buton to open all archive list.', 'we-make-content-crm' ); ?> <a href="#" class="fw-boldk"><?php esc_html_e( 'Learn more', 'we-make-content-crm' ); ?></a>. </div>
+                      
+                    <?php if( $text = apply_filters( 'futurewordpress/project/system/getoption', 'docs-clientrowvideos', false ) ) : ?>
+                      <div class="form-text py-2"><?php echo wp_kses_post( $text ); ?> 
+                        <?php if( $url = apply_filters( 'futurewordpress/project/system/getoption', 'docs-clientrowvideosurl', false ) ) : ?>
+                        <a href="<?php echo esc_url( $url ); ?>" class="fw-boldk"><?php esc_html_e( 'Learn more', 'we-make-content-crm' ); ?></a>. 
+                        <?php endif; ?>
+                      </div>
+                      <?php endif; ?>
                     </div>
                   </div>
                   <!--end::Form row-->
@@ -203,7 +228,13 @@
                           <?php endif; ?>
                         </div>
                       </div>
-                      <div class="form-text py-2"> <?php esc_html_e( 'Manage your retainer from here. You can pause or cancel it from here.', 'we-make-content-crm' ); ?> <a href="#" class="fw-boldk"><?php esc_html_e( 'Learn more', 'we-make-content-crm' ); ?></a>. </div>
+                      <?php if( $text = apply_filters( 'futurewordpress/project/system/getoption', 'docs-manageretainer', false ) ) : ?>
+                      <div class="form-text py-2"><?php echo wp_kses_post( $text ); ?> 
+                        <?php if( $url = apply_filters( 'futurewordpress/project/system/getoption', 'docs-manageretainerurl', false ) ) : ?>
+                        <a href="<?php echo esc_url( $url ); ?>" class="fw-boldk"><?php esc_html_e( 'Learn more', 'we-make-content-crm' ); ?></a>.
+                        <?php endif; ?>
+                      </div>
+                      <?php endif; ?>
                     </div>
                   </div>
                   <!--end::Form row-->
@@ -215,7 +246,14 @@
                     <label class="col-lg-3 col-form-label"><?php esc_html_e( 'Payment History', 'we-make-content-crm' ); ?></label>
                     <div class="col-lg-9">
                       <button type="button" class="btn btn-light-primary fw-bold btn-sm" data-bs-toggle="modal" data-bs-target="#recentPaymentHistory"><?php esc_html_e( 'Open history', 'we-make-content-crm' ); ?></button>
-                      <div class="form-text"> <?php esc_html_e( 'Payment history is synced form your stripe account since you started subscription.', 'we-make-content-crm' ); ?> <a href="#" class="fw-bold"><?php esc_html_e( 'Learn more', 'we-make-content-crm' ); ?></a>. </div>
+                      
+                      <?php if( $text = apply_filters( 'futurewordpress/project/system/getoption', 'docs-paymenthistory', false ) ) : ?>
+                      <div class="form-text py-2"><?php echo wp_kses_post( $text ); ?> 
+                        <?php if( $url = apply_filters( 'futurewordpress/project/system/getoption', 'docs-paymenthistoryurl', false ) ) : ?>
+                        <a href="<?php echo esc_url( $url ); ?>" class="fw-boldk"><?php esc_html_e( 'Learn more', 'we-make-content-crm' ); ?></a>.
+                        <?php endif; ?>
+                      </div>
+                      <?php endif; ?>
                     </div>
                   </div>
                   <!--end::Form row-->
@@ -274,7 +312,14 @@
                         <!-- <input class="form-control form-control-lg form-control-solid" id="change-password-field" type="password" value="" placeholder="******************" /> -->
                         <button type="button" class="btn btn-light-primary btn-outline fw-bold btn-sm" data-bs-toggle="modal" data-bs-target="#changePasswordform"><?php esc_html_e( 'Click to change Password', 'we-make-content-crm' ); ?></button>
                       </div>
-                      <div class="form-text"><?php esc_html_e( 'Change your password from here. This won\'t store on our database. Only encrypted password we store and make sure you\'ve saved your password on a safe place.', 'we-make-content-crm' ); ?> <a href="#" class="fw-bold"><?php esc_html_e( 'Learn more', 'we-make-content-crm' ); ?></a>. </div>
+                      
+                      <?php if( $text = apply_filters( 'futurewordpress/project/system/getoption', 'docs-changepassword', false ) ) : ?>
+                      <div class="form-text py-2"><?php echo wp_kses_post( $text ); ?> 
+                        <?php if( $url = apply_filters( 'futurewordpress/project/system/getoption', 'docs-changepasswordurl', false ) ) : ?>
+                        <a href="<?php echo esc_url( $url ); ?>" class="fw-boldk"><?php esc_html_e( 'Learn more', 'we-make-content-crm' ); ?></a>.
+                        <?php endif; ?>
+                      </div>
+                      <?php endif; ?>
                     </div>
                   </div>
                   <!--end::Form row-->
@@ -341,12 +386,19 @@
                     <label class="col-lg-3 col-form-label"><?php esc_html_e( 'Email Address', 'we-make-content-crm' ); ?></label>
                     <div class="col-lg-9">
                       <div class="input-group mb-5">
-                        <input type="text" class="form-control form-control-lg form-control-solid" placeholder="example@gmail.com" aria-label="example@gmail.com" aria-describedby="basic-editopen-contact" oldautocomplete="remove" autocomplete="off" disabled value="<?php echo esc_attr( $userInfo->meta->email ); ?>">
+                        <input type="text" class="form-control form-control-lg form-control-solid" name="data-user_email" placeholder="example@gmail.com" aria-label="example@gmail.com" aria-describedby="basic-editopen-contact" oldautocomplete="remove" autocomplete="off" disabled value="<?php echo esc_attr( empty( $userInfo->data->user_email ) ? $userInfo->meta->email : $userInfo->data->user_email ); ?>">
                         <span class="input-group-text" id="basic-editopen-contact">
                           <i class="fas fa-pencil-alt fs-4"></i>
                         </span>
                       </div>
-                      <div class="form-text"><?php esc_html_e( 'Your conatct number is necessery in case if you need to communicate with you.', 'we-make-content-crm' ); ?> <a href="#" class="fw-bold"><?php esc_html_e( 'Learn more', 'we-make-content-crm' ); ?></a>. </div>
+                      
+                      <?php if( $text = apply_filters( 'futurewordpress/project/system/getoption', 'docs-emailaddress', false ) ) : ?>
+                      <div class="form-text py-2"><?php echo wp_kses_post( $text ); ?> 
+                        <?php if( $url = apply_filters( 'futurewordpress/project/system/getoption', 'docs-emailaddressurl', false ) ) : ?>
+                        <a href="<?php echo esc_url( $url ); ?>" class="fw-boldk"><?php esc_html_e( 'Learn more', 'we-make-content-crm' ); ?></a>.
+                        <?php endif; ?>
+                      </div>
+                      <?php endif; ?>
                     </div>
                   </div>
                   <!--end::Form row-->
@@ -355,12 +407,18 @@
                     <label class="col-lg-3 col-form-label"><?php esc_html_e( 'Contact Number', 'we-make-content-crm' ); ?></label>
                     <div class="col-lg-9">
                       <div class="input-group mb-5">
-                        <input type="text" class="form-control form-control-lg form-control-solid" placeholder="123 456 789" aria-label="123 456 789" aria-describedby="basic-editopen-contact" oldautocomplete="remove" autocomplete="off" disabled value="<?php echo esc_attr( $userInfo->meta->phone ); ?>">
+                        <input type="text" class="form-control form-control-lg form-control-solid" placeholder="123 456 789" aria-label="123 456 789" aria-describedby="basic-editopen-contact" oldautocomplete="remove" autocomplete="off" disabled value="<?php echo esc_attr( $userInfo->meta->phone ); ?>" name="meta-phone" >
                         <span class="input-group-text" id="basic-editopen-contact">
                           <i class="fas fa-pencil-alt fs-4"></i>
                         </span>
                       </div>
-                      <div class="form-text"><?php esc_html_e( 'Your conatct number is necessery in case if you need to communicate with you.', 'we-make-content-crm' ); ?> <a href="#" class="fw-bold"><?php esc_html_e( 'Learn more', 'we-make-content-crm' ); ?></a>. </div>
+                      <?php if( $text = apply_filters( 'futurewordpress/project/system/getoption', 'docs-contactnumber', false ) ) : ?>
+                      <div class="form-text py-2"><?php echo wp_kses_post( $text ); ?> 
+                        <?php if( $url = apply_filters( 'futurewordpress/project/system/getoption', 'docs-contactnumberurl', false ) ) : ?>
+                        <a href="<?php echo esc_url( $url ); ?>" class="fw-boldk"><?php esc_html_e( 'Learn more', 'we-make-content-crm' ); ?></a>.
+                        <?php endif; ?>
+                      </div>
+                      <?php endif; ?>
                     </div>
                   </div>
                   <!--end::Form row-->
@@ -374,7 +432,13 @@
                           <i class="fas fa-pencil-alt fs-4"></i>
                         </span>
                       </div>
-                      <div class="form-text"><?php esc_html_e( 'Your conatct number is necessery in case if you need to communicate with you.', 'we-make-content-crm' ); ?> <a href="#" class="fw-bold"><?php esc_html_e( 'Learn more', 'we-make-content-crm' ); ?></a>. </div>
+                      <?php if( $text = apply_filters( 'futurewordpress/project/system/getoption', 'docs-website', false ) ) : ?>
+                      <div class="form-text py-2"><?php echo wp_kses_post( $text ); ?> 
+                        <?php if( $url = apply_filters( 'futurewordpress/project/system/getoption', 'docs-websiteurl', false ) ) : ?>
+                        <a href="<?php echo esc_url( $url ); ?>" class="fw-boldk"><?php esc_html_e( 'Learn more', 'we-make-content-crm' ); ?></a>.
+                        <?php endif; ?>
+                      </div>
+                      <?php endif; ?>
                     </div>
                   </div>
                   <!--end::Form row-->

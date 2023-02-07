@@ -34,6 +34,8 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 		add_filter( 'futurewordpress/project/database/countries', [ $this, 'databaseCountries' ], 10, 2 );
 		add_filter( 'futurewordpress/project/database/countryflags', [ $this, 'countryFlags' ], 10, 1 );
 
+		add_filter( 'futurewordpress/project/user/dashboardpermalink', [ $this, 'dashboardPermalink' ], 10, 2 );
+
 
 		add_filter( 'futurewordpress/project/filter/server/time', [ $this, 'serverTime' ], 10, 2 );
 		add_filter( 'futurewordpress/project/filesystem/filemtime', [ $this, 'filemtime' ], 10, 2 );
@@ -102,10 +104,11 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 		$headers = [ 'Content-Type: text/plain; charset=UTF-8' ];
 		$headers[] = 'Reply-To: ' . $request[ 'name' ] . ' <' . $request[ 'email' ] . '>';
 
-		wp_mail( $to, $subject, $body, $headers );
+		$mail_sent = wp_mail( $to, $subject, $body, $headers );
 		// $msg = [ 'status' => 'success', 'message' => __( get_FwpOption( 'msg_profile_edit_success_txt', 'Changes saved' ), FUTUREWORDPRESS_PROJECT_TEXT_DOMAIN ) ];
 		// set_transient( 'status_successed_message-' . get_current_user_id(), $msg, 300 );
-		wp_safe_redirect( wp_get_referer() );
+		// wp_safe_redirect( wp_get_referer() );
+		return ( $mail_sent );
   }
 
 	/**
@@ -212,6 +215,14 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 		$country = empty( $country ) ? false : $country;
 		// https://countryflagsapi.com/svg/
 		return ( $country ) ? 'https://flagpedia.net/data/flags/icon/36x27/' . strtolower( $country ) . '.webp' : false;
+	}
+	public function dashboardPermalink( $id, $user = false ) {
+		if( ! defined( 'FUTUREWORDPRESS_PROJECT_DASHBOARDPERMALINK' ) ) {
+			$dashboard_permalink = apply_filters( 'futurewordpress/project/system/getoption', 'permalink-dashboard', 'dashboard' );
+			$dashboard_permalink = site_url( $dashboard_permalink );
+			define( 'FUTUREWORDPRESS_PROJECT_DASHBOARDPERMALINK', $dashboard_permalink );
+		}
+		return ( apply_filters( 'futurewordpress/project/system/getoption', 'permalink-userby', 'id' ) == 'id' ) ? FUTUREWORDPRESS_PROJECT_DASHBOARDPERMALINK . '/' . $id : FUTUREWORDPRESS_PROJECT_DASHBOARDPERMALINK . '/' . $user;
 	}
 
 }

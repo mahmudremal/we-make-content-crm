@@ -139,25 +139,292 @@ class Menus {
 			'description'				=> __( 'Documentation feature and their links can be change from here. If you leave blank anything then these "Learn More" never display.', 'we-make-content-crm' ) . $this->commontags( true ),
 			'fields'						=> [
 				[
-					'id' 						=> 'docs-title',
-					'label'					=> __( 'docs title', 'we-make-content-crm' ),
-					'description'		=> __( 'The title on dahsboard page. make sure you user tags properly.', 'we-make-content-crm' ),
+					'id' 						=> 'docs-monthlyretainer',
+					'label'					=> __( 'Monthly Retainer', 'we-make-content-crm' ),
+					'description'		=> __( 'Your Monthly retainer that could be chaged anytime. Once you\'ve changed this amount, will be sync with your stripe account.', 'we-make-content-crm' ),
 					'type'					=> 'text',
-					'default'				=> sprintf( __( 'Client Dashoard | %s | %s', 'we-make-content-crm' ), '{username}', '{sitename}' )
+					'default'				=> ''
 				],
 				[
-					'id' 						=> 'docs-yearstart',
-					'label'					=> __( 'Year Starts', 'we-make-content-crm' ),
-					'description'		=> __( 'The Year range on docs starts from.', 'we-make-content-crm' ),
-					'type'					=> 'number',
-					'default'				=> date( 'Y' )
+					'id' 						=> 'docs-monthlyretainerurl',
+					'label'					=> __( 'Learn more', 'we-make-content-crm' ),
+					'description'		=> __( 'The URL to place on Learn more.', 'we-make-content-crm' ),
+					'type'					=> 'url',
+					'default'				=> ''
 				],
 				[
-					'id' 						=> 'docs-yearend',
-					'label'					=> __( 'Yeah Ends with', 'we-make-content-crm' ),
-					'description'		=> __( 'The Year range on docs ends on.', 'we-make-content-crm' ),
-					'type'					=> 'number',
-					'default'				=> ( date( 'Y' ) + 3 )
+					'id' 						=> 'docs-contentcalendly',
+					'label'					=> __( 'Content Calendar', 'we-make-content-crm' ),
+					'description'		=> __( 'See your content calendar on Calendly.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'docs-contentcalendlyurl',
+					'label'					=> __( 'Learn more', 'we-make-content-crm' ),
+					'description'		=> __( 'The URL to place on Learn more.', 'we-make-content-crm' ),
+					'type'					=> 'url',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'docs-contentlibrary',
+					'label'					=> __( 'Content Library', 'we-make-content-crm' ),
+					'description'		=> __( 'Open content library from here.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'docs-contentlibraryurl',
+					'label'					=> __( 'Learn more', 'we-make-content-crm' ),
+					'description'		=> __( 'The URL to place on Learn more.', 'we-make-content-crm' ),
+					'type'					=> 'url',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'docs-clientrowvideos',
+					'label'					=> __( 'Client Raw Video Archive', 'we-make-content-crm' ),
+					'description'		=> __( 'All of the video files are here. Click on the buton to open all archive list.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'docs-clientrowvideosurl',
+					'label'					=> __( 'Learn more', 'we-make-content-crm' ),
+					'description'		=> __( 'The URL to place on Learn more.', 'we-make-content-crm' ),
+					'type'					=> 'url',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'docs-manageretainer',
+					'label'					=> __( 'Manage your Retainer', 'we-make-content-crm' ),
+					'description'		=> __( 'Manage your retainer from here. You can pause or cancel it from here.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'docs-manageretainerurl',
+					'label'					=> __( 'Learn more', 'we-make-content-crm' ),
+					'description'		=> __( 'The URL to place on Learn more.', 'we-make-content-crm' ),
+					'type'					=> 'url',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'docs-paymenthistory',
+					'label'					=> __( 'Payment History', 'we-make-content-crm' ),
+					'description'		=> __( 'Payment history is synced form your stripe account since you started subscription.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'docs-paymenthistoryurl',
+					'label'					=> __( 'Learn more', 'we-make-content-crm' ),
+					'description'		=> __( 'The URL to place on Learn more.', 'we-make-content-crm' ),
+					'type'					=> 'url',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'docs-changepassword',
+					'label'					=> __( 'Payment History', 'we-make-content-crm' ),
+					'description'		=> __( 'Change your password from here. This won\'t store on our database. Only encrypted password we store and make sure you\'ve saved your password on a safe place.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'docs-changepasswordurl',
+					'label'					=> __( 'Learn more', 'we-make-content-crm' ),
+					'description'		=> __( 'The URL to place on Learn more.', 'we-make-content-crm' ),
+					'type'					=> 'url',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'docs-emailaddress',
+					'label'					=> __( 'Email Address', 'we-make-content-crm' ),
+					'description'		=> __( 'Email address required. Don\'t worry, we won\'t sent spam.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'docs-emailaddressurl',
+					'label'					=> __( 'Learn more', 'we-make-content-crm' ),
+					'description'		=> __( 'The URL to place on Learn more.', 'we-make-content-crm' ),
+					'type'					=> 'url',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'docs-contactnumber',
+					'label'					=> __( 'Contact Number', 'we-make-content-crm' ),
+					'description'		=> __( 'Your conatct number is necessery in case if you need to communicate with you.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'docs-contactnumberurl',
+					'label'					=> __( 'Learn more', 'we-make-content-crm' ),
+					'description'		=> __( 'The URL to place on Learn more.', 'we-make-content-crm' ),
+					'type'					=> 'url',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'docs-website',
+					'label'					=> __( 'Website URL', 'we-make-content-crm' ),
+					'description'		=> __( 'Give here you websute url if you have. Some case we might need to get idea about your and your company information.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'docs-websiteurl',
+					'label'					=> __( 'Learn more', 'we-make-content-crm' ),
+					'description'		=> __( 'The URL to place on Learn more.', 'we-make-content-crm' ),
+					'type'					=> 'url',
+					'default'				=> ''
+				],
+			]
+		];
+		$args['rest'] 		= [
+			'title'							=> __( 'Rest API', 'we-make-content-crm' ),
+			'description'				=> __( 'Setup what happened when a rest api request fired on this site.', 'we-make-content-crm' ),
+			'fields'						=> [
+				[
+					'id' 						=> 'rest-createprofile',
+					'label'					=> __( 'Create profile', 'we-make-content-crm' ),
+					'description'		=> __( 'When a request email doesn\'t match any account, so will it create a new user account?.', 'we-make-content-crm' ),
+					'type'					=> 'checkbox',
+					'default'				=> true
+				],
+				[
+					'id' 						=> 'rest-updateprofile',
+					'label'					=> __( 'Update profile', 'we-make-content-crm' ),
+					'description'		=> __( 'When a request email detected an account, so will it update profile with requested information?.', 'we-make-content-crm' ),
+					'type'					=> 'checkbox',
+					'default'				=> false
+				],
+				[
+					'id' 						=> 'rest-preventemail',
+					'label'					=> __( 'Prevent Email', 'we-make-content-crm' ),
+					'description'		=> __( 'Creating an account will send an email by default. Would you like to prevent sending email from rest request operation?', 'we-make-content-crm' ),
+					'type'					=> 'checkbox',
+					'default'				=> true
+				],
+				[
+					'id' 						=> 'rest-defaultpass',
+					'label'					=> __( 'Default Password', 'we-make-content-crm' ),
+					'description'		=> __( 'The default password will be applied if any request contains emoty password or doesn\'t. Default value is random number.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> ''
+				],
+			]
+		];
+		$args['auth'] 		= [
+			'title'							=> __( 'Social Auth', 'we-make-content-crm' ),
+			'description'				=> __( 'Social anuthentication requeired provider API keys and some essential information. Claim them and setup here. Every API has an expiry date. So further if you face any problem with social authentication, make sure if api validity expired.', 'we-make-content-crm' ),
+			'fields'						=> [
+				[
+					'id' 						=> 'auth-enable',
+					'label'					=> __( 'Enable Social Authetication', 'we-make-content-crm' ),
+					'description'		=> __( 'Mark this field to run social authentication. Once you disable from here, social authentication will be disabled from everywhere.', 'we-make-content-crm' ),
+					'type'					=> 'checkbox',
+					'default'				=> true
+				],
+				[
+					'id' 						=> 'auth-google',
+					'label'					=> __( 'Enable Google Authetication', 'we-make-content-crm' ),
+					'description'		=> __( 'If you don\'t want to enable google authentication, you can disable this function from here.', 'we-make-content-crm' ),
+					'type'					=> 'checkbox',
+					'default'				=> true
+				],
+				[
+					'id' 						=> 'auth-googleclientid',
+					'label'					=> __( 'Google Client ID', 'we-make-content-crm' ),
+					'description'		=> __( 'Your Google client or App ID, that you created for Authenticate.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'auth-googleclientsecret',
+					'label'					=> __( 'Google Client Secret', 'we-make-content-crm' ),
+					'description'		=> __( 'Your Google client or App Secret. Is required here.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'auth-googleclientredirect',
+					'label'					=> __( 'Google App Redirect', 'we-make-content-crm' ),
+					'description'		=> __( 'Place this link on Google Auth Callback or Redirect field on your Google App.', 'we-make-content-crm' ) . '<code>' . apply_filters( 'futurewordpress/project/socialauth/redirect', '/handle/google', 'google' ) . '</code>',
+					'type'					=> 'textcontent'
+				],
+				[
+					'id' 						=> 'auth-googleauthlink',
+					'label'					=> __( 'Google Auth Link', 'we-make-content-crm' ),
+					'description'		=> __( 'Use this link on your "Login with Google" button.', 'we-make-content-crm' ) . '<code>' . apply_filters( 'futurewordpress/project/socialauth/link', '/auth/google', 'google' ) . '</code>',
+					'type'					=> 'textcontent'
+				],
+			]
+		];
+		$args['signature'] 		= [
+			'title'							=> __( 'E-Signature', 'we-make-content-crm' ),
+			'description'				=> __( 'Setup e-signature plugin some customize settings from here. Four tags for Contract is given below.', 'we-make-content-crm' ) . $this->contractTags( ['{client_name}','{client_address}','{todays_date}','{retainer_amount}'] ),
+			'fields'						=> [
+				[
+					'id' 						=> 'signature-addressplaceholder',
+					'label'					=> __( 'Address Placeholder', 'we-make-content-crm' ),
+					'description'		=> __( 'What shouldbe replace if address1 & address2 both are empty. If you leave it blank, then it\'ll be blank.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> 'N/A'
+				],
+				[
+					'id' 						=> 'signature-dateformat',
+					'label'					=> __( 'Date formate', 'we-make-content-crm' ),
+					'description'		=> __( 'The date format which will apply on {{todays_date}} place.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> get_option('date_format')
+				],
+				[
+					'id' 						=> 'signature-emptyrrtainer',
+					'label'					=> __( 'Empty Retainer amount', 'we-make-content-crm' ),
+					'description'		=> __( 'if anytime we found empty retainer amount, so what will be replace there?', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> 'N/A'
+				],
+			]
+		];
+		$args['email'] 		= [
+			'title'							=> __( 'E-Mail', 'we-make-content-crm' ),
+			'description'				=> __( 'Setup email configuration here', 'we-make-content-crm' ) . $this->contractTags( ['{client_name}','{client_address}','{todays_date}','{retainer_amount}', '{registration_link}', '{{site_name}}', '{{passwordreset_link}}' ] ),
+			'fields'						=> [
+				[
+					'id' 						=> 'email-registationsubject',
+					'label'					=> __( 'Subject', 'we-make-content-crm' ),
+					'description'		=> __( 'The Subject, used on registration link sending mail.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> "Invitation to Register for [Event/Service/Product]"
+				],
+				[
+					'id' 						=> 'email-sendername',
+					'label'					=> __( 'Sender name', 'we-make-content-crm' ),
+					'description'		=> __( 'Sender name that should be on mail metadata..', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> "Invitation to Register for [Event/Service/Product]"
+				],
+				[
+					'id' 						=> 'email-registationbody',
+					'label'					=> __( 'Registration link Template', 'we-make-content-crm' ),
+					'description'		=> __( 'The template, used on registration link sending mail.', 'we-make-content-crm' ),
+					'type'					=> 'textarea',
+					'default'				=> "Dear [Name],\nWe are delighted to invite you to join us for [Event/Service/Product], a [brief description of event/service/product].\n[Event/Service/Product] offers [brief summary of benefits or features]. As a valued member of our community, we would like to extend a special invitation for you to be part of this exciting opportunity.\nTo register, simply click on the link below:\n[Registration link]\nShould you have any questions or require additional information, please do not hesitate to contact us at [contact information].\nWe look forward to seeing you at [Event/Service/Product].\nBest regards,\n[Your Name/Company Name]"
+				],
+				[
+					'id' 						=> 'email-passresetsubject',
+					'label'					=> __( 'Password Reset Subject', 'we-make-content-crm' ),
+					'description'		=> __( 'The email subject on password reset mail.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> __( 'Password Reset Request', 'domain' )
+				],
+				[
+					'id' 						=> 'email-passresetbody',
+					'label'					=> __( 'Password Reset Template', 'we-make-content-crm' ),
+					'description'		=> __( 'The template, used on password reset link sending mail.', 'we-make-content-crm' ),
+					'type'					=> 'textarea',
+					'default'				=> "Dear {{client_name}},\n\nYou recently requested to reset your password for your {{site_name}} account. Please follow the link below to reset your password:\n\n{{passwordreset_link}}\n\nIf you did not make this request, you can safely ignore this email.\n\nBest regards,\n{{site_name}} Team"
 				],
 			]
 		];
@@ -179,4 +446,15 @@ class Menus {
 		}
 		return implode( ', ', $arg );
 	}
+	public function contractTags( $tags ) {
+		$arg = [];
+		foreach( $tags as $tag ) {
+			$arg[] = sprintf( "%s{$tag}%s", '<code>{', '}</code>' );
+		}
+		return implode( ', ', $arg );
+	}
 }
+
+/**
+ * {{client_name}}, {{client_address}}, {{todays_date}}, {{retainer_amount}}
+ */

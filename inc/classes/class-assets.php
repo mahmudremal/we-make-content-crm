@@ -26,12 +26,14 @@ class Assets {
 		 */
 		add_action( 'wp_enqueue_scripts', [ $this, 'register_styles' ] );
 		add_action( 'wp_enqueue_scripts', [ $this, 'register_scripts' ] );
+		add_action( 'wp_enqueue_scripts', [ $this, 'wp_denqueue_scripts' ], 99 );
 		/**
 		 * The 'enqueue_block_assets' hook includes styles and scripts both in editor and frontend,
 		 * except when is_admin() is used to include them conditionally
 		 */
 		// add_action( 'enqueue_block_assets', [ $this, 'enqueue_editor_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'admin_enqueue_scripts' ], 10, 1 );
+		add_action( 'admin_enqueue_scripts', [ $this, 'admin_denqueue_scripts' ], 99 );
 
 		add_filter( 'futurewordpress/project/javascript/siteconfig', [ $this, 'siteConfig' ], 10, 1 );
 	}
@@ -189,13 +191,24 @@ class Assets {
 				'confirming'								=> __( 'Confirming', 'we-make-content-crm' ),
 				'request_failed'						=> __( 'Request failed', 'we-make-content-crm' ),
 				'submit'										=> __( 'Submit', 'we-make-content-crm' ),
+				'cancel'										=> __( 'Cancel', 'we-make-content-crm' ),
+				'registration_link'					=> __( 'Registration link', 'we-make-content-crm' ),
+				'password_reset'						=> __( 'Password reset', 'we-make-content-crm' ),
 				'give_your_old_password'		=> __( 'Give here your old password', 'we-make-content-crm' ),
 				'you_paused'								=> __( 'Pauses the retainer', 'we-make-content-crm' ),
 				'you_un_paused'							=> __( 'Unpauses the retainer', 'we-make-content-crm' ),
 				'are_u_sure'								=> __( 'Are you sure?', 'we-make-content-crm' ),
 				'sure_to_delete'						=> __( 'Are you sure about this deletation. Once you permit to delete, this user data will be removed from database forever. This can\'t be Undone', 'we-make-content-crm' ),
+				'sent_reg_link'							=> __( 'Registration Link sent successfully!', 'we-make-content-crm' ),
+				'sent_passreset'						=> __( 'Password reset link sent Successfully!', 'we-make-content-crm' ),
 			],
+			'leadStatus'		=> apply_filters( 'futurewordpress/project/action/statuses', ['no-action' => __( 'No action fetched', 'we-make-content-crm' )], false )
 		], (array) $args );
+	}
+	public function wp_denqueue_scripts() {}
+	public function admin_denqueue_scripts() {
+		if( ! isset( $_GET[ 'page' ] ) ||  $_GET[ 'page' ] !='crm_dashboard' ) {return;}
+		wp_dequeue_script( 'qode-tax-js' );
 	}
 
 }
