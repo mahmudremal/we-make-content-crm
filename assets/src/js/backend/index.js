@@ -77,7 +77,6 @@ import flatpickr from "flatpickr";
 				document.querySelectorAll( '.delete-lead-user:not([data-handled])' ).forEach( ( el, ei ) => {
 					el.dataset.handled = true;
 					document.body.addEventListener( 'delete-lead-' + el.dataset.id, () => {
-							console.log( [el.dataset.id, lead] );
 						lead = document.querySelector( '#lead-' + el.dataset.id );
 						if( lead ) {lead.remove();} else {
 							console.log( el.dataset.id, lead );

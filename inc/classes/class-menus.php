@@ -428,6 +428,54 @@ class Menus {
 				],
 			]
 		];
+		$args['stripe'] 		= [
+			'title'							=> __( 'Stripe', 'we-make-content-crm' ),
+			'description'				=> __( 'Stripe payment system configuration process should be do carefully. Here some field is importent to work with no inturrupt. Such as API key or secret key, if it\'s expired on your stripe id, it won\'t work here. New user could face problem fo that reason.', 'we-make-content-crm' ) . $this->contractTags( ['{client_name}','{client_address}','{todays_date}','{retainer_amount}', '{registration_link}', '{{site_name}}', '{{passwordreset_link}}' ] ),
+			'fields'						=> [
+				[
+					'id' 						=> 'stripe-publishablekey',
+					'label'					=> __( 'Publishable Key', 'we-make-content-crm' ),
+					'description'		=> __( 'The key which is secure, could import into JS, and is safe evenif any thirdparty got those code. Note that, secret key is not a publishable key.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'stripe-secretkey',
+					'label'					=> __( 'Secret Key', 'we-make-content-crm' ),
+					'description'		=> __( 'The secret key that never share with any kind of frontend functionalities and is ofr backend purpose. Is required.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'stripe-currency',
+					'label'					=> __( 'Currency', 'we-make-content-crm' ),
+					'description'		=> __( 'Default currency which will use to create payment link.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> 'usd'
+				],
+				[
+					'id' 						=> 'stripe-productname',
+					'label'					=> __( 'Product name text', 'we-make-content-crm' ),
+					'description'		=> __( 'A text to show on product name place on checkout sanbox.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> __( 'Subscription', 'domain' )
+				],
+				[
+					'id' 						=> 'stripe-productdesc',
+					'label'					=> __( 'Product Description', 'we-make-content-crm' ),
+					'description'		=> __( 'Some text to show on product description field.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> __( 'Payment for', 'domain' ) . get_option( 'blogname', 'We Make Content' )
+				],
+				[
+					'id' 						=> 'stripe-productimg',
+					'label'					=> __( 'Product Image', 'we-make-content-crm' ),
+					'description'		=> __( 'A valid image url for product. If image url are wrong or image doesn\'t detect by stripe, process will fail.', 'we-make-content-crm' ),
+					'type'					=> 'url',
+					'default'				=> __( 'Payment for', 'domain' ) . get_option( 'blogname', 'We Make Content' )
+				],
+			]
+		];
 		return $args;
 	}
 	/**

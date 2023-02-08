@@ -27,6 +27,7 @@ class Core {
 		add_action( 'wp_ajax_futurewordpress/project/action/deleteleadaccount', [ $this, 'deleteLeadAccount' ], 10, 0 );
 		add_action( 'wp_ajax_futurewordpress/project/action/sendregistration', [ $this, 'sendRegistration' ], 10, 0 );
 		add_action( 'wp_ajax_futurewordpress/project/action/sendpasswordreset', [ $this, 'sendPasswordReset' ], 10, 0 );
+		add_action( 'wp_ajax_futurewordpress/project/action/registerexisting', [ $this, 'registerExisting' ], 10, 0 );
 
 		// add_action( 'wp_ajax_futurewordpress/project/action/test', [ $this, 'testAjax' ], 10, 0 );
 
@@ -63,23 +64,26 @@ class Core {
 		$userMeta = apply_filters( 'futurewordpress/project/usermeta/defaults', [] );
 		if( ! empty( $field ) && isset( $_POST[ 'userid' ] ) ) {
 			$field = substr( $field, 5 );
-			$user_id = get_current_user_id();
+			$user_id = ( ! is_admin() ) ? get_current_user_id() : $_POST[ 'userid' ];
 			if( $type = 'meta' && array_key_exists( $field, $userMeta ) ) {
-				update_user_meta( $user_id, $field, $value );
-			} else if( $type = 'data' && array_key_exists( $field, [ 'email' ] ) ) {
+				if( $field == 'enable_subscription' ) {$this->toggleSubscption( $user_id, $field, $value );} else {
+					update_user_meta( $user_id, $field, $value );
+					wp_send_json_success( __( 'Profile Information Update successful', 'we-make-content-crm' ), 200 );
+				}
+			} else if( $type = 'data' && in_array( $field, [ 'display_name', 'user_email' ] ) ) {
 				if( in_array( $field, [ 'display_name', 'user_email' ] ) ) {
 					wp_update_user( [
-						'ID'			=> ( ! is_admin() ) ? get_current_user_id() : $_POST[ 'userid' ],
+						'ID'			=> $user_id,
 						$field		=> $value
 					] );
 					if( $field == 'user_email' ) {update_user_meta( $user_id, 'email', $value );}
+					wp_send_json_success( __( 'Profile Update successful', 'we-make-content-crm' ), 200 );
 				} else {
 					wp_send_json_error( __( 'Illigal request sent. Nothing happen. Request rejected.', 'we-make-content-crm' ), 200 );
 				}
 			} else {
-				wp_send_json_error( __( 'Request properly not identified or not allowed to madify.', 'we-make-content-crm' ), 200 );
+				wp_send_json_error( __( 'Request properly not identified or not allowed to madify.', 'we-make-content-crm' ) . $field, 200 );
 			}
-			wp_send_json_success( __( 'Update successful', 'we-make-content-crm' ), 200 );
 		} else {
 			wp_send_json_error( __( 'Failed operation', 'we-make-content-crm' ), 200 );
 		}
@@ -253,6 +257,43 @@ class Core {
 			wp_send_json_success( [ 'message' => __( 'Reset Link sent successfully!', 'we-make-content-crm' ), 'hooks' => [ 'sent-passreset-' . $_POST[ 'lead' ] ] ], 200 );
 		} else {
 			wp_send_json_error( __( 'Unexpected respond from backend.', 'we-make-content-crm' ), 200 );
+		}
+	}
+	public function toggleSubscption( $user_id, $meta_key, $meta_value ) {
+		update_user_meta( $user_id, $meta_key, $meta_value );
+		wp_send_json_success( [ 'message' => __( 'User subscription Changed Successfully', 'we-make-content-crm' ), 'hooks' => ['subscription-status-' . $meta_value ] ], 200 );
+	}
+	public function registerExisting() {
+		// if( ! isset( $_POST[ '_nonce' ] ) || ! wp_verify_nonce( $_POST[ '_nonce' ], 'futurewordpress/project/verify/registerexisting' ) ) {
+		// 	wp_send_json_error( __( 'We\'ve detected you\'re requesting with an invalid security token or something went wrong with you', 'we-make-content-crm' ), 200 );
+		// }
+		if( ! isset( $_POST[ 'userid' ] ) || ! isset( $_POST[ 'password' ] ) || ! isset( $_POST[ 'metadata' ] ) ) {wp_send_json_error( __( 'Something went wrong.', 'domain' ), 200 );}
+		if( is_array( $_POST[ 'password' ] ) && isset( $_POST[ 'password' ][ 'confirm' ] ) && isset( $_POST[ 'password' ][ 'given' ] ) && $_POST[ 'password' ][ 'given' ] != $_POST[ 'password' ][ 'confirm' ] ) {wp_send_json_error( __( 'Password not matched', 'domain' ), 200 );}
+		if( ! empty( $_POST[ 'password' ][ 'given' ] ) ) {
+			$password = $_POST[ 'password' ][ 'given' ];
+			$userid = hex2bin( $_POST[ 'userid' ] );
+			$userInfo = get_user_by( 'id', $userid );
+			if( is_wp_error( $userInfo ) ) {wp_send_json_error( $userInfo->get_error_message(), 200 );}
+			$metadata = (array) $_POST[ 'metadata' ];
+			foreach( $metadata as $meta_key => $meta_value ) {
+				update_user_meta( $_POST[ 'userid' ], $meta_key, $meta_value );
+			}
+			$userargs = [
+				'ID'							=> $userid,
+				'user_pass'				=> $password
+			];
+			$userdata = isset( $_POST[ 'userdata' ] ) ? (array) $_POST[ 'userdata' ] : [];
+			if( isset( $userdata[ 'display_name' ] ) ) {
+				$userargs[ 'display_name' ] = $userdata[ 'display_name' ];
+			}
+			$response = wp_update_user( $userargs );
+			if( is_wp_error( $response ) ) {
+				wp_send_json_error( $response->get_error_message(), 200 );
+			}
+			if( isset( $_FILES[ 'profile-image' ] ) && $avater = apply_filters( 'futurewordpress/project/filesystem/set_avater', false, $_FILES[ 'profile-image' ] ) && ! isset( $avater[ 'error' ] ) ) {}
+			// $redirect = esc_url( apply_filters( 'futurewordpress/project/user/dashboardpermalink', $userid, $userInfo->data->user_nicename ) );
+			$redirect = site_url( 'pay_retainer/' . bin2hex( $userInfo->ID ) . '/' );
+			wp_send_json_success( [ 'message' => __( 'Data updated successfully. Please wait a while, we\'re redirecting.', 'we-make-content-crm' ), 'redirect' => $redirect, 'hooks' => [ 'register-existing-account-wizard-success' ] ], 200 );
 		}
 	}
 	public function testAjax() {

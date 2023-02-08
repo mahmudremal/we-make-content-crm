@@ -69,3 +69,24 @@ div.wpforms-container-full .wpforms-form .wpforms-field {
     }
   }
 }
+.profile-image-preview {
+  height: 0;
+  opacity: 0;
+  width: 200px;
+  margin: auto;
+  overflow: hidden;
+  visibility: hidden;
+  transition: all .7s ease;
+  &.active {
+    height: 200px;
+    opacity: 1;
+    visibility: visible;
+    img {
+      height: 100%;
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      box-shadow: 2px 0 5px #ddd;
+    }
+  }
+}

@@ -150,37 +150,39 @@ class Dashboard {
   }
   public function defaultUserMeta( $meta = [] ) {
     return wp_parse_args( (array) $meta, [
-      'subscribe'                 => false,
-      'enable_subscription'          => false,
-      'monthly_retainer'          => '',
-      'content_calendar'          => '',
-      'content_library'          => '',
+      'subscribe'           => false,
+      'enable_subscription' => false,
+      'monthly_retainer' => '',
+      'content_calendar' => '',
+      'content_library'  => '',
 
-      'country'                   => '',
+      'country'         => '',
 
       'status'          => 'call_scheduled',
       'tiktok'          => '',
-      'YouTube_url'          => '',
-      'instagram_url'          => '',
-      'website'          => '',
+      'YouTube_url'     => '',
+      'instagram_url'   => '',
+      'website'         => '',
 
-      'address1'          => '',
-      'address2'          => '',
-      'phone'          => '',
-      'email'          => '',
-      'zip'          => '',
-      'city'          => '',
-      'newpassword'          => '',
+      'address1'        => '',
+      'address2'        => '',
+      'phone'           => '',
+      'phone1'           => '',
+      'email'           => '',
+      'zip'             => '',
+      'city'            => '',
+      'newpassword'     => '',
 
-      'company_name'      => '',
-      'next_meeting'      => '',
-      'meeting_link'      => '',
+      'company_name'    => '',
+      'next_meeting'    => '',
+      'meeting_link'    => '',
 
-      'question1'      => '',
-      'question2'      => '',
-      'question3'      => '',
-      'question4'      => '',
+      'question1'       => '',
+      'question2'       => '',
+      'question3'       => '',
+      'question4'       => '',
 
+      'document_type'      => '',
       'contract_type'      => '',
     ] );
   }

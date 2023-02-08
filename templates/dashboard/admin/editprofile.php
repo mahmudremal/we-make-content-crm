@@ -9,6 +9,12 @@ $userStatuses = apply_filters( 'futurewordpress/project/action/statuses', [
 $userContracts = apply_filters( 'futurewordpress/project/action/contracts', [
     'no-action'             => __( 'No Contract fetched', 'we-make-content-crm' )
 ], false );
+$userDocuments = [
+    'basic'                 => __( 'Basic Document', 'domain' )
+];
+if( class_exists('ESIG_SAD_Admin') ) {
+    $userDocuments[ 'sad' ] = __( 'Stand Alone Document', 'domain' );
+}
 $userCountries = apply_filters( 'futurewordpress/project/database/countries', [
     'no-country'			=> __( 'No Country Found', 'we-make-content-crm' )
 ], false );
@@ -74,15 +80,6 @@ $is_edit_profile = ( ! empty( $args[ 'split' ][2] ) );
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label"><?php esc_html_e( 'Contract type:', 'we-make-content-crm' ); ?></label>
-                            <select name="userinfo[contract]" class="selectpicker form-control" data-style="py-0">
-                                <option><?php esc_html_e( 'Select a type', 'we-make-content-crm' ); ?></option>
-                                <?php foreach( $userContracts as $contract_key => $contract_text ) : ?>
-                                    <option value="<?php echo esc_attr( $contract_key ); ?>" <?php echo esc_attr( ( $contract_key == $userInfo->meta->contract_type ) ? 'selected' : '' ); ?>><?php echo esc_html( $contract_text ); ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="form-group">
                             <label class="form-label" for="monthly_retainer"><?php esc_html_e( 'Monthly Retainer:', 'we-make-content-crm' ); ?></label>
                             <input type="text" class="form-control" id="monthly_retainer" name="userinfo[monthly_retainer]" value="<?php echo esc_attr( $userInfo->meta->monthly_retainer ); ?>" placeholder="$2000">
                         </div>
@@ -108,6 +105,36 @@ $is_edit_profile = ( ! empty( $args[ 'split' ][2] ) );
                         <a class="btn btn-primary btn-outline mt-2" href="<?php echo esc_url( apply_filters( 'futurewordpress/project/user/dashboardpermalink', $userInfo->ID, $userInfo->data->user_nicename ) ); ?>" role="button" target="_blank"><?php esc_html_e( 'View Frontend', 'we-make-content-crm' ); ?></a>
                         <button type="button" class="btn btn-danger btn-outline mt-2 delete-lead-user" data-id="<?php echo esc_attr( $userInfo->ID ); ?>" data-user-info="<?php echo esc_attr( json_encode( [ 'displayname' => $userInfo->display_name, 'role' => $userInfo->user_role ] ) ); ?>" role="button"><?php esc_html_e( 'Delete Account', 'we-make-content-crm' ); ?></button>
                         <button type="button" class="btn btn-success btn-outline mt-2 lead-send-registration" data-id="<?php echo esc_attr( $userInfo->ID ); ?>" data-user-info="<?php echo esc_attr( $userInfo->display_name ); ?>" role="button"><?php esc_html_e( 'Mail Registration', 'we-make-content-crm' ); ?></button>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-full-width">
+                <div class="card-header d-flex justify-content-between">
+                    <div class="header-title">
+                    <h4 class="card-title"><?php esc_html_e( 'Send Contract:', 'we-make-content-crm' ); ?></h4>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label class="form-label"><?php esc_html_e( 'Document type:', 'we-make-content-crm' ); ?></label>
+                        <select name="userinfo[document_type]" class="selectpicker form-control" data-style="py-0" id="contract_type">
+                            <option><?php esc_html_e( 'Select a type', 'we-make-content-crm' ); ?></option>
+                            <?php foreach( $userDocuments as $document_key => $document_text ) : ?>
+                                <option value="<?php echo esc_attr( $document_key ); ?>" <?php echo esc_attr( ( $document_key == $userInfo->meta->document_type ) ? 'selected' : '' ); ?>><?php echo esc_html( $document_text ); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><?php esc_html_e( 'Contract type:', 'we-make-content-crm' ); ?></label>
+                        <select name="userinfo[contract_type]" class="selectpicker form-control" data-style="py-0" id="contract_type">
+                            <option><?php esc_html_e( 'Select a type', 'we-make-content-crm' ); ?></option>
+                            <?php foreach( $userContracts as $contract_key => $contract_text ) : ?>
+                                <option value="<?php echo esc_attr( $contract_key ); ?>" <?php echo esc_attr( ( $contract_key == $userInfo->meta->contract_type ) ? 'selected' : '' ); ?>><?php echo esc_html( $contract_text ); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-success btn-outline mt-2 lead-send-contract" data-id="<?php echo esc_attr( $userInfo->ID ); ?>" data-user-info="<?php echo esc_attr( $userInfo->display_name ); ?>" role="button"><?php esc_html_e( 'Send Contract', 'we-make-content-crm' ); ?></button>
                     </div>
                 </div>
             </div>

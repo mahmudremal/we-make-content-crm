@@ -1,5 +1,23 @@
 import Swal from "sweetalert2";
 import { toast } from 'toast-notification-alert';
+import validator from 'validator';
+
+// const stripe = require('stripe')('your_stripe_api_key');
+// import stripe from 'stripe';
+// import {loadStripe} from '@stripe/stripe-js';
+// const stripe = await loadStripe('pk_test_TYooMQauvdEDq54NiTphI7jx');
+
+/**
+ * import Stripe from 'stripe';
+const stripe = new Stripe('sk_test_...');
+
+const customer = await stripe.customers.create({
+  email: 'customer@example.com',
+});
+
+console.log(customer.id);
+ */
+
 
 
 ( function ( $ ) {
@@ -10,21 +28,29 @@ import { toast } from 'toast-notification-alert';
 		constructor() {
 			this.ajaxUrl = fwpSiteConfig?.ajaxUrl ?? '';
 			this.ajaxNonce = fwpSiteConfig?.ajax_nonce ?? '';
+			this.lastAjax	 = false;
 			var i18n = fwpSiteConfig?.i18n ?? {};
 			this.i18n = {
 				confirm_cancel_subscribe	: 'Do you really want to cancel this Subscription?',
-				i_confirm_it				: 'Yes I confirm it',
-				confirming					: 'Confirming',
-				submit						: 'Submit',
-				request_failed				: 'Request failed',
+				i_confirm_it							: 'Yes I confirm it',
+				confirming								: 'Confirming',
+				successful								: 'Successful',
+				submit										: 'Submit',
+				request_failed						: 'Request failed',
 				give_your_old_password		: 'Give here your old password',
-				you_paused					: 'Pause your Retainer',
-				you_un_paused				: 'Your unpaused Retainer',
+				you_paused								: 'Pause your Retainer',
+				you_un_paused							: 'Your unpaused Retainer',
+				sometextfieldmissing			: 'Some required field you missed. Pleae fillup them first, then we can proceed.',
+				rqstrongpass							: 'Strong password required',
+				renumber									: 'Only field allowed number only. Please recheck.',
+				rqemail										: 'You provide a wrong email address. Please fix.',
+				passnotmatched						: 'Password not matched',
 				...i18n
 			}
 			this.init();this.toOpenEdit();this.inputEventListner();
 			this.cancelSubscription();this.changePassword();
 			this.toggleStatus();this.passwordToggle();
+			this.regWidget();
 			// this.fetchDataWidthContract();
 			// this.accordion();
 			// console.log( 'frontend init...' );
@@ -159,7 +185,9 @@ import { toast } from 'toast-notification-alert';
 			} );
 		}
 		inputEventListner() {
-			const thisClass = this;var i, el;
+			const thisClass = this;var i, el, userid;
+			userid = document.querySelector( 'input[type="hidden"][name="userid"]' );
+			if( userid ) {userid = userid.value;} else {userid = false;}
 			document.querySelectorAll( 'input' ).forEach( ( input ) => {
 				input.addEventListener( 'change', ( e ) => {
 					el = input.nextElementSibling;
@@ -173,6 +201,7 @@ import { toast } from 'toast-notification-alert';
 						formdata.append( 'action', 'futurewordpress/project/action/singlefield' );
 						formdata.append( 'field', input.name );
 						formdata.append( 'value', input.value );
+						formdata.append( 'userid', userid );
 						formdata.append( '_nonce', thisClass.ajaxNonce );
 						thisClass.sendToServer( formdata, (i)?i:false );
 					}
@@ -180,18 +209,23 @@ import { toast } from 'toast-notification-alert';
 			} );
 		}
 		toggleStatus() {
-			const thisClass = this;
+			const thisClass = this;var userid;
+			userid = document.querySelector( 'input[type="hidden"][name="userid"]' );
+			if( userid ) {userid = userid.value;} else {userid = false;}
 			document.querySelectorAll( '.fwp-form-checkbox-pause-subscribe' ).forEach( ( el, ei ) => {
+				document.body.addEventListener( 'subscription-status-on subscription-status-off', () => {
+					Swal.fire( { position: 'top-end', icon: 'success', title: ( el.checked ) ? thisClass.i18n.you_paused : thisClass.i18n.you_un_paused, showConfirmButton: false, timer: 3500 } );
+				} );
+				
 				el.addEventListener( 'change', ( event ) => {
 					var formdata = new FormData();
 						formdata.append( 'action', 'futurewordpress/project/action/singlefield' );
 						formdata.append( 'field', el.name );
-						formdata.append( 'value', el.value );
-						formdata.append( 'userid', el.value );
+						formdata.append( 'value', ( el.checked ) ? 'on' : 'off' );
+						formdata.append( 'userid', userid );
 						formdata.append( '_nonce', thisClass.ajaxNonce );
-						// thisClass.sendToServer( formdata );
-					// toast.show({title: ( el.checked ) ? thisClass.i18n.you_paused : thisClass.i18n.you_un_paused, position: 'topright', type: ( el.checked ) ? 'info' : 'alert' });
-					Swal.fire( { position: 'top-end', icon: 'success', title: ( el.checked ) ? thisClass.i18n.you_paused : thisClass.i18n.you_un_paused, showConfirmButton: false, timer: 3500 } );
+						thisClass.sendToServer( formdata );
+						// toast.show({title: ( el.checked ) ? thisClass.i18n.you_paused : thisClass.i18n.you_un_paused, position: 'topright', type: ( el.checked ) ? 'info' : 'alert' });
 				} );
 			} );
 		}
@@ -252,7 +286,7 @@ import { toast } from 'toast-notification-alert';
 				contentType: false,
 				processData: false,
 				success: function( json ) {
-					// console.log( json );
+					thisClass.lastAjax = json;
 					message = ( json.data.message ) ? json.data.message : json.data;
 					if( json.success ) {
 						toast.show({title: message, position: 'bottomright', type: 'info'});
@@ -260,6 +294,11 @@ import { toast } from 'toast-notification-alert';
 					} else {
 						toast.show({title: message, position: 'bottomright', type: 'warn'});
 						if( i ) {i.classList.remove( 'fa-spinner', 'fa-spin' );i.classList.add( 'fa-times' );}
+					}
+					if( json.data.hooks ) {
+						json.data.hooks.forEach( ( hook ) => {
+							document.body.dispatchEvent( new Event( hook ) );
+						} );
 					}
 				},
 				error: function( err ) {
@@ -271,6 +310,138 @@ import { toast } from 'toast-notification-alert';
 		addEventListener( elem, event ) {
 			
 			elem.dispatchEvent( new Event( 'fuck' ) )
+		}
+		regWidget() {
+			const thisClass = this;var currentTab = 0, isNotOkay, tab, wrap, widzard = document.querySelector( '#register-existing-account-wizard' );
+			if( ! widzard ) {return;}this.prevImage();this.submitWidget( widzard );
+			var rendWidget = function( done ) {
+				tab = widzard.querySelector( 'fieldset.active' );tab.classList.remove( 'active' );
+				if( done && currentTab >= 1 ) {widzard.querySelectorAll( '#top-tab-list li' )[(currentTab-1)].classList.add( 'done' );}
+				widzard.querySelectorAll( 'fieldset' )[currentTab].classList.add( 'active' );
+				tab = widzard.querySelectorAll( '#top-tab-list li' )[currentTab];tab.classList.add( 'active' );
+			}
+			document.querySelectorAll( 'button[name="next"]' ).forEach( ( al, ai ) => {
+				al.addEventListener( 'click', ( e ) => {isNotOkay = false;
+					if( e.target.previousElementSibling ) {
+						wrap = e.target.previousElementSibling;
+						wrap.querySelectorAll( 'input[required]' ).forEach( ( input ) => {
+							switch( input.type ) {
+								case 'email' :
+									if( ! validator.isEmail( input.value ) ) {isNotOkay = thisClass.i18n.rqemail;thisClass.handleError( input );}
+									break;
+								case 'text' :
+									if( validator.isEmpty( input.value ) ) {isNotOkay = thisClass.i18n.sometextfieldmissing;thisClass.handleError( input );}
+									break;
+								case 'number' :
+									if( ! validator.isNumeric( input.value ) ) {isNotOkay = thisClass.i18n.renumber;thisClass.handleError( input );}
+									break;
+								case 'password' :
+									if( ! validator.isStrongPassword( input.value ) ) {isNotOkay = thisClass.i18n.rqstrongpass;thisClass.handleError( input );}
+									if( wrap.querySelector( '#password-field-1' ) && wrap.querySelector( '#password-field-2' ) && wrap.querySelector( '#password-field-1' ).value != wrap.querySelector( '#password-field-2' ).value ) {isNotOkay = thisClass.i18n.passnotmatched;}
+									break;
+								default:
+									break;
+							}
+						} );
+					}
+					if( isNotOkay === false ) {
+						currentTab = ( currentTab + 1 );rendWidget( true );
+					} else {
+						toast.show({title: isNotOkay, position: 'bottomright', type: 'warn'});
+					}
+				} );
+			} );
+			document.querySelectorAll( 'button[name="previous"]' ).forEach( ( al, ai ) => {
+				al.addEventListener( 'click', ( e ) => {
+					currentTab = ( currentTab - 1 );rendWidget( false );
+				} );
+			} );
+		}
+		handleError( e ) {
+			e.classList.add( 'border-danger' );
+		}
+		prevImage() {
+			var preview, image, reader, file, input;
+			image = document.querySelector( '.profile-image-preview' );
+			input = document.querySelector( '[name="profile-image"]' );
+			if( input && image ) {
+				input.addEventListener( 'change', ( e ) => {
+					preview = document.getElementById("preview");
+					file = input.files[0];
+					reader = new FileReader();
+					reader.onloadend = function () {
+						preview.src = reader.result;
+						image.classList.add( 'active' );
+					}
+					if (file) {
+						reader.readAsDataURL(file);
+					} else {
+						preview.src = "";
+						image.classList.remove( 'remove' );
+					}
+				} );
+			}
+		}
+		submitWidget( widzard ) {
+			const thisClass = this;var el, message;
+			document.body.addEventListener( 'register-existing-account-wizard-success', ( event ) => {
+				el = document.querySelector( '#avaters' );if( el ) {el.classList.toggle( 'active', 'done' );}
+				el = document.querySelector( '#confirm' );if( el ) {el.classList.add( 'active', 'done' );}
+				el = document.querySelectorAll( '#register-existing-account-wizard fieldset' );if( el[3] ) {el[2].classList.remove( 'active' );el[3].classList.add( 'active' );}
+				if( thisClass.lastAjax && thisClass.lastAjax.data.redirect ) {
+					location.href = thisClass.lastAjax.data.redirect;
+				} else {
+					Swal.fire({
+						title: thisClass.i18n.successful,
+						text: ( thisClass.lastAjax.data.message ) ? thisClass.lastAjax.data.message : thisClass.lastAjax.data,
+					})
+				}
+			} );
+			widzard.addEventListener( 'submit', ( event ) => {
+				event.preventDefault();
+				var formdata = new FormData( event.target );
+				thisClass.sendToServer( formdata );
+			} );
+		}
+		tryHttpXhr() {
+			var params = '', form = event.target, data = new FormData( form );
+			for (var [key, value] of data.entries()) {params += encodeURIComponent(key) + "=" + encodeURIComponent(value) + "&";}
+			params = params.slice(0, -1);
+
+			var xhr = new XMLHttpRequest();
+			xhr.open( "POST", thisClass.ajaxUrl + "?" + params, true );
+			xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+			xhr.upload.addEventListener("progress", function(e) {
+				if (e.lengthComputable) {
+					var percentComplete = (e.loaded / e.total) * 100;
+					// document.getElementById("progressBar").value = percentComplete;
+				}
+			});
+			xhr.onreadystatechange = function() {
+				if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+					console.log(this.responseText);
+				}
+			};
+			xhr.send(  ); // new FormData( event.target )
+		}
+		handleStripeBtn() {
+			this.stripePublishaleKey = 'sk_test_51MYvdBI8VOGXMyoFiYpojuTUhvmS1Cxwhke4QK6jfJopnRN4fT8Qq6sy2Rmf2uvyHBtbafFpWVqIHBFoZcHp0vqq00HaOBUh1P';
+			const thisClass = this;var el, widget;
+			if( typeof Stripe !=='undefined' ) {return;}
+			widget = document.querySelector( '.pay_retainer-amount' );
+			if( ! widget ) {return;}
+			widget.addEventListener( 'click', async ( event ) => {
+				event.preventDefault();
+				const stripe = new Stripe( thisClass.stripePublishaleKey );
+
+				thisClass.stripe = await loadStripe(  thisClass.stripePublishaleKey );
+				window.stripe = thisClass.stripe;
+				var customer = await thisClass.stripe.customers.create({
+					email: 'customer@example.com',
+				});
+				
+				console.log(customer.id);
+			} );
 		}
 	}
 	new FutureWordPress_Frontend();

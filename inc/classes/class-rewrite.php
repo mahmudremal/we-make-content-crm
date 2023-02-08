@@ -32,7 +32,7 @@ class Rewrite {
 	}
   public function init() {
 		// add_rewrite_rule( 'clip/([^/]*)/([^/]*)/?', 'index.php?user_profile=$matches[1]&order_id=$matches[2]', 'top' );
-		
+		add_rewrite_rule( 'pay_retainer/([^/]*)/?', 'index.php?pay_retainer=$matches[1]&redirect=true', 'top' );
 		add_rewrite_rule( stripslashes( apply_filters( 'futurewordpress/project/system/getoption', 'permalink-dashboard', 'dashboard' ) ) . '/([^/]*)/?', 'index.php?user_profile=$matches[1]', 'top' );
 		foreach( apply_filters( 'futurewordpress/project/rewrite/rules', [] ) as $rule ) {
 			add_rewrite_rule( $rule[ 0 ], $rule[ 1 ], $rule[ 2 ] );
@@ -41,6 +41,7 @@ class Rewrite {
 	public function query_vars( $query_vars  ) {
 		$query_vars[] = 'user_profile';
 		$query_vars[] = 'lead_registration';
+		$query_vars[] = 'pay_retainer';
     return $query_vars;
 	}
 	public function template_include( $template ) {

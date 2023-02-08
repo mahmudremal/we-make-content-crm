@@ -189,6 +189,7 @@ class Assets {
 				'confirm_cancel_subscribe'	=> __( 'Do you really want to cancel this Subscription?', 'we-make-content-crm' ),
 				'i_confirm_it'							=> __( 'Yes I confirm it', 'we-make-content-crm' ),
 				'confirming'								=> __( 'Confirming', 'we-make-content-crm' ),
+				'successful'								=> __( 'Successful', 'we-make-content-crm' ),
 				'request_failed'						=> __( 'Request failed', 'we-make-content-crm' ),
 				'submit'										=> __( 'Submit', 'we-make-content-crm' ),
 				'cancel'										=> __( 'Cancel', 'we-make-content-crm' ),
@@ -201,6 +202,7 @@ class Assets {
 				'sure_to_delete'						=> __( 'Are you sure about this deletation. Once you permit to delete, this user data will be removed from database forever. This can\'t be Undone', 'we-make-content-crm' ),
 				'sent_reg_link'							=> __( 'Registration Link sent successfully!', 'we-make-content-crm' ),
 				'sent_passreset'						=> __( 'Password reset link sent Successfully!', 'we-make-content-crm' ),
+				'sometextfieldmissing'			=> __( 'Some required field you missed. Pleae fillup them first, then we can proceed.', 'we-make-content-crm' ),
 			],
 			'leadStatus'		=> apply_filters( 'futurewordpress/project/action/statuses', ['no-action' => __( 'No action fetched', 'we-make-content-crm' )], false )
 		], (array) $args );

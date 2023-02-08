@@ -25,12 +25,14 @@ class Project {
 		SocialAuth::get_instance();
 		// Widgets::get_instance();
 		// Notices::get_instance();
+		Stripe::get_instance();
 		// Admin::get_instance();
 		// Bulks::get_instance();
 
 		// Blocks::get_instance();
 		Option::get_instance();
 		Menus::get_instance();
+		Profile::get_instance();
 		// Meta_Boxes::get_instance();
 		// Update::get_instance();
 		Rewrite::get_instance();
@@ -45,6 +47,8 @@ class Project {
 	protected function setup_hooks() {
 		add_action( 'body_class', [ $this, 'body_class' ], 10, 1 );
 		add_action( 'init', [ $this, 'init' ], 10, 0 );
+		register_activation_hook( WEMAKECONTENTCMS_PROJECT__FILE__, [ $this, 'register_activation_hook' ] );
+		register_deactivation_hook( WEMAKECONTENTCMS_PROJECT__FILE__, [ $this, 'register_deactivation_hook' ] );
 	}
 	public function body_class( $classes ) {
 		$classes = (array) $classes;
@@ -58,5 +62,33 @@ class Project {
 		load_plugin_textdomain( 'we-make-content-crm', false, dirname( plugin_basename( WEMAKECONTENTCMS_PROJECT__FILE__ ) ) . '/languages' );
 		
 		// add_action ( 'wp', function() {load_theme_textdomain( 'theme-name-here' );}, 1, 0 );
+	}
+	public function register_activation_hook() {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'fwp_stripe_subscriptions';
+		$charset_collate = $wpdb->get_charset_collate();
+		$sql = "CREATE TABLE IF NOT EXISTS {$table_name} (
+			id bigint(20) NOT NULL AUTO_INCREMENT,
+			user_id varchar(100) NOT NULL,
+			user_email TEXT NOT NULL,
+			subsc_id TEXT NOT NULL,
+			user_object TEXT NOT NULL,
+			user_address TEXT NOT NULL,
+			invoice TEXT NOT NULL,
+			phone TEXT NOT NULL,
+			archived LONGTEXT NOT NULL,
+			last_modify TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY (id)
+		) $charset_collate;";
+		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		dbDelta( $sql );
+		// wp_die( $sql );
+	}
+	public function register_deactivation_hook() {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'fwp_stripe_subscriptions';
+		$charset_collate = $wpdb->get_charset_collate();
+		$sql = "DROP TABLE IF EXISTS {$table_name};";
+		$wpdb->query( $sql );
 	}
 }

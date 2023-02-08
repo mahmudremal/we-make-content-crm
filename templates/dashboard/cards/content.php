@@ -19,6 +19,7 @@
               <!--begin::Form-->
               <form class="form d-flex flex-center" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="post">
               <input type="hidden" name="action" value="futurewordpress/project/action/dashboard">
+              <input type="hidden" name="userid" value="<?php echo esc_attr( $userInfo->ID ); ?>">
               <?php wp_nonce_field( 'futurewordpress/project/nonce/dashboard', '_nonce', true, true ); ?>
                 <div class="card-body mw-800px py-20">
                   <?php if( $alert = (array) get_transient( 'futurewordpress/project/transiant/dashboard/' . get_current_user_id() ) && isset( $alert[ 'type' ] ) && isset( $alert[ 'message' ] ) ) : ?>
@@ -215,7 +216,7 @@
                     <div class="col-lg-9 col-xl-9 align-items-center">
                       <div class="row col-12">
                         <div class="col-6 col-sm-3 m-auto mt-2 mb-2  form-check form-check-custom form-check-solid form-switch">
-                          <input class="form-check-input fwp-form-checkbox-pause-subscribe" type="checkbox" <?php echo esc_attr( in_array( $userInfo->meta->enable_subscription, [ true, 'on' ] ) ? 'checked' : '' ); ?> name="meta-enable_subscription" />
+                          <input class="form-check-input fwp-form-checkbox-pause-subscribe" type="checkbox" <?php echo esc_attr( in_array( $userInfo->meta->enable_subscription, [ 'on' ] ) ? 'checked' : '' ); ?> name="meta-enable_subscription" />
                         </div>
                         <div class="mt-2 mb-2 col-sm-9">
                           <?php if( ! in_array( $userInfo->meta->subscribe, [ true, 'on' ] ) ) : ?>

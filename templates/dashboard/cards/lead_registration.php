@@ -45,7 +45,7 @@ else :
           <div class="container-xxl">
             <div class="row g-5 g-xxl-12">
               <div class="col-xl-12">
-                <?php include WEMAKECONTENTCMS_DIR_PATH . '/templates/dashboard/cards/content.php'; ?>
+                <?php include WEMAKECONTENTCMS_DIR_PATH . '/templates/dashboard/cards/form-wizard.php'; ?>
               </div>
             </div>
           </div>
