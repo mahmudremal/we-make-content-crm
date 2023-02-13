@@ -35,10 +35,12 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 		add_filter( 'futurewordpress/project/database/countryflags', [ $this, 'countryFlags' ], 10, 1 );
 
 		add_filter( 'futurewordpress/project/user/dashboardpermalink', [ $this, 'dashboardPermalink' ], 10, 2 );
+		add_filter( 'futurewordpress/project/user/visitorip', [ $this, 'visitorIP' ], 10, 0 );
 
 
 		add_filter( 'futurewordpress/project/filter/server/time', [ $this, 'serverTime' ], 10, 2 );
 		add_filter( 'futurewordpress/project/filesystem/filemtime', [ $this, 'filemtime' ], 10, 2 );
+		add_filter( 'futurewordpress/project/filesystem/uploaddir', [ $this, 'uploadDir' ], 10, 2 );
 		add_filter( 'futurewordpress/project/mailsystem/sendmail', [ $this, 'sendMail' ], 10, 1 );
 		
 		add_action( 'wp_ajax_futurewordpress/project/filesystem/upload', [ $this, 'uploadFile' ], 10, 0 );
@@ -116,40 +118,43 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 	 * 
 	 * @return string
 	 */
-	private function uploadDir( $file = false, $force = false ) {
+	public function uploadDir( $file = false, $force = false ) {
 		$uploadDir = $this->theUploadDir;
 		if( $this->theUploadDir === false ) {
-			$uploadDir = wp_get_upload_dir();
-			$uploadDir[ 'basedir' ] = $uploadDir[ 'basedir' ] . '/checkout-video';
-			$uploadDir[ 'baseurl' ] = $uploadDir[ 'baseurl' ] . '/checkout-video';
+			$uploadDir = wp_get_upload_dir(); // wp_send_json_error( $uploadDir, 200 );
+			$uploadDir[ 'basedir' ] = $uploadDir[ 'basedir' ] . '/futurewordpress';
+			$uploadDir[ 'baseurl' ] = $uploadDir[ 'baseurl' ] . '/futurewordpress';
+			if( ! is_dir( $uploadDir[ 'basedir' ] ) ) {wp_mkdir_p( $uploadDir[ 'basedir' ] );}
 			$this->theUploadDir = $uploadDir;
 		}
 		// wp_die( print_r( $uploadDir ) );
 		$basedir = $uploadDir[ 'basedir' ];
-		if( ! is_dir( $basedir ) ) {wp_mkdir_p( $basedir );}
 		return ( $file && file_exists( $basedir . '/' . $file ) ) ? $basedir . '/' . $file : ( ( $force ) ? $basedir . '/' . $file : $basedir );
 	}
 	public function uploadFile() {
-		if( ! function_exists( 'WC' ) ) {wp_send_json_error( __( 'Woo not installed', 'we-make-content-crm' ), 200 );}
 		check_ajax_referer( 'futurewordpress/project/verify/nonce', '_nonce' );
-
+		
 		if( isset( $_FILES[ 'blobFile' ] ) || isset( $_FILES[ 'file' ] ) ) {
 			$file = isset( $_FILES[ 'blobFile' ] ) ? $_FILES[ 'blobFile' ] : $_FILES[ 'file' ];
 			$blobInfo = isset( $_POST[ 'blobInfo' ] ) ? (array) json_decode( $_POST[ 'blobInfo' ] ) : [];
 			// ABSPATH . WP_CONTENT_URL . 
-			$file[ 'name' ] = isset( $file[ 'name' ] ) ? (
-				( $file[ 'name' ] == 'blob' ) ? ( isset( $blobInfo[ 'name' ] ) ? $blobInfo[ 'name' ] : 'captured.webm' ) : $file[ 'name' ]
-			) : 'captured.' . explode( '/', $file[ 'type' ] )[1];
-			$file[ 'full_path' ] = $this->uploadDir( time() . '-' . basename( $file[ 'name' ] ), true );$error = false;
-			if( $file[ 'size' ] > 5000000000 ) {
-				$error = sprintf( __( 'File is larger then allowed range. (%d)', 'we-make-content-crm' ), $file[ 'size' ] );
-			}
-			$extension = strtolower( pathinfo( $file[ 'name' ], PATHINFO_EXTENSION ) );
-			$mime = mime_content_type( $file[ 'tmp_name' ] );$extension = empty( $extension ) ? $mime : $extension;
-			if( ! in_array( $extension, [ 'mp4', 'text/html' ] ) && ! strstr( $mime, "video/" ) ) {
-				$error = sprintf( __( 'File format (%s) is not allowed.', 'we-make-content-crm' ), $extension );
-			}
-			if( $error === false && move_uploaded_file( $file[ 'tmp_name' ], $file[ 'full_path' ] ) ) {
+			$file[ 'name' ][0] = isset( $file[ 'name' ][0] ) ? (
+				( $file[ 'name' ][0] == 'blob' ) ? ( isset( $blobInfo[ 'name' ] ) ? $blobInfo[ 'name' ] : 'captured.webm' ) : $file[ 'name' ][0]
+			) : 'captured.' . explode( '/', $file[ 'type' ][0] )[1];
+			$file[ 'full_path' ] = $this->uploadDir( time() . '-' . basename( $file[ 'name' ][0] ), true );$error = false;
+			
+			// if( $file[ 'size' ][0] > 5000000000 ) {
+			// 	$error = sprintf( __( 'File is larger then allowed range. (%d)', 'we-make-content-crm' ), $file[ 'size' ][0] );
+			// }
+			$extension = strtolower( pathinfo( $file[ 'name' ][0], PATHINFO_EXTENSION ) );
+			// $mime = mime_content_type( $file[ 'tmp_name' ][0] );$extension = empty( $extension ) ? $mime : $extension;
+			// if( ! in_array( $extension, [ 'mp4', 'text/html' ] ) && ! strstr( $mime, "video/" ) ) {
+			// 	$error = sprintf( __( 'File format (%s) is not allowed.', 'we-make-content-crm' ), $extension );
+			// }
+
+			// wp_send_json_error( $file, 200 );
+
+			if( $error === false && move_uploaded_file( $file[ 'tmp_name' ][0], $file[ 'full_path' ] ) ) {
 				$file[ 'full_url' ] = str_replace( [ $this->theUploadDir[ 'basedir' ] ], [ $this->theUploadDir[ 'baseurl' ] ], $file[ 'full_path' ] );
 				$meta = [
 					// 'time' => time(),
@@ -157,10 +162,11 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 					'wp_date' => wp_date( 'Y:M:d H:i:s' ),
 					...$file
 				];
-				$oldMeta = (array) WC()->session->get( 'checkout_video_clip' );
-				if( isset( $oldMeta[ 'full_path' ] ) && ! empty( $oldMeta[ 'full_path' ] ) && file_exists( $oldMeta[ 'full_path' ] ) && ! is_dir( $oldMeta[ 'full_path' ] ) ) {unlink( $oldMeta[ 'full_path' ] );}
-				$meta['type'] = apply_filters( 'futurewordpress/project/validate/format', $meta['type'], $meta );
-				WC()->session->set( 'checkout_video_clip', $meta );
+				$oldMeta = (array) WC()->session->get( 'uploaded_files_to_archive' );
+				// if( isset( $oldMeta[ 'full_path' ] ) && ! empty( $oldMeta[ 'full_path' ] ) && file_exists( $oldMeta[ 'full_path' ] ) && ! is_dir( $oldMeta[ 'full_path' ] ) ) {unlink( $oldMeta[ 'full_path' ] );}
+				// $meta['type'] = apply_filters( 'futurewordpress/project/validate/format', $meta['type'], $meta );
+				$oldMeta[] = $meta;
+				WC()->session->set( 'uploaded_files_to_archive', $oldMeta );
 				wp_send_json_success( [
 					'message'			=> __( 'Uploaded successfully', 'we-make-content-crm' ),
 					'dropZone'		=> $meta
@@ -170,8 +176,7 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 				wp_send_json_error( $error, 200 );
 			}
 		}
-		wp_send_json_error( __( 'Error happens.', 'we-make-content-crm' ), 200 );
-
+		wp_send_json_error( __( 'Error happens.', 'we-make-content-crm' ) );
 	}
 	public function removeFile() {
 		check_ajax_referer( 'futurewordpress/project/verify/nonce', '_nonce' );
@@ -183,16 +188,21 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 		if( isset( $fileInfo[ 'full_path' ] ) && file_exists( $fileInfo[ 'full_path' ] ) && ! is_dir( $fileInfo[ 'full_path' ] ) ) {
 			// unlink( $this->uploadDir( basename( $fileInfo[ 'full_path' ] ), true ) );
 			unlink( $fileInfo[ 'full_path' ] );
-			WC()->session->set( 'checkout_video_clip', [] );
-			wp_send_json_success( __( 'Clip removed from server.', 'we-make-content-crm' ), 200 );
+			$newMeta = (array) WC()->session->get( 'uploaded_files_to_archive' );
+			foreach( $newMeta as $i => $meta ) {
+				if( $meta[ 'full_path' ] == $fileInfo[ 'full_path' ] ) {
+					WC()->session->set( 'uploaded_files_to_archive', $newMeta );
+				}
+			}
+			wp_send_json_success( __( 'File removed from server.', 'we-make-content-crm' ), 200 );
 		} else {
-			wp_send_json_error( __( 'Failed to delete. Maybe File not found on server or your request doesn\'t contain file data enough.', 'we-make-content-crm' ), 400 );
+			wp_send_json_error( __( 'Failed to delete. Maybe File not found on server or your request doesn\'t contain file data enough.', 'we-make-content-crm' ), 200 );
 		}
 	}
 	public function downloadFile() {
 		check_ajax_referer( 'futurewordpress/project/verify/nonce', '_nonce' );
 		$order_id = isset( $_GET[ 'order_id' ] ) ? $_GET[ 'order_id' ] : false;$fileInfo = [];
-		$meta = get_post_meta( $order_id, 'checkout_video_clip', true );
+		$meta = get_post_meta( $order_id, 'uploaded_files_to_archive', true );
 		if( $meta && !empty( $meta ) && isset( $meta[ 'name' ] ) ) {$fileInfo = $meta;}
 
 		if( isset( $fileInfo[ 'full_url' ] ) && isset( $fileInfo[ 'full_path' ] ) && file_exists( $fileInfo[ 'full_path' ] ) && ! is_dir( $fileInfo[ 'full_path' ] ) ) {
@@ -222,7 +232,18 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 			$dashboard_permalink = site_url( $dashboard_permalink );
 			define( 'FUTUREWORDPRESS_PROJECT_DASHBOARDPERMALINK', $dashboard_permalink );
 		}
-		return ( apply_filters( 'futurewordpress/project/system/getoption', 'permalink-userby', 'id' ) == 'id' ) ? FUTUREWORDPRESS_PROJECT_DASHBOARDPERMALINK . '/' . $id : FUTUREWORDPRESS_PROJECT_DASHBOARDPERMALINK . '/' . $user;
+		$profile = ( apply_filters( 'futurewordpress/project/system/getoption', 'permalink-userby', 'id' ) == 'id' ) ? FUTUREWORDPRESS_PROJECT_DASHBOARDPERMALINK . '/' . $id : FUTUREWORDPRESS_PROJECT_DASHBOARDPERMALINK . '/' . $user;
+		return $profile . '/profile';
+	}
+	public function visitorIP() {
+		if ( ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
+			$ip = $_SERVER['HTTP_CLIENT_IP'];
+		} elseif ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		} else {
+			$ip = $_SERVER['REMOTE_ADDR'];
+		}
+		return $ip;
 	}
 
 }

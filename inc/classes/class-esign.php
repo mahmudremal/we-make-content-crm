@@ -26,6 +26,7 @@ class Esign {
 		add_filter( 'futurewordpress/project/contract/pdfcontent', [ $this, 'pdfContent' ], 10, 2 );
 		add_filter( 'esignature_content', [ $this, 'esignature_content' ], 10, 2 ); // C:\workspace\New folder\e-signature\e-signature\models\Document.php: 52
 		
+		add_filter( 'futurewordpress/project/action/contractforms', [ $this, 'contractForms' ], 10, 2 );
 		add_filter( 'futurewordpress/project/action/contracts', [ $this, 'contracts' ], 10, 2 ); // C:\workspace\New folder\e-signature\e-signature\models\Document.php: 52
 		
 		add_action( 'esig_reciepent_edit', [ $this, 'esig_reciepent_edit' ], 10, 1 );
@@ -97,6 +98,20 @@ class Esign {
 		return $unfiltered_content;
 	}
 
+	public function contractForms( $default, $special = false ) {
+		$default = [];
+		// $docs = get_posts( [
+		// 	'post_type'					=> 'wpforms',
+		// 	'post_status'				=> 'publish'
+		// ] );
+		// foreach( $docs as $doc ) {
+		// 	$default[ $doc->ID ] = $doc->post_title;
+		// }
+		for( $i = 1;$i <= apply_filters( 'futurewordpress/project/system/getoption', 'regis-rows', 3 ); $i++ ) {
+			$default[ $i ] = apply_filters( 'futurewordpress/project/system/getoption', 'regis-link-title-' . $i, 'Link title #' . $i );
+		}
+		return $default;
+	}
 	public function contracts( $default, $special = false ) {
 		if( ! class_exists( 'esig_templates' ) ) {return $default;}
 		$temp_obj = new \esig_templates();$default = [];
@@ -106,6 +121,7 @@ class Esign {
 			if (class_exists('ESIG_USR_ADMIN')) {
 
 				$document_allow = apply_filters('esig-sender-roles-permission', $template->document_id, $template->user_id);
+				$default[ $template->document_id ] = $template->document_title;
 
 				if ($document_allow) {
 					$default[ $template->document_id ] = $template->document_title;

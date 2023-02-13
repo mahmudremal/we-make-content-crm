@@ -28,6 +28,8 @@ import flatpickr from "flatpickr";
 				registration_link					: 'Registration link',
 				password_reset						: 'Password reset',
 				sent_passreset						: 'Password reset link sent Successfully!',
+				retainer_zero							: 'Retainer Amount Zero',
+				retainer_zerowarn					: 'You must set retainer amount before send a registration email.',
 				...i18n
 			}
 			this.setup_hooks();
@@ -36,7 +38,8 @@ import flatpickr from "flatpickr";
 			// this.apex();this.flatPicker();
 			this.fullScreen();this.deleteLeadUser();
 			this.calendarPicker();this.switcherMenu();
-			this.sendRegLink();
+			this.sendRegLink();this.profileImgUpload();
+			this.printADiv();this.deletePayment();
 		}
 		apex() {
 			var options = {
@@ -102,8 +105,36 @@ import flatpickr from "flatpickr";
 				} );
 			// }, 3000 );
 		}
-		sendRegLink() {
+		deletePayment() {
 			const thisClass = this;var theInterval, selector, lead;
+			// theInterval = setInterval( () => {
+				document.querySelectorAll( '.delete-stripe-log:not([data-handled])' ).forEach( ( el, ei ) => {
+					el.dataset.handled = true;
+					document.body.addEventListener( 'delete-stripe-log-' + el.dataset.id, () => {
+						lead = document.querySelector( '#stripelog-' + el.dataset.id );
+						if( lead ) {lead.remove();} else {console.log( el.dataset.id, lead );}
+					} );
+					el.addEventListener( 'click', ( event ) => {
+						Swal.fire( {
+							// title: `${result.value.login}'s avatar`,
+							// imageUrl: result.value.avatar_url: 
+							title: thisClass.i18n.are_u_sure,
+							text: thisClass.i18n.sure_to_delete
+						} ).then( (result) => {
+							if (result.isConfirmed) {
+								var formdata = new FormData();
+								formdata.append( 'action', 'futurewordpress/project/action/deletepayment' );
+								formdata.append( 'id', el.dataset.id );
+								formdata.append( '_nonce', thisClass.ajaxNonce );
+								thisClass.sendToServer( formdata );
+							}
+						} );
+					} );
+				} );
+			// }, 3000 );
+		}
+		sendRegLink() {
+			const thisClass = this;var theInterval, selector, lead, retainer;
 			// theInterval = setInterval( () => {
 				document.querySelectorAll( '.lead-send-registration:not([data-handled])' ).forEach( ( el, ei ) => {
 					el.dataset.handled = true;
@@ -114,27 +145,38 @@ import flatpickr from "flatpickr";
 						Swal.fire( { position: 'top-end', icon: 'success', title: thisClass.i18n.sent_passreset, showConfirmButton: false, timer: 3500 } );
 					} );
 					el.addEventListener( 'click', ( event ) => {
-						Swal.fire({
-							title: 'Do you want to save the changes?',
-							showDenyButton: true,
-							showCancelButton: true,
-							confirmButtonText: thisClass.i18n.registration_link,
-							denyButtonText: thisClass.i18n.password_reset,
-							cancelButtonText: thisClass.i18n.cancel,
-						}).then( ( result ) => {
-							if( result.isDismissed ) {} else {
-								var formdata = new FormData();
-								if( result.isConfirmed ) {
-									formdata.append( 'action', 'futurewordpress/project/action/sendregistration' );
-								} else if( result.isDenied ) {
-									formdata.append( 'action', 'futurewordpress/project/action/sendpasswordreset' );
-								} else {}
-								formdata.append( 'lead', el.dataset.id );
-								formdata.append( 'value', el.dataset.userInfo );
-								formdata.append( '_nonce', thisClass.ajaxNonce );
-								thisClass.sendToServer( formdata );
-							}
-						} );
+						retainer = document.querySelector( 'input#monthly_retainer' );
+						if( retainer && retainer.getAttribute( 'value' ) == '' || retainer.getAttribute( 'value' ) <= 0 ) {
+							Swal.fire({
+								title: thisClass.i18n.retainer_zero,
+								text: thisClass.i18n.retainer_zerowarn,
+								type: 'warn'
+							})
+						} else {
+							Swal.fire({
+								title: 'Do you want to save the changes?',
+								showDenyButton: true,
+								showCancelButton: true,
+								confirmButtonText: thisClass.i18n.registration_link,
+								denyButtonText: thisClass.i18n.password_reset,
+								cancelButtonText: thisClass.i18n.cancel,
+								input: 'text',
+								inputValue: ( retainer && retainer.dataset.registration ) ? retainer.dataset.registration : '',
+							}).then( ( result ) => {
+								if( result.isDismissed ) {} else {
+									var formdata = new FormData();
+									if( result.isConfirmed ) {
+										formdata.append( 'action', 'futurewordpress/project/action/sendregistration' );
+									} else if( result.isDenied ) {
+										formdata.append( 'action', 'futurewordpress/project/action/sendpasswordreset' );
+									} else {}
+									formdata.append( 'lead', el.dataset.id );
+									formdata.append( 'value', el.dataset.userInfo );
+									formdata.append( '_nonce', thisClass.ajaxNonce );
+									thisClass.sendToServer( formdata );
+								}
+							} );
+						}
 					} );
 				} );
 			// }, 3000 );
@@ -194,6 +236,52 @@ import flatpickr from "flatpickr";
 					} );
 				} );
 			}, 1000 );
+		}
+		profileImgUpload() {
+			const thisClass = this;var theInterval, reader, file, preview;
+			// theInterval = setInterval( () => {
+				document.querySelectorAll( '.profile-image-upload:not([data-handled])' ).forEach( ( el, ei ) => {
+					el.dataset.handled = true;
+					el.addEventListener( 'change', ( event ) => {
+						// var formdata = new FormData();
+						// 		formdata.append( 'action', 'futurewordpress/project/action/profileimgupload' );
+						// 		formdata.append( 'lead', el.dataset.id );
+						// 		formdata.append( 'value', el.dataset.userInfo );
+						// 		formdata.append( '_nonce', thisClass.ajaxNonce );
+						// 		thisClass.sendToServer( formdata );
+						if( el.dataset.preview ) {
+							preview = document.querySelector( el.dataset.preview );
+							file = el.files[0];
+							reader = new FileReader();
+							reader.onloadend = function () {
+								preview.src = reader.result;
+							}
+							if (file) {
+								reader.readAsDataURL(file);
+							} else {
+								if( preview.dataset.default ) {
+									preview.src = preview.dataset.default;
+								} else {
+									preview.src = "";
+								}
+							}
+						}
+					} );
+				} );
+			// }, 3000 );
+		}
+		printADiv() {
+			var node = document.querySelector( '.print-this-page' );
+			if( ! node ) {return;}
+			node.addEventListener( 'click', ( e ) => {
+				var page = document.querySelector( e.target.dataset.print );
+				var divToPrint = page.parentElement;page.classList.add( 'is-printing' );
+				e.target.style.display = 'none';
+				var newWin = window.open('', 'Print-Window');
+				newWin.document.write('<html><head><link rel="stylesheet" type="text/css" href="https://wemakecontent.net/wp-content/plugins/we-make-content-crm/assets/build/library/css/backend-library.css?ver=6.1.1" /></head><body onload="window.print()">' + divToPrint.innerHTML + '<style>.is-printing {min-height: 28cm;min-width: 20cm;max-height: 29.7cm;max-width: 21cm;}</style></body></html>');
+				// newWin.document.close();newWin.close();
+				e.target.style.display = 'block';page.classList.remove( 'is-printing' );
+			} );
 		}
 		sendToServer( data ) {
 			const thisClass = this;var message;

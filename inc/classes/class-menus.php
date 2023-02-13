@@ -84,6 +84,13 @@ class Menus {
 					'type'					=> 'checkbox',
 					'default'				=> true
 				],
+				[
+					'id' 						=> 'general-address',
+					'label'					=> __( 'Address', 'we-make-content-crm' ),
+					'description'		=> __( 'Company address, that might be used on invoice and any public place if needed.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> ''
+				],
 			]
 		];
 		$args['permalink'] 		= [
@@ -391,6 +398,13 @@ class Menus {
 			'title'							=> __( 'E-Mail', 'we-make-content-crm' ),
 			'description'				=> __( 'Setup email configuration here', 'we-make-content-crm' ) . $this->contractTags( ['{client_name}','{client_address}','{todays_date}','{retainer_amount}', '{registration_link}', '{{site_name}}', '{{passwordreset_link}}' ] ),
 			'fields'						=> [
+				// [
+				// 	'id' 						=> 'email-registationlink',
+				// 	'label'					=> __( 'Registration Link', 'we-make-content-crm' ),
+				// 	'description'		=> __( 'Registration link that contains WP-Form registration form.', 'we-make-content-crm' ),
+				// 	'type'					=> 'text',
+				// 	'default'				=> "https://wemakecontent.net/test-page/"
+				// ],
 				[
 					'id' 						=> 'email-registationsubject',
 					'label'					=> __( 'Subject', 'we-make-content-crm' ),
@@ -417,7 +431,7 @@ class Menus {
 					'label'					=> __( 'Password Reset Subject', 'we-make-content-crm' ),
 					'description'		=> __( 'The email subject on password reset mail.', 'we-make-content-crm' ),
 					'type'					=> 'text',
-					'default'				=> __( 'Password Reset Request', 'domain' )
+					'default'				=> __( 'Password Reset Request',   'we-make-content-crm' )
 				],
 				[
 					'id' 						=> 'email-passresetbody',
@@ -430,7 +444,7 @@ class Menus {
 		];
 		$args['stripe'] 		= [
 			'title'							=> __( 'Stripe', 'we-make-content-crm' ),
-			'description'				=> __( 'Stripe payment system configuration process should be do carefully. Here some field is importent to work with no inturrupt. Such as API key or secret key, if it\'s expired on your stripe id, it won\'t work here. New user could face problem fo that reason.', 'we-make-content-crm' ) . $this->contractTags( ['{client_name}','{client_address}','{todays_date}','{retainer_amount}', '{registration_link}', '{{site_name}}', '{{passwordreset_link}}' ] ),
+			'description'				=> __( 'Stripe payment system configuration process should be do carefully. Here some field is importent to work with no inturrupt. Such as API key or secret key, if it\'s expired on your stripe id, it won\'t work here. New user could face problem fo that reason.', 'we-make-content-crm' ),
 			'fields'						=> [
 				[
 					'id' 						=> 'stripe-publishablekey',
@@ -458,24 +472,61 @@ class Menus {
 					'label'					=> __( 'Product name text', 'we-make-content-crm' ),
 					'description'		=> __( 'A text to show on product name place on checkout sanbox.', 'we-make-content-crm' ),
 					'type'					=> 'text',
-					'default'				=> __( 'Subscription', 'domain' )
+					'default'				=> __( 'Subscription',   'we-make-content-crm' )
 				],
 				[
 					'id' 						=> 'stripe-productdesc',
 					'label'					=> __( 'Product Description', 'we-make-content-crm' ),
 					'description'		=> __( 'Some text to show on product description field.', 'we-make-content-crm' ),
 					'type'					=> 'text',
-					'default'				=> __( 'Payment for', 'domain' ) . get_option( 'blogname', 'We Make Content' )
+					'default'				=> __( 'Payment for',   'we-make-content-crm' ) . ' ' . get_option( 'blogname', 'We Make Content' )
 				],
 				[
 					'id' 						=> 'stripe-productimg',
 					'label'					=> __( 'Product Image', 'we-make-content-crm' ),
 					'description'		=> __( 'A valid image url for product. If image url are wrong or image doesn\'t detect by stripe, process will fail.', 'we-make-content-crm' ),
 					'type'					=> 'url',
-					'default'				=> __( 'Payment for', 'domain' ) . get_option( 'blogname', 'We Make Content' )
+					'default'				=> esc_url( WEMAKECONTENTCMS_BUILD_URI . '/icons/Online payment_Flatline.svg' )
+				],
+				[
+					'id' 						=> 'stripe-paymentmethod',
+					'label'					=> __( 'Payment Method', 'we-make-content-crm' ),
+					'description'		=> __( 'Select which payment method you will love to get payment.', 'we-make-content-crm' ),
+					'type'					=> 'select',
+					'default'				=> 'card',
+					'options'				=> apply_filters( 'futurewordpress/project/payment/stripe/payment_methods', [] )
 				],
 			]
 		];
+		$args['regis'] 		= [
+			'title'							=> __( 'Registrations', 'we-make-content-crm' ),
+			'description'				=> __( 'Setup registration link and WP-forms information here.', 'we-make-content-crm' ),
+			'fields'						=> [
+				[
+					'id' 						=> 'regis-rows',
+					'label'					=> __( 'Rows', 'we-make-content-crm' ),
+					'description'		=> __( 'How many registration links do you have.', 'we-make-content-crm' ),
+					'type'					=> 'number',
+					'default'				=> 2
+				],
+			]
+		];
+		for( $i = 1;$i <= apply_filters( 'futurewordpress/project/system/getoption', 'regis-rows', 3 ); $i++ ) {
+			$args['regis'][ 'fields' ][] = [
+				'id' 						=> 'regis-link-title-' . $i,
+				'label'					=> __( 'Link title #' . $i, 'we-make-content-crm' ),
+				'description'		=> '',
+				'type'					=> 'text',
+				'default'				=> 'Link #' . $i
+			];
+			$args['regis'][ 'fields' ][] = [
+				'id' 						=> 'regis-link-url-' . $i,
+				'label'					=> __( 'Link URL #' . $i, 'we-make-content-crm' ),
+				'description'		=> '',
+				'type'					=> 'url',
+				'default'				=> ''
+			];
+		}
 		return $args;
 	}
 	/**

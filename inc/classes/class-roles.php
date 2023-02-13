@@ -28,7 +28,7 @@ class Roles {
 	public function wp_init() {
 			 // This user will NOT be able to  delete published pages.
 		$cap = [ 'read'  => true, 'delete_posts'  => true, 'delete_published_posts' => true, 'edit_posts'   => true, 'publish_posts' => true, 'upload_files'  => true, 'edit_pages'  => true, 'edit_published_pages'  =>  true, 'publish_pages'  => true, 'delete_published_pages' => false, ];
-		add_role( 'lead', __( 'Lead', 'domain' ), $cap );
+		add_role( 'lead', __( 'Lead',   'we-make-content-crm' ), $cap );
 		$role = get_role( 'lead' );
 
     $role->add_cap( 'read' );

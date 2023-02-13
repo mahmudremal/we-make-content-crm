@@ -9,6 +9,18 @@ $userInfo = get_user_by( 'id', hex2bin( get_query_var( 'lead_registration' ) ) )
 //   $user_slug = apply_filters( 'futurewordpress/project/system/getoption', 'permalink-dashboard', 'dashboard' ) . '/' . ( ( apply_filters( 'futurewordpress/project/system/getoption', 'permalink-userby', 'id' ) == 'id' ) ? $userInfo->ID : $userInfo->data->user_login );
 //   wp_redirect( site_url( $user_slug ) );
 // }
+// $_SESSION[ 'current-lead' ] = $userInfo->ID;
+if( get_transient( '_lead_user_registration-' . apply_filters( 'futurewordpress/project/user/visitorip', '' ) ) ) {
+  delete_transient( '_lead_user_registration-' . apply_filters( 'futurewordpress/project/user/visitorip', '' ) );
+}
+set_transient( '_lead_user_registration-' . apply_filters( 'futurewordpress/project/user/visitorip', '' ), $userInfo->ID, 7200 );
+// if( function_exists( 'setcookie' ) ) {setcookie( '_lead_user_registration', $userInfo->ID, time()+31556926 );}
+
+$regLink = get_user_meta( $userInfo->ID, 'contract_type', true );
+$regLink = apply_filters( 'futurewordpress/project/system/getoption', 'regis-link-url-' . $regLink, false );
+// if( $regLink && ! empty( $regLink ) ) {$regLink = get_the_permalink( $regLink );}
+
+if( $regLink && ! empty( $regLink ) ) {wp_redirect( esc_url( $regLink ) );} else {wp_die( __( 'Regisatration link not found.', 'domain' ) );}exit;
 
 
 $userMeta = array_map( function( $a ){ return $a[0]; }, (array) get_user_meta( $userInfo->ID ) );

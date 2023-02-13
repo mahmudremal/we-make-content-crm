@@ -28,7 +28,7 @@ console.log(customer.id);
 		constructor() {
 			this.ajaxUrl = fwpSiteConfig?.ajaxUrl ?? '';
 			this.ajaxNonce = fwpSiteConfig?.ajax_nonce ?? '';
-			this.lastAjax	 = false;
+			this.lastAjax	 = false;this.profile	 = fwpSiteConfig?.profile ?? false;
 			var i18n = fwpSiteConfig?.i18n ?? {};
 			this.i18n = {
 				confirm_cancel_subscribe	: 'Do you really want to cancel this Subscription?',
@@ -50,7 +50,9 @@ console.log(customer.id);
 			this.init();this.toOpenEdit();this.inputEventListner();
 			this.cancelSubscription();this.changePassword();
 			this.toggleStatus();this.passwordToggle();
-			this.regWidget();
+			this.regWidget();this.handleTabHref();
+			this.submitArchiveFiles();
+			this.setup_hooks();
 			// this.fetchDataWidthContract();
 			// this.accordion();
 			// console.log( 'frontend init...' );
@@ -133,40 +135,40 @@ console.log(customer.id);
 			node = document.querySelector( '#change-password-field' );
 			if( node ) {
 				node.addEventListener( 'change', ( event ) => {
-					  Swal.fire({
-						title: thisClass.i18n.confirming,
-						text: thisClass.i18n.give_your_old_password,
-						icon: 'warning',
-						confirmButtonText: thisClass.i18n.submit,
-						input: 'text',
-						inputAttributes: {
-						  autocapitalize: 'off'
-						},
-						showCancelButton: true,
-						showLoaderOnConfirm: true,
-						preConfirm: (login) => {
-						  return fetch( thisClass.ajaxUrl + `?action=futurewordpress/project/action/changepassword` )
-							.then(response => {
-							  if (!response.ok) {
-								throw new Error(response.statusText)
-							  }
-							  return response.json()
-							})
-							.catch(error => {
-							  Swal.showValidationMessage(
-								thisClass.i18n.request_failed + `: ${error}`
-							  )
-							})
-						},
-						allowOutsideClick: () => !Swal.isLoading()
-					  }).then((result) => {
-						if (result.isConfirmed ) {
-						  Swal.fire({
-							title: ( result.value.success ) ? 'Success' : 'Failed',icon: ( result.value.success ) ? 'success' : 'error',
-							text: result.value?.data??'Request sent but doesn\'t update anything.',
-						  })
-						}
-					  })
+					Swal.fire({
+					title: thisClass.i18n.confirming,
+					text: thisClass.i18n.give_your_old_password,
+					icon: 'warning',
+					confirmButtonText: thisClass.i18n.submit,
+					input: 'text',
+					inputAttributes: {
+						autocapitalize: 'off'
+					},
+					showCancelButton: true,
+					showLoaderOnConfirm: true,
+					preConfirm: (login) => {
+						return fetch( thisClass.ajaxUrl + `?action=futurewordpress/project/action/changepassword` )
+						.then(response => {
+							if (!response.ok) {
+							throw new Error(response.statusText)
+							}
+							return response.json()
+						})
+						.catch(error => {
+							Swal.showValidationMessage(
+							thisClass.i18n.request_failed + `: ${error}`
+							)
+						})
+					},
+					allowOutsideClick: () => !Swal.isLoading()
+					}).then((result) => {
+					if (result.isConfirmed ) {
+						Swal.fire({
+						title: ( result.value.success ) ? 'Success' : 'Failed',icon: ( result.value.success ) ? 'success' : 'error',
+						text: result.value?.data??'Request sent but doesn\'t update anything.',
+						})
+					}
+					})
 				} );
 			}
 		}
@@ -265,12 +267,7 @@ console.log(customer.id);
 		}
 		fetchDataWidthContract() {
 			document.querySelectorAll( '.document-sign-page *' ).forEach( ( e ) => {
-				var replacer = {
-						'client_name': 'Remal Mahmud',
-						'client_address': 'Bangladesh',
-						'todays_date': '20 Dec 2022',
-						'retainer_amount': '280$',
-				};
+				var replacer = {};
 				Object.keys( replacer ).forEach(function( lsi ) {
 						e.textContent = e.textContent.replace( '{{' + lsi + '}}', replacer[ lsi ] );
 				} );
@@ -310,6 +307,9 @@ console.log(customer.id);
 		addEventListener( elem, event ) {
 			
 			elem.dispatchEvent( new Event( 'fuck' ) )
+		}
+		setup_hooks() {
+			document.body.addEventListener( 'reload-page', () => {location.reload();} );
 		}
 		regWidget() {
 			const thisClass = this;var currentTab = 0, isNotOkay, tab, wrap, widzard = document.querySelector( '#register-existing-account-wizard' );
@@ -442,6 +442,87 @@ console.log(customer.id);
 				
 				console.log(customer.id);
 			} );
+		}
+		handleTabHref() {
+			const thisClass = this;var selector, href, split, tab;selector = '.nav-pills .nav-link[role="tab"]';
+			if( thisClass.profile && thisClass.profile.profilePath ) {
+				split = thisClass.profile.profilePath.split( '/' );
+				thisClass.profile.profilePath =  thisClass.profile.profilePath.substring( 0, ( thisClass.profile.profilePath.length - split[ ( split.length - 1 ) ].length - 1 ) );
+			}
+			document.querySelectorAll( selector ).forEach( link => {
+				link.addEventListener( 'click', e => {
+					e.preventDefault();
+					href = link.href.split('#');href = ( href[1] ) ? href[1] : href[0];
+					href = href.split('-');href = ( href[1] ) ? href[1] : href[0];
+					thisClass.navigateTo( thisClass.profile.profilePath + '/' + href );
+				} );
+			} );
+			setTimeout(() => {
+				if( thisClass.profile && thisClass.profile.currentTab ) {
+					tab = document.querySelector( selector + '[href="#profile-' + thisClass.profile.currentTab + '"]' );
+					if( tab ) {tab.click();}
+				}
+			}, 500);
+		}
+		navigateTo( url ) {
+			// if( this.profile ) {}
+			// if( history.pushState && performance && performance.navigation.type == 0  ) {
+			// 	history.pushState({}, '', url);
+			// } else {
+			if( url ) {
+				history.replaceState({}, '', url);
+			}
+			// fetch( url ).then( response => response.text() ).then( html => {
+			// 	document.querySelector('#content').innerHTML = html;
+			// } );
+		}
+		submitArchiveFiles() {
+			const thisClass = this;
+			var node = document.querySelector( '.submit-archive-files' ), json;
+			if( node ) {
+				node.addEventListener( 'click', function( e ) {
+					json = JSON.parse( node.dataset.config );
+					json.preConfirm = (login) => {
+						var form = document.querySelector( '#the-raw-video-archive-upload' ), formData, data = {};
+						formData = new FormData(form);
+						// formData.forEach(function(value, key) {
+						// 	if( key == '_wp_http_referer' ) {} else {
+						// 		data[key] = value;
+						// 	}
+						// });
+						formData.append( 'title', login );
+
+						// + '?action=futurewordpress/project/action/submitarchives&title=' + data.title + '&month=' + data.month + '&year=' + data.year
+						return fetch( thisClass.ajaxUrl, {
+							method: "POST",
+							// headers: {"Content-Type": "application/json; charset=utf-8"},
+							body: formData // JSON.stringify( data )
+						} ).then(response => {
+							if (!response.ok) {
+								throw new Error(response.statusText)
+							}
+							return response.json()
+						}).catch(error => {
+							Swal.showValidationMessage(
+								thisClass.i18n.request_failed + `: ${error}`
+							)
+						})
+					};
+					json.allowOutsideClick = () => !Swal.isLoading();
+					Swal.fire( json ).then((result) => {
+						if (result.isConfirmed ) {
+							var data = result.value?.data??'Request sent but doesn\'t update anything.';
+							data = data?.message??data;
+							Swal.fire({
+								title: ( result.value.success ) ? 'Success' : 'Failed', icon: ( result.value.success ) ? 'success' : 'error',
+								text: data,
+							}).then((result) => {
+								location.reload();
+							});
+						}
+					})
+				} );
+			}
 		}
 	}
 	new FutureWordPress_Frontend();

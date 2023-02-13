@@ -35,7 +35,7 @@ class Assets {
 		add_action( 'admin_enqueue_scripts', [ $this, 'admin_enqueue_scripts' ], 10, 1 );
 		add_action( 'admin_enqueue_scripts', [ $this, 'admin_denqueue_scripts' ], 99 );
 
-		add_filter( 'futurewordpress/project/javascript/siteconfig', [ $this, 'siteConfig' ], 10, 1 );
+		add_filter( 'futurewordpress/project/javascript/siteconfig', [ $this, 'siteConfig' ], 1, 1 );
 	}
 
 	public function register_styles() {
@@ -67,15 +67,15 @@ class Assets {
 		// wp_register_script( 'author-js', WEMAKECONTENTCMS_BUILD_JS_URI . '/author.js', ['jquery'], $this->filemtime( WEMAKECONTENTCMS_BUILD_JS_DIR_PATH . '/author.js' ), true );
 		wp_register_script( 'bootstrap', WEMAKECONTENTCMS_BUILD_LIB_URI . '/js/bootstrap.min.js', ['jquery'], false, true );
 		// wp_register_script( 'bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js', ['jquery'], false, true );
-		wp_register_script( 'prismjs', 'https://preview.keenthemes.com/start/assets/plugins/custom/prismjs/prismjs.bundle.js', ['jquery'], false, true );
-		wp_register_script( 'datatables', 'https://preview.keenthemes.com/start/assets/plugins/custom/datatables/datatables.bundle.js', ['jquery'], false, true );
+		// wp_register_script( 'prismjs', 'https://preview.keenthemes.com/start/assets/plugins/custom/prismjs/prismjs.bundle.js', ['jquery'], false, true );
+		// wp_register_script( 'datatables', 'https://preview.keenthemes.com/start/assets/plugins/custom/datatables/datatables.bundle.js', ['jquery'], false, true );
 		wp_register_script( 'popperjs', 'https://unpkg.com/@popperjs/core@2', ['jquery'], false, true );
 		wp_register_script( 'plugins-bundle', WEMAKECONTENTCMS_BUILD_LIB_URI . '/js/keenthemes.plugins.bundle.js', ['jquery'], false, true );
 		wp_register_script( 'scripts-bundle', WEMAKECONTENTCMS_BUILD_LIB_URI . '/js/keenthemes.scripts.bundle', ['jquery'], false, true );
 
 		// Enqueue Scripts.
 		// Both of is_order_received_page() and is_wc_endpoint_url( 'order-received' ) will work to check if you are on the thankyou page in the frontend.
-		wp_enqueue_script( 'datatables' );
+		// wp_enqueue_script( 'datatables' );
 		wp_enqueue_script( 'WeMakeContentCMS' );
 		// wp_enqueue_script( 'prismjs' );wp_enqueue_script( 'popperjs' )
 		;wp_enqueue_script( 'bootstrap' );
@@ -177,6 +177,7 @@ class Assets {
 			'ajax_nonce' 		=> wp_create_nonce( 'futurewordpress/project/verify/nonce' ),
 			'is_admin' 			=> is_admin(),
 			'buildPath'  		=> WEMAKECONTENTCMS_BUILD_URI,
+			'videoClips'  		=> ( function_exists( 'WC' ) && WC()->session !== null ) ? (array) WC()->session->get( 'uploaded_files_to_archive' ) : [],
 			'i18n'					=> [
 				'sureToSubmit'							=> __( 'Want to submit it? You can retake.', 'we-make-content-crm' ),
 				'uploading'									=> __( 'Uploading', 'we-make-content-crm' ),
@@ -203,6 +204,8 @@ class Assets {
 				'sent_reg_link'							=> __( 'Registration Link sent successfully!', 'we-make-content-crm' ),
 				'sent_passreset'						=> __( 'Password reset link sent Successfully!', 'we-make-content-crm' ),
 				'sometextfieldmissing'			=> __( 'Some required field you missed. Pleae fillup them first, then we can proceed.', 'we-make-content-crm' ),
+				'retainer_zero'							=> __( 'Retainer Amount Zero', 'we-make-content-crm' ),
+				'retainer_zerowarn'					=> __( 'You must set retainer amount before send a registration email.', 'we-make-content-crm' ),
 			],
 			'leadStatus'		=> apply_filters( 'futurewordpress/project/action/statuses', ['no-action' => __( 'No action fetched', 'we-make-content-crm' )], false )
 		], (array) $args );

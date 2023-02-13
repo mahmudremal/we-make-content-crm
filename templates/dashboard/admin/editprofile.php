@@ -6,19 +6,23 @@ if( empty( $args[ 'split' ][2] ) ) {
 $userStatuses = apply_filters( 'futurewordpress/project/action/statuses', [
     'no-action'             => __( 'No action fetched', 'we-make-content-crm' )
 ], false );
+$contractForms = apply_filters( 'futurewordpress/project/action/contractforms', [
+    'no-action'             => __( 'No Contract fetched', 'we-make-content-crm' )
+], false );
 $userContracts = apply_filters( 'futurewordpress/project/action/contracts', [
     'no-action'             => __( 'No Contract fetched', 'we-make-content-crm' )
 ], false );
 $userDocuments = [
-    'basic'                 => __( 'Basic Document', 'domain' )
+    'basic'                 => __( 'Basic Document',   'we-make-content-crm' )
 ];
 if( class_exists('ESIG_SAD_Admin') ) {
-    $userDocuments[ 'sad' ] = __( 'Stand Alone Document', 'domain' );
+    $userDocuments[ 'sad' ] = __( 'Stand Alone Document',   'we-make-content-crm' );
 }
 $userCountries = apply_filters( 'futurewordpress/project/database/countries', [
     'no-country'			=> __( 'No Country Found', 'we-make-content-crm' )
 ], false );
 $userInfo = get_user_by( 'id', $args[ 'split' ][2] );
+if( ! $userInfo ) {wp_die( __( 'Seems something went wrong. User not found. Please go back', 'domain' ) );}
 // $userMeta = get_user_meta( $userInfo->ID, null, true );
 // foreach( $userMeta as $meta_key => $meta_value ) {$userMeta[ $meta_key ] = $meta_value[0];}
 $userMeta = array_map( function( $a ){ return $a[0]; }, (array) get_user_meta( $userInfo->ID ) );
@@ -48,12 +52,12 @@ $is_edit_profile = ( ! empty( $args[ 'split' ][2] ) );
                     <div class="d-grid gap-card">
                         <div class="form-group">
                             <div class="profile-img-edit position-relative">
-                                <img src="<?php echo esc_url( get_avatar_url( $user->ID, ['size' => '100'] ) ); ?>" alt="profile-pic" class="theme-color-default-img profile-pic rounded avatar-100" loading="lazy">
+                                <img src="<?php echo esc_url( get_avatar_url( $user->ID, ['size' => '100'] ) ); ?>" alt="profile-pic" class="theme-color-default-img profile-pic rounded avatar-100" loading="lazy" id="profile-image-preview" data-default="<?php echo esc_url( get_avatar_url( $user->ID, ['size' => '100'] ) ); ?>">
                                 <div class="upload-icone bg-primary">
                                     <svg class="upload-button icon-14" width="14" height="14" viewBox="0 0 24 24">
                                     <path fill="#ffffff" d="M14.06,9L15,9.94L5.92,19H5V18.08L14.06,9M17.66,3C17.41,3 17.15,3.1 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18.17,3.09 17.92,3 17.66,3M14.06,6.19L3,17.25V21H6.75L17.81,9.94L14.06,6.19Z" />
                                     </svg>
-                                    <input class="file-upload" type="file" accept="image/*">
+                                    <input type="file" class="form-control file-upload profile-image-upload" name="profile-image" accept="image/*" data-preview="#profile-image-preview">
                                 </div>
                             </div>
                             <div class="img-extension mt-3">
@@ -81,7 +85,7 @@ $is_edit_profile = ( ! empty( $args[ 'split' ][2] ) );
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="monthly_retainer"><?php esc_html_e( 'Monthly Retainer:', 'we-make-content-crm' ); ?></label>
-                            <input type="text" class="form-control" id="monthly_retainer" name="userinfo[monthly_retainer]" value="<?php echo esc_attr( $userInfo->meta->monthly_retainer ); ?>" placeholder="$2000">
+                            <input type="text" class="form-control" id="monthly_retainer" name="userinfo[monthly_retainer]" value="<?php echo esc_attr( $userInfo->meta->monthly_retainer ); ?>" placeholder="$2000" data-registration="<?php echo site_url( 'lead-registration/source-email/' . bin2hex( $userInfo->ID ) . '/' ); ?>">
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="content_calendar"><?php esc_html_e( 'Content Calendar:', 'we-make-content-crm' ); ?></label>
@@ -111,11 +115,11 @@ $is_edit_profile = ( ! empty( $args[ 'split' ][2] ) );
             <div class="card card-full-width">
                 <div class="card-header d-flex justify-content-between">
                     <div class="header-title">
-                    <h4 class="card-title"><?php esc_html_e( 'Send Contract:', 'we-make-content-crm' ); ?></h4>
+                    <h4 class="card-title"><?php esc_html_e( 'Contract:', 'we-make-content-crm' ); ?></h4>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="form-group">
+                    <!-- <div class="form-group">
                         <label class="form-label"><?php esc_html_e( 'Document type:', 'we-make-content-crm' ); ?></label>
                         <select name="userinfo[document_type]" class="selectpicker form-control" data-style="py-0" id="contract_type">
                             <option><?php esc_html_e( 'Select a type', 'we-make-content-crm' ); ?></option>
@@ -132,10 +136,19 @@ $is_edit_profile = ( ! empty( $args[ 'split' ][2] ) );
                                 <option value="<?php echo esc_attr( $contract_key ); ?>" <?php echo esc_attr( ( $contract_key == $userInfo->meta->contract_type ) ? 'selected' : '' ); ?>><?php echo esc_html( $contract_text ); ?></option>
                             <?php endforeach; ?>
                         </select>
-                    </div>
+                    </div> -->
                     <div class="form-group">
-                        <button type="button" class="btn btn-success btn-outline mt-2 lead-send-contract" data-id="<?php echo esc_attr( $userInfo->ID ); ?>" data-user-info="<?php echo esc_attr( $userInfo->display_name ); ?>" role="button"><?php esc_html_e( 'Send Contract', 'we-make-content-crm' ); ?></button>
+                        <label class="form-label"><?php esc_html_e( 'Select Registration Link:', 'we-make-content-crm' ); ?></label>
+                        <select name="userinfo[contract_type]" class="selectpicker form-control" data-style="py-0" id="contract_type">
+                            <option><?php esc_html_e( 'Select a type', 'we-make-content-crm' ); ?></option>
+                            <?php foreach( $contractForms as $contract_key => $contract_text ) : ?>
+                                <option value="<?php echo esc_attr( $contract_key ); ?>" <?php echo esc_attr( ( $contract_key == $userInfo->meta->contract_type ) ? 'selected' : '' ); ?>><?php echo esc_html( $contract_text ); ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
+                    <!-- <div class="form-group">
+                        <button type="button" class="btn btn-success btn-outline mt-2 lead-send-contract" data-id="<?php echo esc_attr( $userInfo->ID ); ?>" data-user-info="<?php echo esc_attr( $userInfo->display_name ); ?>" role="button"><?php esc_html_e( 'Send Contract', 'we-make-content-crm' ); ?></button>
+                    </div> -->
                 </div>
             </div>
         </div>

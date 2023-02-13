@@ -208,10 +208,9 @@ class Option {
 			case 'select':
 				$html .= '<select name="' . esc_attr( $option_name ) . '" id="' . esc_attr( $field['id'] ) . '" ' . $this->attributes( $field ) . '>';
 				foreach( $field['options'] as $k => $v ) {
-					$selected = false;
-					if( $k == $data ) {$selected = true;}
-					if( ! $selected && $k == $field[ 'default' ] ) {$selected = true;}
-					$html .= '<option ' . selected( $selected, true, false ) . ' value="' . esc_attr( $k ) . '">' . $v . '</option>';
+					$selected = ( $k == $data );
+					if( empty( $data ) && ! $selected && $k == $field[ 'default' ] ) {$selected = true;}
+					$html .= '<option ' . selected( $selected, true, false ) . '>' . $v . '</option>';
 				}
 				$html .= '</select> ';
 			break;

@@ -29,8 +29,7 @@ import { toast } from 'toast-notification-alert';
 			this.ajaxUrl = fwpSiteConfig?.ajaxUrl ?? '';
 			this.ajaxNonce = fwpSiteConfig?.ajax_nonce ?? '';
 			this.buildPath = fwpSiteConfig?.buildPath ?? '';
-			this.videoClips = fwpSiteConfig?.videoClips ?? false;
-      this.videoClips = ( this.videoClips !== false && this.videoClips.length >= 1 ) ? [this.videoClips] : [];
+			this.videoClips = fwpSiteConfig?.videoClips ?? [];
       this.selector = '.fwp-dropzone-field';
       // reference  https://developer.mozilla.org/en-US/docs/Web/API/FileReader/    http://community.sitepoint.com/t/get-video-duration-before-upload/30623/4
       this.videoControl = {
@@ -122,10 +121,10 @@ import { toast } from 'toast-notification-alert';
         // formData.append( "filesize", file.size );
         formData.append( 'action', 'futurewordpress/project/filesystem/upload' );
         formData.append( '_nonce', thisClass.ajaxNonce );
-        document.querySelector( '.woocommerce-checkout-payment' ).classList.add( 'still-uploading' );
+        // document.querySelector( '.woocommerce-checkout-payment' ).classList.add( 'still-uploading' );
       } );
       dropzone.on( "complete", function( file, xhr, formData ) {
-        document.querySelector( '.woocommerce-checkout-payment' ).classList.remove( 'still-uploading' );
+        // document.querySelector( '.woocommerce-checkout-payment' ).classList.remove( 'still-uploading' );
       } );
       dropzone.on( "removedfile", function( file ) {
         // console.log( 'To remove ' + file.name );
@@ -191,7 +190,7 @@ import { toast } from 'toast-notification-alert';
          * also trigger additional events (like `processingmultiple`). See the events
          * documentation section for more information.
          */
-        uploadMultiple: false,
+        uploadMultiple: true,
       
         /**
          * Whether you want files to be uploaded in chunks to your server. This can't be
@@ -314,7 +313,7 @@ import { toast } from 'toast-notification-alert';
          * class `dz-max-files-reached` accordingly so you can provide visual
          * feedback.
          */
-        maxFiles: 1,
+        maxFiles: 10,
       
         /**
          * An optional object to send additional headers to the server. Eg:
@@ -355,8 +354,9 @@ import { toast } from 'toast-notification-alert';
          * If the Dropzone is `clickable` this option will also be used as
          * [`accept`](https://developer.mozilla.org/en-US/docs/HTML/Element/input#attr-accept)
          * parameter on the hidden file input as well.
+         * video/*,image/*,audio/*,application/pdf,.psd
          */
-        acceptedFiles: 'video/*,image/*,audio/*,application/pdf,.psd',
+        // acceptedFiles: '*',
       
         /**
          * **Deprecated!**
@@ -519,9 +519,11 @@ import { toast } from 'toast-notification-alert';
          * You can add event listeners here
          */
         init: function () {
-          let dropzone = this;
-          thisClass.videoClips.forEach( function( e ) {
+          let dropzone = this;var e;
+          Object.keys( thisClass.videoClips ).forEach( ( i ) => {
+            e = thisClass.videoClips[i];
             e.type = ( e.type ) ? e.type : 'video/webm';
+            e.name = ( ! e.name ) ? '' : ( ( e.name[0] ) ? e.name[0] : e.name );
             dropzone.displayExistingFile( e, e.full_url );
             // console.log( e );
             // dropzone.options.maxFiles = ( dropzone.options.maxFiles - 1 );
@@ -578,7 +580,8 @@ import { toast } from 'toast-notification-alert';
           //   console.log(imageData);
           // };
           // reader.readAsDataURL(file);
-          if( thisClass.videoDurationValidate( file ) ) {
+          // if( thisClass.videoDurationValidate( file ) ) {
+          if( true ) {
             return done();
           } else {
             return false;
