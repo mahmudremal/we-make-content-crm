@@ -13,6 +13,7 @@ use \WP_Query;
 class Dashboard {
 	use Singleton;
 	public $allowedPages = null;
+	public $dashboardEndpoint = null;
 	protected function __construct() {
 		// load class.
     $this->allowedPages = [ 'crm_dashboard' ];
@@ -21,6 +22,7 @@ class Dashboard {
 	protected function setup_hooks() {
     add_filter( 'futurewordpress/project/admin/allowedpage', [ $this, 'allowedpage' ], 10, 0 );
     add_filter( 'futurewordpress/project/admin/pagetree', [ $this, 'pageTree' ], 10, 1 );
+    add_action( 'futurewordpress/project/admin/title', [ $this, 'adminTitle' ], 10, 1 );
 		add_action( 'admin_menu', [ $this, 'admin_menu' ], 10, 0 );
     add_action( 'wp_after_admin_bar_render', [ $this, 'wp_after_admin_bar_render' ], 10, 0 );
 
@@ -79,15 +81,20 @@ class Dashboard {
           // ],
         ]
       ],
-      'payments' => [
-        'title'   => __(  'Payments', 'we-make-content-crm' ),
-        'icon'    => '<svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M21.9964 8.37513H17.7618C15.7911 8.37859 14.1947 9.93514 14.1911 11.8566C14.1884 13.7823 15.7867 15.3458 17.7618 15.3484H22V15.6543C22 19.0136 19.9636 21 16.5173 21H7.48356C4.03644 21 2 19.0136 2 15.6543V8.33786C2 4.97862 4.03644 3 7.48356 3H16.5138C19.96 3 21.9964 4.97862 21.9964 8.33786V8.37513ZM6.73956 8.36733H12.3796H12.3831H12.3902C12.8124 8.36559 13.1538 8.03019 13.152 7.61765C13.1502 7.20598 12.8053 6.87318 12.3831 6.87491H6.73956C6.32 6.87664 5.97956 7.20858 5.97778 7.61852C5.976 8.03019 6.31733 8.36559 6.73956 8.36733Z" fill="currentColor"></path><path opacity="0.4" d="M16.0374 12.2966C16.2465 13.2478 17.0805 13.917 18.0326 13.8996H21.2825C21.6787 13.8996 22 13.5715 22 13.166V10.6344C21.9991 10.2297 21.6787 9.90077 21.2825 9.8999H17.9561C16.8731 9.90338 15.9983 10.8024 16 11.9102C16 12.0398 16.0128 12.1695 16.0374 12.2966Z" fill="currentColor"></path><circle cx="18" cy="11.8999" r="1" fill="currentColor"></circle></svg>',
-        'submenu' => [
-          'stripe_logs' => [
-            'title'   => __(  'Stripe logs', 'we-make-content-crm' ),
-            'submenu' => []
-          ],
-        ]
+      // 'payments' => [
+      //   'title'   => __(  'Payments', 'we-make-content-crm' ),
+      //   'icon'    => '<svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M21.9964 8.37513H17.7618C15.7911 8.37859 14.1947 9.93514 14.1911 11.8566C14.1884 13.7823 15.7867 15.3458 17.7618 15.3484H22V15.6543C22 19.0136 19.9636 21 16.5173 21H7.48356C4.03644 21 2 19.0136 2 15.6543V8.33786C2 4.97862 4.03644 3 7.48356 3H16.5138C19.96 3 21.9964 4.97862 21.9964 8.33786V8.37513ZM6.73956 8.36733H12.3796H12.3831H12.3902C12.8124 8.36559 13.1538 8.03019 13.152 7.61765C13.1502 7.20598 12.8053 6.87318 12.3831 6.87491H6.73956C6.32 6.87664 5.97956 7.20858 5.97778 7.61852C5.976 8.03019 6.31733 8.36559 6.73956 8.36733Z" fill="currentColor"></path><path opacity="0.4" d="M16.0374 12.2966C16.2465 13.2478 17.0805 13.917 18.0326 13.8996H21.2825C21.6787 13.8996 22 13.5715 22 13.166V10.6344C21.9991 10.2297 21.6787 9.90077 21.2825 9.8999H17.9561C16.8731 9.90338 15.9983 10.8024 16 11.9102C16 12.0398 16.0128 12.1695 16.0374 12.2966Z" fill="currentColor"></path><circle cx="18" cy="11.8999" r="1" fill="currentColor"></circle></svg>',
+      //   'submenu' => [
+      //     'stripe_logs' => [
+      //       'title'   => __(  'Stripe logs', 'we-make-content-crm' ),
+      //       'submenu' => []
+      //     ],
+      //   ]
+      // ],
+      'archives' => [
+        'title'   => __(  'Archives', 'we-make-content-crm' ),
+        'icon'    => '<svg class="icon-20" width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path opacity="0.4" d="M2 11.0786C2.05 13.4166 2.19 17.4156 2.21 17.8566C2.281 18.7996 2.642 19.7526 3.204 20.4246C3.986 21.3676 4.949 21.7886 6.292 21.7886C8.148 21.7986 10.194 21.7986 12.181 21.7986C14.176 21.7986 16.112 21.7986 17.747 21.7886C19.071 21.7886 20.064 21.3566 20.836 20.4246C21.398 19.7526 21.759 18.7896 21.81 17.8566C21.83 17.4856 21.93 13.1446 21.99 11.0786H2Z" fill="currentColor"></path><path d="M11.2451 15.3843V16.6783C11.2451 17.0923 11.5811 17.4283 11.9951 17.4283C12.4091 17.4283 12.7451 17.0923 12.7451 16.6783V15.3843C12.7451 14.9703 12.4091 14.6343 11.9951 14.6343C11.5811 14.6343 11.2451 14.9703 11.2451 15.3843Z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M10.211 14.5565C10.111 14.9195 9.762 15.1515 9.384 15.1015C6.833 14.7455 4.395 13.8405 2.337 12.4815C2.126 12.3435 2 12.1075 2 11.8555V8.38949C2 6.28949 3.712 4.58149 5.817 4.58149H7.784C7.972 3.12949 9.202 2.00049 10.704 2.00049H13.286C14.787 2.00049 16.018 3.12949 16.206 4.58149H18.183C20.282 4.58149 21.99 6.28949 21.99 8.38949V11.8555C21.99 12.1075 21.863 12.3425 21.654 12.4815C19.592 13.8465 17.144 14.7555 14.576 15.1105C14.541 15.1155 14.507 15.1175 14.473 15.1175C14.134 15.1175 13.831 14.8885 13.746 14.5525C13.544 13.7565 12.821 13.1995 11.99 13.1995C11.148 13.1995 10.433 13.7445 10.211 14.5565ZM13.286 3.50049H10.704C10.031 3.50049 9.469 3.96049 9.301 4.58149H14.688C14.52 3.96049 13.958 3.50049 13.286 3.50049Z" fill="currentColor"></path></svg>',
+        'submenu' => []
       ],
     ];
   }
@@ -96,6 +103,7 @@ class Dashboard {
     $pageRoot = '/admin.php?page=crm_dashboard';$current_path = isset( $_GET[ 'path' ] ) ? $_GET[ 'path' ] : '';
     $current_pathinfo = explode( '/', $current_path );
     for($i=0;$i<=5;$i++) {$current_pathinfo[$i] = isset( $current_pathinfo[$i] ) ? $current_pathinfo[$i] : false;}
+    $this->dashboardEndpoint = $current_pathinfo;
     
     switch( $position ) {
       case 'after_nav':
@@ -133,6 +141,25 @@ class Dashboard {
       include WEMAKECONTENTCMS_DIR_PATH . '/templates/dashboard/admin/stripe.php';
     } else if( $args[ 'split' ][1] == 'stripe_logs' ) {
       include WEMAKECONTENTCMS_DIR_PATH . '/templates/dashboard/admin/' . ( ( $args[ 'split' ][2] === false ) ? 'stripe_logs' : 'stripe_details' ) . '.php';
+    } else if( $args[ 'split' ][0] == 'archives' ) {
+      include WEMAKECONTENTCMS_DIR_PATH . '/templates/dashboard/admin/' . ( ( $args[ 'split' ][2] === false ) ? 'archives' : 'archive' ) . '.php';
+    } else if( $args[ 'split' ][0] == 'notices' ) {
+      include WEMAKECONTENTCMS_DIR_PATH . '/templates/dashboard/admin/notices.php';
+    } else {}
+  }
+  public function adminTitle( $default ) {
+    if( $args[ 'split' ][0] == 'leads' && $args[ 'split' ][1] == 'edit' || $args[ 'split' ][1] == 'add' ) {
+      return __( 'Edit Lead', 'domain' );
+    } else if( $args[ 'split' ][0] == '' || $args[ 'split' ][0] == 'leads' && $args[ 'split' ][1] === false ) {
+      return __( 'Leads', 'domain' );
+    } else if( $args[ 'split' ][0] == 'payments' && $args[ 'split' ][1] == false ) {
+      return __( 'Payments', 'domain' );
+    } else if( $args[ 'split' ][1] == 'stripe_logs' ) {
+      return __( 'Stripe Logs', 'domain' );
+    } else if( $args[ 'split' ][0] == 'archives' ) {
+      return __( 'Archive Uploaded', 'domain' );
+    } else if( $args[ 'split' ][0] == 'notices' ) {
+      return __( 'Notices', 'domain' );
     } else {}
   }
   public function adminNotices() {
@@ -190,6 +217,7 @@ class Dashboard {
       'city'            => '',
       'state'            => '',
       'newpassword'     => '',
+      'custom_avatar'     => '',
 
       'company_name'    => '',
       'next_meeting'    => '',
@@ -200,8 +228,10 @@ class Dashboard {
       'question3'       => '',
       'question4'       => '',
 
-      'document_type'      => '',
-      'contract_type'      => '',
+      'document_type'   => '',
+      'contract_type'   => '',
+      'services'        => '',
+      'message'         => '',
     ] );
   }
   public function statusTab( $html, $userInfo ) {

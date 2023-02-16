@@ -23,16 +23,20 @@ class Stripe {
 	protected function __construct() {
 		// Replace with your own Stripe secret key
 		// sk_test_51MYvdBI8VOGXMyoFiYpojuTUhvmS1Cxwhke4QK6jfJopnRN4fT8Qq6sy2Rmf2uvyHBtbafFpWVqIHBFoZcHp0vqq00HaOBUh1P
+		// load class.
+		add_action( 'init', [ $this, 'setup_hooks' ], 10, 0 );
+	}
+
+	public function setup_hooks() {
+		global $wpdb;$this->theTable = $wpdb->prefix . 'fwp_stripe_subscriptions';
 		$this->stripePublishAble = apply_filters( 'futurewordpress/project/system/getoption', 'stripe-publishablekey', false );
+		// $this->stripeSecretKey = 'sk_test_51MYvdBI8VOGXMyoFiYpojuTUhvmS1Cxwhke4QK6jfJopnRN4fT8Qq6sy2Rmf2uvyHBtbafFpWVqIHBFoZcHp0vqq00HaOBUh1P';
 		$this->stripeSecretKey = apply_filters( 'futurewordpress/project/system/getoption', 'stripe-secretkey', false );
 		$this->productID = 'prod_NJlPpW2S6i75vM';
 		$this->lastResult = false;$this->successUrl = site_url( 'payment/stripe/{CHECKOUT_SESSION_ID}/success' );$this->cancelUrl = site_url( 'payment/stripe/{CHECKOUT_SESSION_ID}/cancel' );
-		// load class.
-		$this->setup_hooks();
-	}
 
-	protected function setup_hooks() {
-		global $wpdb;$this->theTable = $wpdb->prefix . 'fwp_stripe_subscriptions';
+
+
 		add_filter( 'futurewordpress/project/payment/stripe/paymentlink', [ $this, 'thePaymentlink' ], 10, 2 );
 		add_filter( 'futurewordpress/project/payment/stripe/handlesuccess', [ $this, 'handleSuccess' ], 10, 2 );
 		add_filter( 'futurewordpress/project/payment/stripe/payment_methods', [ $this, 'paymentMethods' ], 10, 0 );
@@ -56,8 +60,10 @@ class Stripe {
 		// 		],
 		// 	]
 		// ], 'radvix.flow@gmail.com' );
+
 		// $response = $this->stripe_payment_history( $this->customerIDfromEmail( 'radvix.flow@gmail.com' ) );
-		// print_r( $response );wp_die();
+
+		// print_r( $this->pauseSubscriptionUsingEmail( 'pause', 'radvix.flow@gmail.com' ) );wp_die();
 	}
 	public function query_vars( $query_vars  ) {
 		$query_vars[] = 'pay_retainer';
@@ -154,7 +160,7 @@ class Stripe {
 		// print_r( $session );
     // $payment_link = "https://checkout.stripe.com/pay/" . $session_id;
 		if( isset( $session[ 'error' ] ) ) {
-			print_r( $session );return false;
+			// print_r( $session );return false;
 		} else {
 			$payment_link = isset( $session[ 'url' ] ) ? $session[ 'url' ] : 'https://checkout.stripe.com/pay/'  . $session[ 'id' ];return $payment_link;
 		}
@@ -268,19 +274,19 @@ class Stripe {
 	}
 
 	public function customerIDfromEmail( $email ) {
+		$url = "https://api.stripe.com/v1/customers?email=" . urlencode($email);
 		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/customers');
-		curl_setopt($ch, CURLOPT_USERPWD, $this->stripeSecretKey . ':');
+		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query( [ 'email' => $email ] ));
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+			"Authorization: Bearer {$this->stripeSecretKey}",
+			"Content-Type: application/x-www-form-urlencoded"
+		));
 		$response = curl_exec($ch);
 		curl_close($ch);
-		$data = json_decode($response, true);
-		if (isset($data['data'][0]['id'])) {
-			return $data['data'][0]['id'];
-		} else {
-			return isset( $data[ 'id' ] ) ? $data[ 'id' ] : false;
-		}
+		$data = json_decode($response);
+		$customer_id = $data->data[0]->id;
+		return $customer_id;
 	}
 	public function stripe_payment_history( $customerID ) {
 		$ch = curl_init();
@@ -293,13 +299,15 @@ class Stripe {
 		] );
 		$response = curl_exec($ch);
 		if (curl_errno($ch)) {
-			echo 'cURL error: ' . curl_error($ch);
+			// echo 'cURL error: ' . curl_error($ch);
 		}
-		$payments = json_decode($response, true);
+		$payments = json_decode( $response, true );
 		if (isset($payments['error'])) {
-			echo 'API error: ' . $payments['error']['message'];
+			// echo 'API error: ' . $payments['error']['message'];
 		}
-		print_r($payments);
+
+		return $payments;
+		
 		curl_close($ch);
 	}
 	public function paymentHistoryfromCustmerID( $customerID ) {
@@ -322,27 +330,43 @@ class Stripe {
 	}
 	public function paymentHistory( $default, $email ) {
 		if( ! $email ) {return $default;}
+		// $response = $this->stripe_payment_history( $this->customerIDfromEmail( 'radvix.flow@gmail.com' ) );
 		$customerID = $this->customerIDfromEmail( $email );
-		$payment_history = $this->paymentHistoryfromCustmerID( $customerID );
+		$payment_history = $this->stripe_payment_history( $customerID );
+		// $payment_history = $this->paymentHistoryfromCustmerID( $customerID );
 		return ( $payment_history !== false ) ? $payment_history : $default;
 	}
 
 	public function subscriptionToggle( $status, $email, $user_id = false ) {
-		$subscription_id = $this->getStripeSubscriptionIdByEmail( $email );
-		if( $subscription_id && ! empty( $subscription_id ) ) {
-			if( $user_id ) {
-				if( get_user_meta( $user_id, 'subscription_id', true ) ) {
-					update_user_meta( $user_id, 'subscription_id', $subscription_id );
-				}
-			}
-			if( $this->stripe_subscription_toggle( $subscription_id, $status ) ) {
-				return true;
-			} else {
-				return false;
-			}
-		}
+		// $customer_id = $this->customerIDfromEmail( $email );
+		// print_r( [$status, $email, $user_id] );
+		// if( $customer_id && ! empty( $customer_id ) ) {
+		// 	if( $user_id ) {
+		// 		// if( get_user_meta( $user_id, 'customer_id', true ) ) {
+		// 		// 	update_user_meta( $user_id, 'customer_id', $customer_id );
+		// 		// }
+		// 	}
+		
+		return ( $this->pauseSubscriptionUsingEmail( $status, $email ) );
+		// }
 	}
 	protected function getStripeSubscriptionIdByEmail( $email ) {
+		$url = "https://api.stripe.com/v1/customers?email=" . urlencode($email);
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+			"Authorization: Bearer {$this->stripeSecretKey}",
+			"Content-Type: application/x-www-form-urlencoded"
+		));
+		$response = curl_exec($ch);
+		curl_close($ch);
+		$data = json_decode($response);
+		$customer_id = $data->data[0]->id;
+		return $customer_id;
+
+
+		
 		$curl = curl_init();
 		curl_setopt_array($curl, array(
 				CURLOPT_URL => "https://api.stripe.com/v1/customers?email=" . $email,
@@ -353,7 +377,7 @@ class Stripe {
 				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 				CURLOPT_CUSTOMREQUEST => "GET",
 				CURLOPT_HTTPHEADER => array(
-						"Authorization: Bearer {$this->stripeSecretKey}"
+					"Authorization: Bearer "
 				),
 		));
 		$response = curl_exec($curl);
@@ -361,6 +385,7 @@ class Stripe {
 		curl_close($curl);
 		if( ! $err ) {
 			$data = json_decode($response);
+			// print_r( $data );
 			if (!empty($data->data)) {
 				foreach ($data->data as $customer) {
 					if ( ! empty( $customer->subscriptions->data ) ) {
@@ -372,9 +397,8 @@ class Stripe {
 		}
 		return false;
 	}
-	protected function stripe_subscription_toggle( $subscription_id, $status ) {
-    $url = "https://api.stripe.com/v1/subscriptions/" . $subscription_id;
-    $secret_key = $this->stripeSecretKey;
+	protected function stripe_subscription_toggle( $customer_id, $status ) {
+    $url = "https://api.stripe.com/v1/subscriptions?customer=" . urlencode( $customer_id );
   
     if ($status == "pause") {
         $data = array("pause_collection" => "now");
@@ -385,23 +409,21 @@ class Stripe {
 				return false;
     }
   
-    $data_string = json_encode($data);
-  
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-        'Content-Type: application/json',
-        'Authorization: Bearer ' . $secret_key,
-        'Content-Length: ' . strlen($data_string)
-    ));
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		// curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query( $data ) );
+		curl_setopt($ch, CURLOPT_HTTPHEADER, [
+			"Authorization: Bearer {$this->stripeSecretKey}",
+			"Content-Type: application/x-www-form-urlencoded"
+		] );
   
     $response = curl_exec($ch);
     $response_data = json_decode($response);
     curl_close($ch);
-  
+
+		// print_r( $response );wp_die();
+
     if (isset($response_data->error)) {
 			// return $response_data->error->message;
 			return false;
@@ -411,24 +433,18 @@ class Stripe {
     }
 	}
 	public function subscriptionCancel( $status, $email, $user_id = false ) {
-		$subscription_id = $this->getStripeSubscriptionIdByEmail( $email );
-		if( $subscription_id && ! empty( $subscription_id ) ) {
-			if( $user_id ) {
-				if( get_user_meta( $user_id, 'subscription_id', true ) ) {
-					update_user_meta( $user_id, 'subscription_id', '' );
-				}
-			}
-			if( $this->cancelStripeSubscription( $subscription_id ) ) {
-				return true;
-			} else {
-				return false;
-			}
-		}
+		$customer_id = $this->customerIDfromEmail( $email );
+		if( ! $customer_id ) {return false;}
+		$subscription_id = $this->getStripeSubscriptionIdByCustomerID( $customer_id );
+		if( ! $subscription_id ) {return false;}
+		// print_r( [$status, $email, $user_id, $customer_id, $subscription_id] );
+		$is_success = $this->cancelStripeSubscription( $subscription_id );
+		return ( $is_success );
 	}
-	protected function cancelStripeSubscription( $subscription_id ) {
+	private function cancelStripeSubscription( $subscription_id ) {
     $curl = curl_init();
     curl_setopt_array($curl, array(
-			CURLOPT_URL => "https://api.stripe.com/v1/subscriptions/" . $subscription_id,
+			CURLOPT_URL => "https://api.stripe.com/v1/subscriptions/" . urlencode( $subscription_id ),
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_ENCODING => "",
 			CURLOPT_MAXREDIRS => 10,
@@ -436,18 +452,84 @@ class Stripe {
 			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 			CURLOPT_CUSTOMREQUEST => "DELETE",
 			CURLOPT_HTTPHEADER => array(
+				"Content-Type: application/x-www-form-urlencoded",
 				"Authorization: Bearer {$this->stripeSecretKey}"
 			),
     ));
     $response = curl_exec($curl);
     $err = curl_error($curl);
     curl_close($curl);
+
+		// print_r( $response );
+
     if( ! $err ) {
 			$data = json_decode($response);
+			if( ! empty( $data->status ) && $data->status == 'canceled' ) {
+				return true;
+			}
 			if( ! empty( $data->deleted ) && $data->deleted == true) {
 				return true;
 			}
     }
     return false;
+	}
+	private function getStripeSubscriptionIdByCustomerID( $customer_id ) {
+		$url = "https://api.stripe.com/v1/subscriptions?customer=" . urlencode( $customer_id );
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+			"Authorization: Bearer " . $this->stripeSecretKey,
+			"Content-Type: application/x-www-form-urlencoded"
+		));
+		$response = curl_exec($ch);
+		curl_close($ch);
+		$data = json_decode($response);
+		$subscription_id = $data->data[0]->id;
+		return $subscription_id;
+	}
+	private function toggleStripeSubscriptionPause( $action, $subscription_id ) {
+		$url = "https://api.stripe.com/v1/subscriptions/" . urlencode( $subscription_id );
+
+		// $data = [ 'pause_collection' => [ 'behavior' => 'void' ] ];
+		if ($action == "pause") {
+			// $data = array("pause_collection" => "now");
+			$data = [ 'pause_collection' => [ 'behavior' => 'mark_uncollectible' ] ];
+		} else if ($action == "unpause") {
+			// $data = array("resume" => "now");
+			$data = [ 'pause_collection' => '' ]; // [ 'resumes_at' =>  date( 'c' ) ]
+		} else {
+			return false;
+		}
+		// print_r( $data );wp_die();
+
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+			"Authorization: Bearer " . $this->stripeSecretKey,
+			"Content-Type: application/x-www-form-urlencoded"
+		));
+
+		$response = curl_exec($ch);
+		curl_close($ch);
+
+		// echo "Subscription Changed: " . $subscription_id;
+		// print_r( $response );wp_die();
+		return true;
+	}
+
+
+	public function pauseSubscriptionUsingEmail( $action, $email ) {
+		$api_key = $this->stripeSecretKey;
+		$customer_id = $this->customerIDfromEmail( $email );
+		$subscription_id = $this->getStripeSubscriptionIdByCustomerID( $customer_id );
+		// print_r( [$customer_id, $subscription_id] );wp_die();
+		$status = in_array( $action, [ 'pause', 'unpause' ] ) ? $action : false;
+		if( ! $status ) {return $status;}
+		$is_success = $this->toggleStripeSubscriptionPause( $status, $subscription_id );
+		return ( $is_success );
 	}
 }

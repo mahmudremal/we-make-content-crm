@@ -23,7 +23,7 @@ $userInfo = (object) wp_parse_args( $userInfo, [ 'meta' => (object) wp_parse_arg
         <div class="card-body">
         <div class="row">
           <div class="col-sm-12">  
-          <h4 class="mb-3"><?php esc_html_e( 'Invoice', 'domain' ); ?>  #<?php echo esc_html( substr( $log->session_id, -20 ) ); ?></h4>
+          <h4 class="mb-3"><?php esc_html_e( 'Invoice', 'we-make-content-crm' ); ?>  #<?php echo esc_html( substr( $log->session_id, -20 ) ); ?></h4>
           <h3 class="mb-5"><?php echo esc_html( $userInfo->meta->first_name . ' ' . $userInfo->meta->last_name ); ?></h3>
           </div>
         </div>
@@ -35,19 +35,19 @@ $userInfo = (object) wp_parse_args( $userInfo, [ 'meta' => (object) wp_parse_arg
           <?php echo esc_html( get_option( 'admin_email', '' ) ); ?></p>
           </div>
           <div class="col-lg-3">
-          <h5><?php esc_html_e( 'Bill from:', 'domain' ); ?></h5>
+          <h5><?php esc_html_e( 'Bill from:', 'we-make-content-crm' ); ?></h5>
           <p><?php echo esc_html( $userInfo->meta->first_name . ' ' . $userInfo->meta->last_name ); ?></p>
           <p><?php echo esc_html( ! empty( $userInfo->meta->address1 ) ? $userInfo->meta->address1 : (
-            ! empty( $userInfo->meta->address2 ) ? $userInfo->meta->address2 : __( 'Address not available', 'domain' )
+            ! empty( $userInfo->meta->address2 ) ? $userInfo->meta->address2 : __( 'Address not available', 'we-make-content-crm' )
           ) ); ?><br>
             <?php echo esc_html( $log->customer_email ); ?> </p>
           </div>
           <div class="col-lg-3">
-          <h5><?php esc_html_e( 'Bill fromAmount:', 'domain' ); ?></h5>
+          <h5><?php esc_html_e( 'Bill fromAmount:', 'we-make-content-crm' ); ?></h5>
           <h4>$<?php echo esc_html( number_format_i18n( ( $log->amount / 100 ), 2 ) ); ?></h4>
           </div>
           <div class="col-lg-2 text-end">
-          <h5><?php esc_html_e( 'Invoice Date', 'domain' ); ?></h5>
+          <h5><?php esc_html_e( 'Invoice Date', 'we-make-content-crm' ); ?></h5>
           <p class=""><?php echo esc_html( wp_date( 'd M Y', strtotime( $log->created_at ) ) ); ?></p>
           </div>
         </div>
@@ -57,10 +57,10 @@ $userInfo = (object) wp_parse_args( $userInfo, [ 'meta' => (object) wp_parse_arg
               <table class="table billing">
               <thead>
                 <tr>
-                  <th scope="col"><?php esc_html_e( 'Description', 'domain' ); ?></th>
-                  <th scope="col"><?php esc_html_e( 'Price', 'domain' ); ?></th>
-                  <th scope="col"><?php esc_html_e( 'Quantity', 'domain' ); ?></th>
-                  <th class="text-end" scope="col"><?php esc_html_e( 'Sub-Total', 'domain' ); ?></th>
+                  <th scope="col"><?php esc_html_e( 'Description', 'we-make-content-crm' ); ?></th>
+                  <th scope="col"><?php esc_html_e( 'Price', 'we-make-content-crm' ); ?></th>
+                  <th scope="col"><?php esc_html_e( 'Quantity', 'we-make-content-crm' ); ?></th>
+                  <th class="text-end" scope="col"><?php esc_html_e( 'Sub-Total', 'we-make-content-crm' ); ?></th>
                 </tr>
               </thead>
               <tbody>
@@ -77,7 +77,7 @@ $userInfo = (object) wp_parse_args( $userInfo, [ 'meta' => (object) wp_parse_arg
                 <tr><td colspan="4"></td></tr>
                 <tr>
                   <td>
-                    <h5 class="mb-0"><b><?php esc_html_e( 'Net Amount', 'domain' ); ?></b></h5>
+                    <h5 class="mb-0"><b><?php esc_html_e( 'Net Amount', 'we-make-content-crm' ); ?></b></h5>
                   </td>
                   <td></td>
                   <td></td>

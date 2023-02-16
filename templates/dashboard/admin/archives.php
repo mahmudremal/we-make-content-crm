@@ -4,8 +4,7 @@ $date_formate = get_option( 'date_format' );global $wpdb;
 // print_r( $subscribers );wp_die();
 
 $logs = $wpdb->get_results( $wpdb->prepare(
-  "SELECT * FROM {$wpdb->prefix}fwp_stripe_payments ORDER BY id DESC LIMIT 0, 500;",
-  'paid', 'success'
+  "SELECT * FROM {$wpdb->prefix}fwp_googledrive ORDER BY id DESC LIMIT 0, 500;"
 ) );
 
 ?>
@@ -20,10 +19,9 @@ $logs = $wpdb->get_results( $wpdb->prepare(
               <thead>
                 <tr>
                   <th scope="col"><?php esc_html_e( 'Date', 'we-make-content-crm' ); ?></th>
-                  <th scope="col"><?php esc_html_e( 'Email', 'we-make-content-crm' ); ?></th>
                   <th scope="col"><?php esc_html_e( 'Profiles', 'we-make-content-crm' ); ?></th>
-                  <th scope="col"><?php esc_html_e( 'Retainer Amount', 'we-make-content-crm' ); ?></th>
-                  <th scope="col"><?php esc_html_e( 'Status', 'we-make-content-crm' ); ?></th>
+                  <th scope="col"><?php esc_html_e( 'Month', 'we-make-content-crm' ); ?></th>
+                  <th scope="col"><?php esc_html_e( 'Title', 'we-make-content-crm' ); ?></th>
                   <th scope="col"><?php esc_html_e( 'Action', 'we-make-content-crm' ); ?></th>
                 </tr>
               </thead>
@@ -34,14 +32,13 @@ $logs = $wpdb->get_results( $wpdb->prepare(
                   </tr>
                 <?php endif; ?>
                 <?php foreach( $logs as $log ) :
-                  $userInfo = get_user_by( 'id', $log->user_id );
-                  $userMeta = array_map( function( $a ){ return $a[0]; }, (array) get_user_meta( $userInfo->ID ) );
+                  $userInfo = get_userdata( $log->user_id );
+                  $userMeta = array_map( function( $a ){ return $a[0]; }, (array) get_user_meta( ( $userInfo ) ? $log->user_id : 0 ) );
                   $userInfo = (object) wp_parse_args( $userInfo, [ 'meta' => (object) wp_parse_args( $userMeta, apply_filters( 'futurewordpress/project/usermeta/defaults', (array) $userMeta ) ) ] );
                   // print_r( $userInfo );
                   ?>
                   <tr id="stripelog-<?php echo esc_html( $log->id ); ?>">
-                    <td class="text-dark"><?php echo esc_html( wp_date( 'd M Y H:i', strtotime( $log->created_at ) ) ); ?></td>
-                    <td class="text-dark"><?php echo esc_html( empty( $log->customer_email ) ? $userInfo->data->user_email : $log->customer_email ); ?></td>
+                    <td class="text-dark"><?php echo esc_html( wp_date( 'd M', strtotime( $log->created_at ) ) ); ?></td>
                     <td>
                       <div class="d-flex align-items-center">
                         <img class="rounded img-fluid avatar-60 me-3" src="<?php echo esc_url( get_avatar_url( $userInfo->ID, ['size' => '100'] ) ); ?>" alt="" loading="lazy">
@@ -54,19 +51,19 @@ $logs = $wpdb->get_results( $wpdb->prepare(
                         </div>
                       </div>
                     </td>
-                    <td class="text-dark"><?php echo esc_html( strtoupper( $log->currency ) . ' ' . ( $log->amount / 100 ) ); ?></td>
-                    <td class="text-dark"><?php echo esc_html( strtoupper( $log->status ) ); ?></td>
+                    <td class="text-dark"><?php echo esc_html( wp_date( 'd M', strtotime( $log->formonth ) ) ); ?></td>
+                    <td class="text-dark"><?php echo esc_html( $log->title ); ?></td>
                     <td>
                       <div class="d-flex justify-content-evenly">
-                        <a class="btn btn-primary btn-icon btn-sm rounded-pill" href="<?php echo esc_url( admin_url( 'admin.php?page=crm_dashboard&path=payments/stripe_logs/' . $log->id . '/' ) ); ?>" role="button">
+                        <a class="btn btn-primary btn-icon btn-sm ms-2" href="<?php echo esc_attr( $log->file_path ); ?>" target="_blank" role="button">
                           <span class="btn-inner">
                             <svg class="icon-32" width="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path opacity="0.4" fill-rule="evenodd" clip-rule="evenodd" d="M17.7366 6.04606C19.4439 7.36388 20.8976 9.29455 21.9415 11.7091C22.0195 11.8924 22.0195 12.1067 21.9415 12.2812C19.8537 17.1103 16.1366 20 12 20H11.9902C7.86341 20 4.14634 17.1103 2.05854 12.2812C1.98049 12.1067 1.98049 11.8924 2.05854 11.7091C4.14634 6.87903 7.86341 4 11.9902 4H12C14.0683 4 16.0293 4.71758 17.7366 6.04606ZM8.09756 12C8.09756 14.1333 9.8439 15.8691 12 15.8691C14.1463 15.8691 15.8927 14.1333 15.8927 12C15.8927 9.85697 14.1463 8.12121 12 8.12121C9.8439 8.12121 8.09756 9.85697 8.09756 12Z" fill="currentColor"></path>
-                              <path d="M14.4308 11.997C14.4308 13.3255 13.3381 14.4115 12.0015 14.4115C10.6552 14.4115 9.5625 13.3255 9.5625 11.997C9.5625 11.8321 9.58201 11.678 9.61128 11.5228H9.66006C10.743 11.5228 11.621 10.6695 11.6601 9.60184C11.7674 9.58342 11.8845 9.57275 12.0015 9.57275C13.3381 9.57275 14.4308 10.6588 14.4308 11.997Z" fill="currentColor"></path>
+                              <path opacity="0.4" d="M17.554 7.29614C20.005 7.29614 22 9.35594 22 11.8876V16.9199C22 19.4453 20.01 21.5 17.564 21.5L6.448 21.5C3.996 21.5 2 19.4412 2 16.9096V11.8773C2 9.35181 3.991 7.29614 6.438 7.29614H7.378L17.554 7.29614Z" fill="currentColor"></path>
+                              <path d="M12.5464 16.0374L15.4554 13.0695C15.7554 12.7627 15.7554 12.2691 15.4534 11.9634C15.1514 11.6587 14.6644 11.6597 14.3644 11.9654L12.7714 13.5905L12.7714 3.2821C12.7714 2.85042 12.4264 2.5 12.0004 2.5C11.5754 2.5 11.2314 2.85042 11.2314 3.2821L11.2314 13.5905L9.63742 11.9654C9.33742 11.6597 8.85043 11.6587 8.54843 11.9634C8.39743 12.1168 8.32142 12.3168 8.32142 12.518C8.32142 12.717 8.39743 12.9171 8.54643 13.0695L11.4554 16.0374C11.6004 16.1847 11.7964 16.268 12.0004 16.268C12.2054 16.268 12.4014 16.1847 12.5464 16.0374Z" fill="currentColor"></path>
                             </svg>
                           </span>
                         </a>
-                        <a class="btn btn-primary btn-icon btn-sm delete-stripe-log ms-2" href="#" data-id="<?php echo esc_attr( $log->id ); ?>" role="button">
+                        <a class="btn btn-primary btn-icon btn-sm archive-delete-btn ms-2" href="#" data-archive="<?php echo esc_attr( $log->id ); ?>" data-userid="<?php echo esc_attr( $log->user_id ); ?>" role="button">
                           <span class="btn-inner">
                             <svg class="icon-32" width="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path opacity="0.4" d="M19.643 9.48851C19.643 9.5565 19.11 16.2973 18.8056 19.1342C18.615 20.8751 17.4927 21.9311 15.8092 21.9611C14.5157 21.9901 13.2494 22.0001 12.0036 22.0001C10.6809 22.0001 9.38741 21.9901 8.13185 21.9611C6.50477 21.9221 5.38147 20.8451 5.20057 19.1342C4.88741 16.2873 4.36418 9.5565 4.35445 9.48851C4.34473 9.28351 4.41086 9.08852 4.54507 8.93053C4.67734 8.78453 4.86796 8.69653 5.06831 8.69653H18.9388C19.1382 8.69653 19.3191 8.78453 19.4621 8.93053C19.5953 9.08852 19.6624 9.28351 19.643 9.48851Z" fill="currentColor"></path>

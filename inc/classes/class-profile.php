@@ -19,8 +19,14 @@ class Profile {
 		$this->setup_hooks();
 	}
 	protected function setup_hooks() {
-		add_action( 'get_avatar', [ $this, 'get_avatar' ], 10, 5 );
+		// add_filter( 'get_avatar', [ $this, 'get_avatar' ], 9999, 5 );
+		// add_filter( 'get_avatar_url', [ $this, 'get_avatar_url' ], 99, 3 );
+		add_filter( 'get_avatar_data', [ $this, 'get_avatar_data' ], 99, 2 );
 		add_filter( 'futurewordpress/project/filesystem/set_avater', [ $this, 'set_avater' ], 10, 2 );
+
+		add_action( 'wp_ajax_futurewordpress/project/filesystem/uploadavater', [ $this, 'uploadAvater' ], 10, 0 );
+
+		add_filter( 'login_redirect', [ $this, 'login_redirect' ], 10, 0 );
 	}
 	public function get_avatar( $avatar, $id_or_email, $size, $default, $alt ) {
 		$user = false;
@@ -44,6 +50,36 @@ class Profile {
 		}
 		return $avatar;
 	}
+	public function get_avatar_url( $url, $id_or_email, $args ) {
+		$userInfo = get_user_by( ( is_string( $id_or_email ) ? 'email' : 'id' ), $id_or_email );
+		if( $userInfo && ! is_wp_error( $userInfo ) && $custom_avatar = get_user_meta( $userInfo->ID, 'custom_avatar', true ) && ! empty( $custom_avatar ) ) {
+			$url = $custom_avatar;
+		} else {
+			$url = 'https://templates.iqonic.design/product/qompac-ui/html/dist/assets/images/shapes/02.png?';
+		}
+		return $url;
+	}
+
+	public function get_avatar_data( $args, $id_or_email ) {
+		$user = false;
+		if( is_numeric( $id_or_email ) ) {
+			$id = (int) $id_or_email;
+			$user = get_user_by( 'id', $id );
+		} elseif( is_object( $id_or_email ) ) {
+			if( ! empty( $id_or_email->user_id ) ) {
+				$id = (int) $id_or_email->user_id;
+				$user = get_user_by( 'id', $id );
+			}
+		} else {
+			$user = get_user_by( 'email', $id_or_email ); 
+		}
+		if( $user && ! is_wp_error( $user ) ) {
+			$custom_avatar = get_user_meta( $user->ID, 'custom_avatar', true );
+			$args[ 'url' ] = empty( $custom_avatar ) ? $args[ 'url' ] : $custom_avatar;
+			$args[ 'found_avatar' ] = true;
+		}
+		return $args;
+	}
 	public function set_avater( $status, $file ) {
 		if( ! is_user_logged_in() ) {return;}
 		$current_user = wp_get_current_user();
@@ -62,5 +98,35 @@ class Profile {
 				}
 			}
 		}
+	}
+	public function uploadAvater() {
+		check_ajax_referer( 'futurewordpress/project/verify/nonce', '_nonce' );
+		$user_id = $_POST[ 'lead' ];
+		$upload_dir = apply_filters( 'futurewordpress/project/filesystem/uploaddir', false );
+		$custom_avatar = get_user_meta( $user_id, 'custom_avatar', true );
+		$oldFilePATH = str_replace( [site_url('/')], [ABSPATH], $custom_avatar );
+		if( $oldFilePATH && ! empty( $oldFilePATH ) && file_exists( $oldFilePATH ) && ! is_dir( $oldFilePATH ) ) {
+			unlink( $oldFilePATH );
+		}
+		$randomstring = apply_filters( 'futurewordpress/project/filter/string/random', '', 10 );
+		$newFileName = time() . '-' . $randomstring . '-' . $_FILES[ 'avater' ][ 'name' ];
+		// wp_send_json_success( $newFileName );
+		if( $upload_dir && move_uploaded_file( $_FILES[ 'avater' ][ 'tmp_name' ], $upload_dir . '/' . $newFileName ) ) {
+			$newFileURL = str_replace( [ABSPATH], [site_url('/')], $upload_dir . '/' . $newFileName );
+			if( $custom_avatar ) {
+				update_user_meta( $user_id, 'custom_avatar', $newFileURL );
+			} else {
+				add_user_meta( $user_id, 'custom_avatar', $newFileURL );
+			}
+			// '<img src="' . $newFileURL . '" alt="" class="mr-2" height="30px" width="auto" />' . 
+			wp_send_json_success( __( 'Profile Image Updated Successfully.', 'we-make-content-crm' ), 200 );
+		} else {
+			wp_send_json_error( __( 'Profile Image upload failed.', 'we-make-content-crm' ) );
+		}
+	}
+	public function login_redirect() {
+		$who = 'me'; // isset( $_POST['log'] ) ? strtolower( sanitize_user( $_POST['log'] ) ) : 'me';
+    $redirect_to = apply_filters( 'futurewordpress/project/user/dashboardpermalink', false, $who );
+    return $redirect_to;
 	}
 }

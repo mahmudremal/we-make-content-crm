@@ -3,6 +3,7 @@
 import Swal from "sweetalert2";
 import { toast } from 'toast-notification-alert';
 import flatpickr from "flatpickr";
+// import ClassicEditor from '@ckeditor5/ckeditor5-editor-classic/src/classiceditor';
 
 
 ( function ( $ ) {
@@ -40,6 +41,7 @@ import flatpickr from "flatpickr";
 			this.calendarPicker();this.switcherMenu();
 			this.sendRegLink();this.profileImgUpload();
 			this.printADiv();this.deletePayment();
+			this.deleteArchive();this.dropDownToggle();
 		}
 		apex() {
 			var options = {
@@ -243,18 +245,18 @@ import flatpickr from "flatpickr";
 				document.querySelectorAll( '.profile-image-upload:not([data-handled])' ).forEach( ( el, ei ) => {
 					el.dataset.handled = true;
 					el.addEventListener( 'change', ( event ) => {
-						// var formdata = new FormData();
-						// 		formdata.append( 'action', 'futurewordpress/project/action/profileimgupload' );
-						// 		formdata.append( 'lead', el.dataset.id );
-						// 		formdata.append( 'value', el.dataset.userInfo );
-						// 		formdata.append( '_nonce', thisClass.ajaxNonce );
-						// 		thisClass.sendToServer( formdata );
 						if( el.dataset.preview ) {
 							preview = document.querySelector( el.dataset.preview );
 							file = el.files[0];
 							reader = new FileReader();
 							reader.onloadend = function () {
 								preview.src = reader.result;
+								var formdata = new FormData();
+								formdata.append( 'action', 'futurewordpress/project/filesystem/uploadavater' );
+								formdata.append( 'lead', el.dataset.lead );
+								formdata.append( 'avater', el.files[0] );
+								formdata.append( '_nonce', thisClass.ajaxNonce );
+								thisClass.sendToServer( formdata );
 							}
 							if (file) {
 								reader.readAsDataURL(file);
@@ -281,6 +283,29 @@ import flatpickr from "flatpickr";
 				newWin.document.write('<html><head><link rel="stylesheet" type="text/css" href="https://wemakecontent.net/wp-content/plugins/we-make-content-crm/assets/build/library/css/backend-library.css?ver=6.1.1" /></head><body onload="window.print()">' + divToPrint.innerHTML + '<style>.is-printing {min-height: 28cm;min-width: 20cm;max-height: 29.7cm;max-width: 21cm;}</style></body></html>');
 				// newWin.document.close();newWin.close();
 				e.target.style.display = 'block';page.classList.remove( 'is-printing' );
+			} );
+		}
+		deleteArchive() {
+			const thisClass = this;var el, message;
+			document.querySelectorAll( '.archive-delete-btn' ).forEach( ( archive ) => {
+				archive.addEventListener( 'click', ( event ) => {
+					event.preventDefault();
+					Swal.fire({
+						icon: 'info',
+						title: thisClass.i18n.are_u_sure,
+						showCancelButton: true,
+						showLoaderOnConfirm: true
+					} ).then((result) => {
+						if (result.isConfirmed ) {
+							var formdata = new FormData();
+								formdata.append( 'action', 'futurewordpress/project/action/deletearchives' );
+								formdata.append( 'archive', archive.dataset.archive );
+								formdata.append( 'userid', archive.dataset.userid );
+								formdata.append( '_nonce', thisClass.ajaxNonce );
+								thisClass.sendToServer( formdata );
+						}
+					} );
+				} );
 			} );
 		}
 		sendToServer( data ) {
@@ -312,6 +337,30 @@ import flatpickr from "flatpickr";
 				}
 			});
 		}
+		dropDownToggle() {
+			document.querySelectorAll( '[data-fwp-toggle]' ).forEach( ( el ) => {
+				el.addEventListener( 'click', ( event ) => {
+					event.preventDefault();
+					event.target.classList.toggle( 'show' );
+					event.target.setAttribute( 'aria-expanded', ( event.target.getAttribute( 'aria-expanded' ) === true ) );
+					var target = document.querySelector( '[aria-labelledby="' + event.target.getAttribute( 'id' ) + '"]' );
+					if( target ) {
+							target.classList.toggle( 'show' );
+							target.dataset.bsPopper = 'static';
+					}
+				} );
+			} );
+		}
+		ckEditor() {
+			document.querySelectorAll( '[data-ckeditor]:not([data-handled])' ).forEach( ( el ) => {
+				el.dataset.handled = true;
+				ClassicEditor.create( el ).catch( error => {
+					console.error( error );
+					toast.show({title: 'Inline Editor not properly Loaded.', position: 'bottomright', type: 'warn'});
+        } );
+			} );
+		}
+		
 	}
 
 	new FWPListivoBackendJS();

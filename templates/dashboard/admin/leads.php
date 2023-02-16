@@ -41,7 +41,7 @@ $date_formate = get_option( 'date_format' );
                                     <td class="text-dark"><?php echo esc_html( empty( $userInfo->meta->email ) ? $userInfo->data->user_email : $userInfo->meta->email ); ?></td>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <img class="rounded img-fluid avatar-60 me-3" src="<?php echo esc_url( get_avatar_url( $user->ID, ['size' => '100'] ) ); ?>" alt="" loading="lazy">
+                                            <img class="rounded img-fluid avatar-60 me-3" src="<?php echo esc_url( get_avatar_url( $userInfo->ID, ['size' => '100'] ) ); ?>" alt="" loading="lazy">
                                             <div class="media-support-info">
                                             <h5 class="iq-sub-label"><?php echo esc_html( $userInfo->meta->first_name . ' ' . $userInfo->meta->last_name ); ?></h5>
                                             <p class="mb-0">@<?php echo esc_html( $userInfo->data->user_nicename ); ?></p>

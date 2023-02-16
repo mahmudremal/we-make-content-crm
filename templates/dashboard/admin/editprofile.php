@@ -22,7 +22,7 @@ $userCountries = apply_filters( 'futurewordpress/project/database/countries', [
     'no-country'			=> __( 'No Country Found', 'we-make-content-crm' )
 ], false );
 $userInfo = get_user_by( 'id', $args[ 'split' ][2] );
-if( ! $userInfo ) {wp_die( __( 'Seems something went wrong. User not found. Please go back', 'domain' ) );}
+if( ! $userInfo ) {wp_die( __( 'Seems something went wrong. User not found. Please go back', 'we-make-content-crm' ) );}
 // $userMeta = get_user_meta( $userInfo->ID, null, true );
 // foreach( $userMeta as $meta_key => $meta_value ) {$userMeta[ $meta_key ] = $meta_value[0];}
 $userMeta = array_map( function( $a ){ return $a[0]; }, (array) get_user_meta( $userInfo->ID ) );
@@ -52,17 +52,17 @@ $is_edit_profile = ( ! empty( $args[ 'split' ][2] ) );
                     <div class="d-grid gap-card">
                         <div class="form-group">
                             <div class="profile-img-edit position-relative">
-                                <img src="<?php echo esc_url( get_avatar_url( $user->ID, ['size' => '100'] ) ); ?>" alt="profile-pic" class="theme-color-default-img profile-pic rounded avatar-100" loading="lazy" id="profile-image-preview" data-default="<?php echo esc_url( get_avatar_url( $user->ID, ['size' => '100'] ) ); ?>">
+                                <img src="<?php echo esc_url( get_avatar_url( $userInfo->ID, ['size' => '100'] ) ); ?>" alt="profile-pic" class="theme-color-default-img profile-pic rounded avatar-100" loading="lazy" id="profile-image-preview" data-default="<?php echo esc_url( get_avatar_url( $userInfo->ID, ['size' => '100'] ) ); ?>">
                                 <div class="upload-icone bg-primary">
                                     <svg class="upload-button icon-14" width="14" height="14" viewBox="0 0 24 24">
                                     <path fill="#ffffff" d="M14.06,9L15,9.94L5.92,19H5V18.08L14.06,9M17.66,3C17.41,3 17.15,3.1 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18.17,3.09 17.92,3 17.66,3M14.06,6.19L3,17.25V21H6.75L17.81,9.94L14.06,6.19Z" />
                                     </svg>
-                                    <input type="file" class="form-control file-upload profile-image-upload" name="profile-image" accept="image/*" data-preview="#profile-image-preview">
+                                    <input type="file" class="form-control file-upload profile-image-upload" name="profile-image" accept="image/*" data-preview="#profile-image-preview" data-lead="<?php echo esc_attr( $userInfo->ID ); ?>">
                                 </div>
                             </div>
                             <div class="img-extension mt-3">
                                 <div class="d-inline-block align-items-center">
-                                    <span><?php echo wp_kses_post( sprintf( __( 'Only %s allowed', 'we-make-content-crm' ), '</span><a href="javascript:void(0);">.jpg</a><a href="javascript:void(0);">.png</a><a href="javascript:void(0);">.jpeg</a><span>' ) ); ?></span>
+                                    <span><?php echo wp_kses_post( sprintf( __( '%s are Recommend', 'we-make-content-crm' ), '</span><a href="javascript:void(0);">.jpg</a><a href="javascript:void(0);">.png</a><a href="javascript:void(0);">.jpeg</a><span>' ) ); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -270,6 +270,32 @@ $is_edit_profile = ( ! empty( $args[ 'split' ][2] ) );
                     <div class="form-group mb-0">
                         <label class="form-label" for="website"><?php esc_html_e( 'Website Url:', 'we-make-content-crm' ); ?></label>
                         <input type="text" class="form-control" id="website" name="userinfo[website]" value="<?php echo esc_attr( $userInfo->meta->website ); ?>" placeholder="<?php esc_attr_e( 'Website URL', 'we-make-content-crm' ); ?>">
+                    </div>
+                </div>
+            </div>
+            <div class="card card-full-width">
+                <div class="card-header d-flex justify-content-between">
+                    <div class="header-title">
+                    <h4 class="card-title"><?php esc_html_e( 'Contract Services:', 'we-make-content-crm' ); ?></h4>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label class="form-label" for="services"><?php esc_html_e( 'Services:', 'we-make-content-crm' ); ?></label>
+                        <textarea class="form-control" name="userinfo[services]" id="services" cols="30" rows="10"><?php echo esc_html( $userInfo->meta->services ); ?></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-full-width">
+                <div class="card-header d-flex justify-content-between">
+                    <div class="header-title">
+                    <h4 class="card-title"><?php esc_html_e( 'Message to Client:', 'we-make-content-crm' ); ?></h4>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label class="form-label" for="message"><?php esc_html_e( 'Leave it blank for disapearing notice.', 'we-make-content-crm' ); ?></label>
+                        <textarea class="form-control" name="userinfo[message]" id="message" cols="30" rows="10" data-ckeditor="{}"><?php echo esc_html( $userInfo->meta->message ); ?></textarea>
                     </div>
                 </div>
             </div>

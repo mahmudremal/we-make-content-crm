@@ -150,6 +150,7 @@ div.wpforms-container-full .wpforms-form .wpforms-field {
       }
       .wpforms-field-row {
         width: 100%;
+        max-width: unset;
       }
       .wpforms-field-stripe-credit-card-cardnumber {
         height: 40px;
@@ -175,15 +176,57 @@ div.wpforms-container-full .wpforms-form .wpforms-field {
             font-size: 30px;
           }
         }
+        &.wpforms-field-pagebreak {
+          text-align: center;
+          display: block;
+          .wpforms-clear {
+            text-align: center;
+            .wpforms-page-next {
+              background-color: #72b239;
+              color: #fff;
+              font-size: 1.5rem;
+              padding: 20px 30px;
+              border-radius: 15px;
+              &:after {
+                content: "";
+                margin-left: 0px;
+                opacity: 0.5;
+                transition: all .7s ease;
+              }
+              &:hover:after {
+                content: "→";
+                opacity: 1;
+                margin-left: 10px;
+              }
+            }
+          }
+        }
+        &.wpforms-field-address {
+          display: block;
+        }
+        .wpforms-field-row {
+          max-width: unset;
+        }
+      }
+      textarea.wpforms-field-large {
+        border: .5px solid #eee;
+        border-radius: 5px;
+        border: none;
       }
     }
-    .wpforms-submit-container .wpforms-submit {
-      min-width: 200px;
-      margin-bottom: 50px;
-      border-radius: 3px;
-      & + img {
-        position: absolute;
-        top: 20px;
+    .wpforms-submit-container {
+      text-align: center;
+      .wpforms-submit {
+        min-width: 200px;
+        margin-bottom: 50px;
+        background-color: #72b239;
+        color: #fff;
+        font-size: 1.2rem;
+        border-radius: 5px;
+        & + img {
+          position: absolute;
+          top: 20px;
+        }
       }
     }
   }

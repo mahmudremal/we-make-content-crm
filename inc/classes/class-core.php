@@ -20,7 +20,6 @@ class Core {
 
 		add_action( 'wp_ajax_futurewordpress/project/action/cancelsubscription', [ $this, 'cancelSubscription' ], 10, 0 );
 		add_action( 'admin_post_futurewordpress/project/action/editsubscriber', [ $this, 'editSubscriber' ], 10, 0 );
-		add_action( 'wp_ajax_futurewordpress/project/action/changepassword', [ $this, 'cancelSubscription' ], 10, 0 );
 		add_action( 'wp_ajax_futurewordpress/project/database/contents', [ $this, 'contentLibraries' ], 10, 0 );
 		add_action( 'wp_ajax_futurewordpress/project/action/singlefield', [ $this, 'singleField' ], 10, 0 );
 		add_action( 'wp_ajax_futurewordpress/project/action/switchleadstatus', [ $this, 'switchLeadStatus' ], 10, 0 );
@@ -29,6 +28,8 @@ class Core {
 		add_action( 'wp_ajax_futurewordpress/project/action/sendregistration', [ $this, 'sendRegistration' ], 10, 0 );
 		add_action( 'wp_ajax_futurewordpress/project/action/sendpasswordreset', [ $this, 'sendPasswordReset' ], 10, 0 );
 		add_action( 'wp_ajax_futurewordpress/project/action/registerexisting', [ $this, 'registerExisting' ], 10, 0 );
+
+		add_action( 'admin_post_futurewordpress/project/action/changepassword', [ $this, 'changePassword' ], 10, 0 );
 
 		// add_action( 'wp_ajax_futurewordpress/project/action/test', [ $this, 'testAjax' ], 10, 0 );
 
@@ -114,6 +115,7 @@ class Core {
 		if( isset( $_POST[ 'userdata' ] ) ) {
 			$userdata = $_POST[ 'userdata' ];$userinfo = $_POST[ 'userinfo' ];
 			$userinfo[ 'enable_subscription' ] = isset( $userinfo[ 'enable_subscription' ] ) ? $userinfo[ 'enable_subscription' ] : false;
+			// $userinfo[ 'services' ] = isset( $userinfo[ 'services' ] ) ? nl2br( $userinfo[ 'services' ] ) : '';
 			$args = [
 				'display_name'	=> $userdata[ 'display_name' ],
 				'first_name'		=> $userdata[ 'first_name' ],
@@ -180,7 +182,7 @@ class Core {
 			if( $is_done && ! is_wp_error( $is_done ) ) {
 				wp_send_json_success( [ 'message' => __( 'Deleted Payment Log Successfully.', 'we-make-content-crm' ), 'hooks' => ['delete-stripe-log-' . $_POST[ 'id' ] ] ], 200 );
 			} else {
-				wp_send_json_error( [ 'message' => is_wp_error( $is_done )? $is_done->get_error_message() : __( 'Failed to delete payment log.', 'domain' ), 'hooks' => [] ], 200 );
+				wp_send_json_error( [ 'message' => is_wp_error( $is_done )? $is_done->get_error_message() : __( 'Failed to delete payment log.', 'we-make-content-crm' ), 'hooks' => [] ], 200 );
 			}
 		} else {
 			wp_send_json_error( __( 'Unexpected status requested.', 'we-make-content-crm' ), 200 );
@@ -214,7 +216,7 @@ class Core {
 			$args = ['id' => 0, 'to' => empty( $userInfo->data->user_email ) ? $userInfo->meta->email : $userInfo->data->user_email, 'name' => get_option( 'blogname' ), 'email' => get_option( 'admin_email' ), 'subject' => '', 'message' => ''];
 			
 			if( $userInfo->meta->monthly_retainer <= 0 ) {
-				wp_send_json_error( __( 'User\'s retainer amount is zero, you\'ve change retainer amount to send registration link.', 'domain' ) );
+				wp_send_json_error( __( 'User\'s retainer amount is zero, you\'ve change retainer amount to send registration link.', 'we-make-content-crm' ) );
 			}
 
 			$instead = [
@@ -279,15 +281,23 @@ class Core {
 		}
 	}
 	public function toggleSubscption( $user_id, $meta_key, $meta_value ) {
-		$lastchanged = false; // get_usermeta( $user_id, 'subscription_last_changed' );
+		$lastchanged = get_usermeta( $user_id, 'subscription_last_changed' );
 		$userInfo = get_user_by( 'id', $user_id );
 		if( $lastchanged && $lastchanged == date( 'd M, Y' ) ) {
 			wp_send_json_success( [ 'message' => __( 'You can\'t change it while it is under pending review. You can change your subscription status once a day maximum. Please wait until it release.', 'we-make-content-crm' ), 'hooks' => [] ], 200 );
 		} else {
 			$status = ( $meta_value == 'on' ) ? 'unpause' : 'pause';
-			if( apply_filters( 'futurewordpress/project/payment/stripe/subscriptionToggle', $status, $userInfo->data->user_email ,$user_id ) ) {
+			if( apply_filters( 'futurewordpress/project/payment/stripe/subscriptionToggle', $status, ( ! empty( $userInfo->data->user_email ) ? $userInfo->data->user_email : get_user_meta( $user_id, 'email', true ) ), $user_id ) ) {
 				if( $lastchanged ) {update_user_meta( $user_id, 'subscription_last_changed', date( 'd M, Y' ) );} else {add_user_meta( $user_id, 'subscription_last_changed', date( 'd M, Y' ) );}
 				update_user_meta( $user_id, $meta_key, $meta_value );
+				$notice = apply_filters( 'futurewordpress/project/notices/manager', 'add', 'cancelSubscription', [
+					'type'						=> 'warn',
+					'message'					=> sprintf( __( '%s %s his Subscription', 'we-make-content-crm' ), '<a href="' . admin_url( 'admin.php?page=crm_dashboard&path=leads/edit/' . $userInfo->ID . '/' ) . '" target="_blank">' . get_user_meta( $userInfo->ID, 'first_name', true ) . ' ' . get_user_meta( $userInfo->ID, 'last_name', true ) . '</a>', strtoupper( $status ) ),
+					'data'						=> [
+						'time'					=> wp_date( 'Y-M-d H:i:s' ),
+						'user'					=> $user_id
+					]
+				] );
 				wp_send_json_success( [ 'message' => __( 'User subscription Changed Successfully', 'we-make-content-crm' ), 'hooks' => ['subscription-status-' . $meta_value ] ], 200 );
 			} else {
 				wp_send_json_error( __( 'Failed to Switch subscription! Please contact with administrative for assistance.', 'we-make-content-crm' ), 200 );
@@ -295,10 +305,21 @@ class Core {
 		}
 	}
 	public function cancelSubscription() {
-		$userInfo = wp_get_current_user();
-		if( apply_filters( 'futurewordpress/project/payment/stripe/subscriptionCancel', $status, $userInfo->data->user_email, $userInfo->ID ) ) {
+		if( ! apply_filters( 'futurewordpress/project/system/isactive', 'stripe-cancelsubscription' ) ) {
+			wp_send_json_error( __( 'Subscription calcelletion is not allowed from administrative. Please contract with them manually.', 'we-make-content-crm' ), 200 );
+		}
+		$userInfo = get_user_by( 'id', ( isset( $_GET[ 'userid' ] ) ? $_GET[ 'userid' ] : 0 ) );
+		if( $userInfo && apply_filters( 'futurewordpress/project/payment/stripe/subscriptionCancel', 'cancel', ( ! empty( $userInfo->data->user_email ) ? $userInfo->data->user_email : get_user_meta( $userInfo->ID, 'email', true ) ), $userInfo->ID ) ) {
 			update_user_meta( $userInfo->ID, 'subscribe', false );
-			wp_send_json_success( __( 'Message recieved but is in staging mode.', 'we-make-content-crm' ), 200 );
+			$notice = apply_filters( 'futurewordpress/project/notices/manager', 'add', 'cancelSubscription', [
+				'type'						=> 'alert',
+				'message'					=> sprintf( __( 'An User (%s) cancelled Subscription on %s', 'we-make-content-crm' ), '<a href="' . admin_url( 'admin.php?page=crm_dashboard&path=leads/edit/' . $userInfo->ID . '/' ) . '" target="_blank">' . get_user_meta( $userInfo->ID, 'first_name', true ) . ' ' . get_user_meta( $userInfo->ID, 'last_name', true ) . '</a>', wp_date( 'M, d H;i' ) ),
+				'data'						=> [
+					'time'					=> wp_date( 'Y-M-d H:i:s' ),
+					'user'					=> $_GET[ 'userid' ]
+				]
+			] );
+			wp_send_json_success( __( 'You successfully Cancelled your subscriptions. A notification to was sent to the Administrative.', 'we-make-content-crm' ), 200 );
 		} else {
 			wp_send_json_error( __( 'Subscription calcelletion failed. Please contact with site administrative for further assistance.', 'we-make-content-crm' ), 200 );
 		}
@@ -335,6 +356,30 @@ class Core {
 			$redirect = site_url( 'pay_retainer/' . bin2hex( $userInfo->ID ) . '/' );
 			wp_send_json_success( [ 'message' => __( 'Data updated successfully. Please wait a while, we\'re redirecting.', 'we-make-content-crm' ), 'redirect' => $redirect, 'hooks' => [ 'register-existing-account-wizard-success' ] ], 200 );
 		}
+	}
+	public function changePassword() {
+		if( ! isset( $_POST[ 'password' ] ) || ! isset( $_POST[ '_nonce' ] ) || ! wp_verify_nonce( $_POST[ '_nonce' ], 'futurewordpress/project/nonce/dashboard' ) ) {
+			wp_send_json_error( __( 'We\'ve detected you\'re requesting with an invalid security token or something went wrong with you', 'we-make-content-crm' ), 200 );
+		}
+		$password = (array) $_POST[ 'password' ];
+		if( isset( $password[ 'new' ] ) && ! empty( $password[ 'new' ] ) && isset( $password[ 'old' ] ) && isset( $password[ 'confirm' ] ) && $password[ 'old' ] == $password[ 'confirm' ] ) {
+			wp_update_user( [
+				'ID'					=> get_current_user_id(),
+				'user_pass'		=> $password[ 'old' ]
+			] );
+			// wp_send_json_error( __( 'Password Updated Successfully!', 'we-make-content-crm' ) );
+			set_transient( 'futurewordpress/project/transiant/admin/' . get_current_user_id(), [
+				'type'					=> 'success', // primary | danger | success | warning | info
+				'message'				=> __( 'Password Updated Successfully!', 'we-make-content-crm' )
+			], 200 );
+		} else {
+			// wp_send_json_error( __( 'Password Mismatch. Please try again.', 'we-make-content-crm' ) );
+			set_transient( 'futurewordpress/project/transiant/admin/' . get_current_user_id(), [
+				'type'					=> 'danger', // primary | danger | success | warning | info
+				'message'				=> __( 'Password Mismatch. Please try again.', 'we-make-content-crm' )
+			], 200 );
+		}
+		wp_redirect( wp_get_referer() );
 	}
 	public function testAjax() {
 		wp_send_json_success( [ 'message' => 'some text', 'hooks' => ['fuck'] ], 200 );

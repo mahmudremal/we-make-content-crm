@@ -1,0 +1,42 @@
+<?php
+$notices = (array) apply_filters( 'futurewordpress/project/notices/manager', 'get', true, true );
+?>
+<div>
+  <div class="row">
+    <div class="col-12">
+      <div class="card card-full-width">
+        <div class="card-body">
+          <div class="fancy-table table-responsive border rounded">
+            <table class="table table-striped mb-0">
+              <thead>
+                <tr>
+                  <th scope="col"><?php esc_html_e( 'Date', 'we-make-content-crm' ); ?></th>
+                  <th scope="col"><?php esc_html_e( 'Message', 'we-make-content-crm' ); ?></th>
+                  <th scope="col"><?php esc_html_e( 'Type', 'we-make-content-crm' ); ?></th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php if( count( $notices ) <= 0 ) : ?>
+                  <tr>
+                    <td colspan="2"><img src="<?php echo esc_url( WEMAKECONTENTCMS_BUILD_URI . '/icons/not-found.svg' ); ?>" alt="<?php esc_attr_e( 'Noting found', 'we-make-content-crm' ); ?>" style="width: 100%;height: auto;max-height: 400px;"></td>
+                  </tr>
+                <?php endif; ?>
+                <?php foreach( $notices as $i => $notice ) :
+                  $notice = (object) $notice;
+                  ?>
+                  <tr id="notice-<?php echo esc_html( $i ); ?>" class="border-<?php echo esc_attr( $notice->type ); ?>">
+                    <td class="text-dark"><?php echo esc_html( wp_date( 'd, M', strtotime( $notice->data->time ) ) ); ?></td>
+                    <td class="text-dark"><?php echo wp_kses_post( $notice->message ); ?></td>
+                    <td class="text-dark"><?php echo esc_html( $notice->type ); ?></td>
+                  </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  
+</div>

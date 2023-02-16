@@ -45,14 +45,15 @@ console.log(customer.id);
 				renumber									: 'Only field allowed number only. Please recheck.',
 				rqemail										: 'You provide a wrong email address. Please fix.',
 				passnotmatched						: 'Password not matched',
+				are_u_sure								: 'Are you sure?',
 				...i18n
 			}
 			this.init();this.toOpenEdit();this.inputEventListner();
 			this.cancelSubscription();this.changePassword();
 			this.toggleStatus();this.passwordToggle();
 			this.regWidget();this.handleTabHref();
-			this.submitArchiveFiles();
-			this.setup_hooks();
+			this.submitArchiveFiles();this.trackWpformAjax();
+			this.setup_hooks();this.deleteArchive();
 			// this.fetchDataWidthContract();
 			// this.accordion();
 			// console.log( 'frontend init...' );
@@ -103,7 +104,7 @@ console.log(customer.id);
 						showCancelButton: true,
 						showLoaderOnConfirm: true,
 						preConfirm: (login) => {
-						  return fetch( thisClass.ajaxUrl + `?action=futurewordpress/project/action/cancelsubscription` )
+						  return fetch( thisClass.ajaxUrl + `?action=futurewordpress/project/action/cancelsubscription&userid=` + node.dataset.userid )
 							.then(response => {
 							  if (!response.ok) {
 								throw new Error(response.statusText)
@@ -124,7 +125,9 @@ console.log(customer.id);
 							// imageUrl: result.value.avatar_url: 
 							title: ( result.value.success ) ? 'Success' : 'Failed',icon: ( result.value.success ) ? 'success' : 'error',
 							text: result.value?.data??'Request sent but doesn\'t update anything.',
-						  })
+						  }).then( () => {
+								location.reload();
+							} )
 						}
 					  })
 				} );
@@ -476,6 +479,29 @@ console.log(customer.id);
 			// 	document.querySelector('#content').innerHTML = html;
 			// } );
 		}
+		deleteArchive() {
+			const thisClass = this;var el, message;
+			document.querySelectorAll( '.archive-delete-btn' ).forEach( ( archive ) => {
+				archive.addEventListener( 'click', ( event ) => {
+					event.preventDefault();
+					Swal.fire({
+						icon: 'info',
+						title: thisClass.i18n.are_u_sure,
+						showCancelButton: true,
+						showLoaderOnConfirm: true
+					} ).then((result) => {
+						if (result.isConfirmed ) {
+							var formdata = new FormData();
+								formdata.append( 'action', 'futurewordpress/project/action/deletearchives' );
+								formdata.append( 'archive', archive.dataset.archive );
+								formdata.append( 'userid', archive.dataset.userid );
+								formdata.append( '_nonce', thisClass.ajaxNonce );
+								thisClass.sendToServer( formdata );
+						}
+					} );
+				} );
+			} );
+		}
 		submitArchiveFiles() {
 			const thisClass = this;
 			var node = document.querySelector( '.submit-archive-files' ), json;
@@ -522,6 +548,23 @@ console.log(customer.id);
 						}
 					})
 				} );
+			}
+		}
+		trackWpformAjax() {
+			const thisClass = this;var form;
+			// wpformsAjaxSubmitSuccess | wpformsAjaxSubmitActionRequired | wpformsAjaxSubmitFailed | wpformsAjaxSubmitError | wpformsAjaxSubmitCompleted
+			form  = document.querySelector( 'form.wpforms-form' );
+			if( form ) {
+				form.addEventListener( 'wpformsAjaxSubmitSuccess', ( event ) => {
+					// Show success Message
+					Swal.fire( {
+						title: thisClass.i18n.confirming,
+						text: thisClass.i18n.give_your_old_password,
+						icon: 'info',
+					} ).then( (result) => {
+						// if (result.isConfirmed ) {}
+					} )
+				} )
 			}
 		}
 	}

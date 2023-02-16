@@ -91,6 +91,13 @@ class Menus {
 					'type'					=> 'text',
 					'default'				=> ''
 				],
+				[
+					'id' 						=> 'general-archivedelete',
+					'label'					=> __( 'Archive delete', 'we-make-content-crm' ),
+					'description'		=> __( 'Enable archive delete permission on frontend, so that user can delete archive files and data from their profile.', 'we-make-content-crm' ),
+					'type'					=> 'checkbox',
+					'default'				=> ''
+				],
 			]
 		];
 		$args['permalink'] 		= [
@@ -139,10 +146,17 @@ class Menus {
 					'type'					=> 'number',
 					'default'				=> ( date( 'Y' ) + 3 )
 				],
+				[
+					'id' 						=> 'dashboard-headerbg',
+					'label'					=> __( 'Header Background', 'we-make-content-crm' ),
+					'description'		=> __( 'Dashboard header background image url.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> ''
+				],
 			]
 		];
-		$args['docs'] 		= [
-			'title'							=> __( 'Documentation', 'we-make-content-crm' ),
+		$args['links'] 		= [
+			'title'							=> __( 'Links', 'we-make-content-crm' ),
 			'description'				=> __( 'Documentation feature and their links can be change from here. If you leave blank anything then these "Learn More" never display.', 'we-make-content-crm' ) . $this->commontags( true ),
 			'fields'						=> [
 				[
@@ -447,6 +461,13 @@ class Menus {
 			'description'				=> __( 'Stripe payment system configuration process should be do carefully. Here some field is importent to work with no inturrupt. Such as API key or secret key, if it\'s expired on your stripe id, it won\'t work here. New user could face problem fo that reason.', 'we-make-content-crm' ),
 			'fields'						=> [
 				[
+					'id' 						=> 'stripe-cancelsubscription',
+					'label'					=> __( 'Cancellation', 'we-make-content-crm' ),
+					'description'		=> __( 'Enable it to make a possibility to user to cancel subscription from client dashboard.', 'we-make-content-crm' ),
+					'type'					=> 'checkbox',
+					'default'				=> false
+				],
+				[
 					'id' 						=> 'stripe-publishablekey',
 					'label'					=> __( 'Publishable Key', 'we-make-content-crm' ),
 					'description'		=> __( 'The key which is secure, could import into JS, and is safe evenif any thirdparty got those code. Note that, secret key is not a publishable key.', 'we-make-content-crm' ),
@@ -527,6 +548,18 @@ class Menus {
 				'default'				=> ''
 			];
 		}
+		$args['docs'] 		= [
+			'title'							=> __( 'Documentations', 'we-make-content-crm' ),
+			'description'				=> __( 'The workprocess is tring to explain here.', 'we-make-content-crm' ),
+			'fields'						=> [
+				[
+					'id' 						=> 'auth-brifing',
+					'label'					=> __( 'How to setup thank you page?', 'we-make-content-crm' ),
+					'description'		=> sprintf( __( 'first go to %sthis link%s Create or Edit an "Stand Alone" document. Give your thankyou custom page link here %s', 'we-make-content-crm' ), '<a href="'. admin_url( 'admin.php?page=esign-docs&document_status=stand_alone' ) . '" target="_blank">', '</a>', '<img src="' . WEMAKECONTENTCMS_DIR_URI . '/docs/Stand-alone-esign-metabox.PNG' . '" alt="" />' ),
+					'type'					=> 'textcontent'
+				],
+			]
+		];
 		return $args;
 	}
 	/**

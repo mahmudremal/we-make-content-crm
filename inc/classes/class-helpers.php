@@ -39,9 +39,13 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 
 
 		add_filter( 'futurewordpress/project/filter/server/time', [ $this, 'serverTime' ], 10, 2 );
+		add_filter( 'futurewordpress/project/filter/string/random', [ $this, 'generateRandomString' ], 10, 2 );
+
 		add_filter( 'futurewordpress/project/filesystem/filemtime', [ $this, 'filemtime' ], 10, 2 );
 		add_filter( 'futurewordpress/project/filesystem/uploaddir', [ $this, 'uploadDir' ], 10, 2 );
 		add_filter( 'futurewordpress/project/mailsystem/sendmail', [ $this, 'sendMail' ], 10, 1 );
+
+		add_filter( 'futurewordpress/project/notices/manager', [ $this, 'noticeManager' ], 10, 3 );
 		
 		add_action( 'wp_ajax_futurewordpress/project/filesystem/upload', [ $this, 'uploadFile' ], 10, 0 );
 		add_action( 'wp_ajax_nopriv_futurewordpress/project/filesystem/upload', [ $this, 'uploadFile' ], 10, 0 );
@@ -49,6 +53,7 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 		add_action( 'wp_ajax_nopriv_futurewordpress/project/filesystem/remove', [ $this, 'removeFile' ], 10, 0 );
 		add_action( 'admin_post_futurewordpress/project/filesystem/download', [ $this, 'downloadFile' ], 10, 0 );
 		add_action( 'admin_post_nopriv_futurewordpress/project/filesystem/download', [ $this, 'downloadFile' ], 10, 0 );
+
 	}
 	/**
 	 * Get and option value, return default. Default false.
@@ -219,7 +224,7 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 				unset( $countries[ 'IL' ] );
 			}
 		}
-		return ( $specific !== false && isset( $countries[ $specific ] ) ) ? $countries[ $specific ] : $countries;
+		return ( $specific === false ) ? $countries : ( isset( $countries[ $specific ] ) ? $countries[ $specific ] : false );
 	}
 	public function countryFlags( $country ) {
 		$country = empty( $country ) ? false : $country;
@@ -232,7 +237,7 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 			$dashboard_permalink = site_url( $dashboard_permalink );
 			define( 'FUTUREWORDPRESS_PROJECT_DASHBOARDPERMALINK', $dashboard_permalink );
 		}
-		$profile = ( apply_filters( 'futurewordpress/project/system/getoption', 'permalink-userby', 'id' ) == 'id' ) ? FUTUREWORDPRESS_PROJECT_DASHBOARDPERMALINK . '/' . $id : FUTUREWORDPRESS_PROJECT_DASHBOARDPERMALINK . '/' . $user;
+		$profile = ( apply_filters( 'futurewordpress/project/system/getoption', 'permalink-userby', 'id' ) == 'id' ) ? FUTUREWORDPRESS_PROJECT_DASHBOARDPERMALINK . '/' . ( ( $id ) ? $id : 'me' ) : FUTUREWORDPRESS_PROJECT_DASHBOARDPERMALINK . '/' . $user;
 		return $profile . '/profile';
 	}
 	public function visitorIP() {
@@ -244,6 +249,29 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 			$ip = $_SERVER['REMOTE_ADDR'];
 		}
 		return $ip;
+	}
+	public function noticeManager( $action, $type, $data ) {
+		$notices = get_option( 'fwp_we_make_content_admin_notice', [] );
+		if( $action == 'get' ) {return $notices;}
+		if( $action == 'add' ) {$notices[] = (object) $data;update_option( 'fwp_we_make_content_admin_notice', $notices );}
+		if( $action == 'filter' ) {$sortedNotices = [];
+			foreach( $notices as $i => $notice ) {
+				if( $notice->type == $type ) {
+					$sortedNotices[] = $notice;
+				}
+			}
+			return $sortedNotices;
+		}
+	}
+
+	public function generateRandomString( $default, $length = 10 ) {
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $charactersLength = strlen($characters);
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[rand(0, $charactersLength - 1)];
+    }
+    return $randomString;
 	}
 
 }
