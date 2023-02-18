@@ -118,18 +118,23 @@ class Core {
 			// $userinfo[ 'services' ] = isset( $userinfo[ 'services' ] ) ? nl2br( $userinfo[ 'services' ] ) : '';
 			$args = [
 				'display_name'	=> $userdata[ 'display_name' ],
-				'first_name'		=> $userdata[ 'first_name' ],
-				'last_name'			=> $userdata[ 'last_name' ],
-				'user_email'		=> $userdata[ 'email' ],
+				'first_name'		=> ( isset( $userdata[ 'first_name' ] ) && ! empty( $userdata[ 'first_name' ] ) ) ? $userdata[ 'first_name' ] : $userinfo[ 'first_name' ],
+				'last_name'			=> ( isset( $userdata[ 'last_name' ] ) && ! empty( $userdata[ 'last_name' ] ) ) ? $userdata[ 'last_name' ] : $userinfo[ 'last_name' ],
+				'user_email'		=> ( isset( $userdata[ 'email' ] ) && ! empty( $userdata[ 'email' ] ) ) ? $userdata[ 'email' ] : $userinfo[ 'email' ],
 				'meta_input'		=> (array) $userinfo
 			];
-			if( ! empty( $userdata[ 'newpassword' ] ) ) {
-				$args[ 'user_pass' ] = $userdata[ 'newpassword' ]; // wp_hash_password
+			if( isset( $userdata[ 'newpassword' ] ) && ! empty( $userdata[ 'newpassword' ] ) ) {
+				if( $is_edit_profile ) {
+					wp_set_password( $userdata[ 'newpassword' ], $user_id );
+				} else {
+					$args[ 'user_pass' ] = $userdata[ 'newpassword' ]; // wp_hash_password
+				}
 			}
 			
 			if( $is_edit_profile ) {
 				$args[ 'ID' ] = $user_id;
 			}
+			// print_r( $args );wp_die();
 			$is_created = (  $is_edit_profile ) ? wp_update_user( $args ) : wp_insert_user( $args );
 			if ( ! is_wp_error( $is_created ) ) {
 				$msg = [
@@ -341,13 +346,13 @@ class Core {
 			}
 			$userargs = [
 				'ID'							=> $userid,
-				'user_pass'				=> $password
 			];
+			wp_set_password( $password, $userid );
 			$userdata = isset( $_POST[ 'userdata' ] ) ? (array) $_POST[ 'userdata' ] : [];
 			if( isset( $userdata[ 'display_name' ] ) ) {
 				$userargs[ 'display_name' ] = $userdata[ 'display_name' ];
 			}
-			$response = wp_update_user( $userargs );
+			$response = ( count( $userargs ) > 1 ) ? wp_update_user( $userargs ) : false;
 			if( is_wp_error( $response ) ) {
 				wp_send_json_error( $response->get_error_message(), 200 );
 			}
@@ -363,10 +368,7 @@ class Core {
 		}
 		$password = (array) $_POST[ 'password' ];
 		if( isset( $password[ 'new' ] ) && ! empty( $password[ 'new' ] ) && isset( $password[ 'old' ] ) && isset( $password[ 'confirm' ] ) && $password[ 'old' ] == $password[ 'confirm' ] ) {
-			wp_update_user( [
-				'ID'					=> get_current_user_id(),
-				'user_pass'		=> $password[ 'old' ]
-			] );
+			wp_set_password( $password[ 'old' ], get_current_user_id() );
 			// wp_send_json_error( __( 'Password Updated Successfully!', 'we-make-content-crm' ) );
 			set_transient( 'futurewordpress/project/transiant/admin/' . get_current_user_id(), [
 				'type'					=> 'success', // primary | danger | success | warning | info

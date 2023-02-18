@@ -101,7 +101,8 @@ div.wpforms-container-full .wpforms-form .wpforms-field {
   .content .container,
   .content .container .container_inner.page_container_inner,
   .content_inner {
-    background: #fff;
+    background: #ffffff9e;
+    border-radius: 10px;
   }
   div.wpforms-container-full {
     .wpforms-form {
@@ -146,7 +147,9 @@ div.wpforms-container-full .wpforms-form .wpforms-field {
         }
       }
       .wpforms-one-half {
-        width: 48%;
+        @include mq($from: 600px) {
+          width: 48%;
+        }
       }
       .wpforms-field-row {
         width: 100%;
@@ -207,11 +210,22 @@ div.wpforms-container-full .wpforms-form .wpforms-field {
         .wpforms-field-row {
           max-width: unset;
         }
+        @include mq($until: 600px) {
+          margin: auto;
+        }
       }
       textarea.wpforms-field-large {
         border: .5px solid #eee;
         border-radius: 5px;
         border: none;
+      }
+      .wpforms-error-container {
+        padding: 10px;
+        background: #f57272;
+        margin-bottom: 20px;
+        border: none;
+        font-size: 16px;
+        font-weight: 100;
       }
     }
     .wpforms-submit-container {
@@ -233,14 +247,20 @@ div.wpforms-container-full .wpforms-form .wpforms-field {
 }
 
 @media (max-width: 600px) {
-    div.wpforms-container-full .wpforms-form .wpforms-field.wpforms-field-name .wpforms-field-row .wpforms-field-row-block {
-      width: 100% !important;
-    }
-    .fwp-body .wpforms-container-full .wpforms-form .wpforms-one-half {
-      width: 100%;
-      margin: auto;
-    }
-    .fwp-body .wpforms-container-full .wpforms-form .wpforms-one-half:nth-child(2) {
-      margin-top: 20px;
-    }
+  .content .container .container_inner.page_container_inner, .full_page_container_inner {
+    padding: 10px 0 0;
+    margin: auto;
+    width: auto;
+    max-width: 90vw;
+  }
+  div.wpforms-container-full .wpforms-form .wpforms-field.wpforms-field-name .wpforms-field-row .wpforms-field-row-block {
+    width: 100% !important;
+  }
+  .fwp-body .wpforms-container-full .wpforms-form .wpforms-one-half {
+    width: 100%;
+    margin: auto;
+  }
+  .fwp-body .wpforms-container-full .wpforms-form .wpforms-one-half:nth-child(2) {
+    margin-top: 20px;
+  }
 }

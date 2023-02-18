@@ -59,6 +59,7 @@ class Project {
 	public function body_class( $classes ) {
 		$classes = (array) $classes;
 		$classes[] = 'fwp-body';
+		$classes[] = 'is-admin';
 		return $classes;
 	}
 	public function init() {

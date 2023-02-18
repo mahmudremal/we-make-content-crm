@@ -14,22 +14,35 @@ class GoogleDrive {
 	private $accessToken;
 	private $clientSecret;
 	private $refreshToken;
+	private $parentDirectory;
+	private $theFiletoUpload;
+	private $authorizationCode;
 	protected function __construct() {
 		global $wpdb;$this->theTable = $wpdb->prefix . 'fwp_googledrive';
-		$this->clientId = apply_filters( 'futurewordpress/project/system/getoption', 'auth-googleclientid', '719552948296-d14739tknbd33tv16b932pb859kcvums.apps.googleusercontent.com' );
-		$this->clientSecret = apply_filters( 'futurewordpress/project/system/getoption', 'auth-googleclientsecret', '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' );
-		$this->refreshToken = "<REFRESH_TOKEN>";// AIzaSyAvwGtzotd9YWfndpmLJDQCOpqQMsspQro
-		$this->redirectURL = apply_filters( 'futurewordpress/project/socialauth/redirect', '/handle/google', 'google' );
-		$this->accessToken = "<REFRESH_TOKEN>";// AIzaSyAvwGtzotd9YWfndpmLJDQCOpqQMsspQro
+		$this->clientId					= '719552948296-d14739tknbd33tv16b932pb859kcvums.apps.googleusercontent.com'; // apply_filters( 'futurewordpress/project/system/getoption', 'auth-googleclientid', '719552948296-d14739tknbd33tv16b932pb859kcvums.apps.googleusercontent.com' );
+		$this->clientSecret			= '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'; // apply_filters( 'futurewordpress/project/system/getoption', 'auth-googleclientsecret', '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' );
+		$this->refreshToken			= "<REFRESH_TOKEN>";// AIzaSyAvwGtzotd9YWfndpmLJDQCOpqQMsspQro
+		$this->redirectURL			= false;
+		$this->authorizationCode = isset( $_GET[ 'code' ] ) ? $_GET[ 'code' ] : get_user_meta( get_current_user_id(), 'google_auth_code', true );'4/0AWtgzh6sAkiOikwI0NBvmHErOHE4bmzC9KIVvJeNo6VxMaDU7eVrh53SuoqZnnLvoQD1sg';
+		$this->accessToken			= "<REFRESH_TOKEN>";// AIzaSyAvwGtzotd9YWfndpmLJDQCOpqQMsspQro
+		$this->parentDirectory	= "1Rk6Rm-8W43T6BrEQ6z-WoeZyULeG8vFW";// 1MliOhH16m413OmiBGJM90cTmWUcwNUP4
+		$this->theFiletoUpload	= '/home3/wemakeco/public_html/wp-content/uploads/futurewordpress/archive-57-feb-17-2023.zip';
 
 		$this->setup_hooks();
 	}
 	protected function setup_hooks() {
+		add_action( 'init', [ $this, 'init' ], 10, 0 );
 		add_action( 'wp_ajax_futurewordpress/project/action/submitarchives', [ $this, 'submitArchives' ], 10, 0 );
 		add_action( 'wp_ajax_futurewordpress/project/action/deletearchives', [ $this, 'deleteArchives' ], 10, 0 );
 		add_filter( 'futurewordpress/project/filesystem/ziparchives', [ $this, 'zipArchives' ], 10, 2 );
+		
+	}
+	public function init() {
+		$this->redirectURL = apply_filters( 'futurewordpress/project/socialauth/redirect', '/handle/google', 'google' );
+		// print_r( "https://accounts.google.com/o/oauth2/auth?response_type=code&client_id={$this->clientId}&redirect_uri={$this->redirectURL}&scope=" . urlencode( 'https://www.googleapis.com/auth/drive.file' ) . "\r\n" );
 
-		// $this->searchOnDrive( 'a' );
+		// print_r( $this->upload_to_google_drive_full() );
+		// wp_die();
 	}
 	public function upload_file() {
 		// Prepare the file
@@ -171,8 +184,72 @@ class GoogleDrive {
 		$response = json_decode($response);
 		$file = $response->files[0];
 		$fileId = $file->id;
-		print_r( $response );wp_die();
+
+		print_r( [ $this->clientSecret, $response ] );wp_die();
 	}
+	private function uploadToGoogleDrive( $file_path, $access_token, $parent_folder_id = false ) {
+		$parent_folder_id = ( $parent_folder_id ) ? $parent_folder_id : $this->parentDirectory;
+		$url = "https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable";
+		$headers = [
+			"Authorization: Bearer " . $access_token,
+			"Content-Type: application/x-www-form-urlencoded; charset=UTF-8",
+			"X-Upload-Content-Type: application/zip",
+			"X-Upload-Content-Length: " . filesize( $file_path )
+		];
+		$data = [
+			"name" => basename( $file_path ),
+			"parents" => [ $parent_folder_id ]
+		];
+		$json_data = json_encode($data);
+
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $json_data);
+		curl_setopt($ch, CURLOPT_HEADER, true);
+		$response = curl_exec($ch);
+		$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+		curl_close($ch);
+
+		print_r( $response );
+		$location = "";
+		if (preg_match('/location:\s*(\S+)/i', $response, $match)) {
+			$location = trim($match[1]);
+		}
+		if( ! empty( $location ) ) {
+			$ch = curl_init();
+			curl_setopt( $ch, CURLOPT_URL, $location );
+			curl_setopt( $ch, CURLOPT_PUT, true );
+			curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+			curl_setopt( $ch, CURLOPT_HEADER, false );
+			$fh = fopen( $file_path, 'r' );
+			curl_setopt( $ch, CURLOPT_INFILE, $fh );
+			curl_setopt( $ch, CURLOPT_INFILESIZE, filesize( $file_path) );
+			$result = curl_exec( $ch );
+			fclose( $fh );
+			curl_close( $ch );
+			print_r( $result );
+			return $result;
+		}
+
+		return false;
+	}
+	public function serverToDriveUpload() {
+		$file_path = $this->theFiletoUpload;
+		$access_token = $this->get_access_token( '' );
+		$parent_folder_id = $this->parentDirectory;
+		$result = $this->uploadToGoogleDrive( $file_path, $access_token, $parent_folder_id );
+
+		if( $result !== false ) {
+			echo "File uploaded successfully!";
+		} else {
+			echo "Failed to upload file.";
+		}
+
+	}
+	
 
 
 	private function upload_to_google_drive($file, $fileName) {
@@ -207,8 +284,15 @@ class GoogleDrive {
 			return $response;
 		}
 	}
-	private function get_access_token($authorizationCode) {
+	private function get_access_token() {
 		// Set up the cURL request
+		$body = [
+			'code' => $this->authorizationCode,
+			'client_id' => $this->clientId,
+			'client_secret' => $this->clientSecret,
+			'redirect_uri' => $this->redirectURL,
+			'grant_type' => 'authorization_code'
+		];
 		$curl = curl_init();
 		curl_setopt_array( $curl, array(
 			CURLOPT_URL => "https://oauth2.googleapis.com/token",
@@ -219,13 +303,7 @@ class GoogleDrive {
 			CURLOPT_FOLLOWLOCATION => true,
 			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 			CURLOPT_CUSTOMREQUEST => "POST",
-			CURLOPT_POSTFIELDS => array(
-				'code' => $authorizationCode,
-				'client_id' => $this->clientId,
-				'client_secret' => $this->clientSecret,
-				'redirect_uri' => $this->redirectURL,
-				'grant_type' => 'authorization_code'
-			),
+			CURLOPT_POSTFIELDS => http_build_query( $body ),
 			CURLOPT_HTTPHEADER => array(
 				"Content-Type: application/x-www-form-urlencoded"
 			),
@@ -234,6 +312,7 @@ class GoogleDrive {
 		$response = curl_exec($curl);
 		$err = curl_error($curl);
 		curl_close($curl);
+		// print_r( $response );
 		// Check for errors
 		if( $err ) {
 			return "cURL Error #:" . $err;
@@ -245,5 +324,165 @@ class GoogleDrive {
 			}
 			return $response[ 'access_token' ];
 		}
-	}	
+	}
+
+
+	private function getAccessToken() {
+		$body = [
+			'code' 							=> get_user_meta( get_current_user_id(), 'google_auth_code', true ),
+			'client_id' 				=> $this->clientId,
+			'client_secret'			=> $this->clientSecret,
+			'redirect_uri'			=> $this->redirectURL,
+			'grant_type'				=> 'authorization_code'
+		];
+		print_r( $body );
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, 'https://oauth2.googleapis.com/token');
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query( $body ) );
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		$response = curl_exec($ch);
+		curl_close($ch);
+		print_r( $response );wp_die();
+		$accessToken = json_decode($response)->access_token;
+		return $accessToken;
+	}
+	public function uploadZipFile( $zipFilePath ) {
+    $ch = curl_init();
+    $postData = array(
+			'file' => new \CURLFile($zipFilePath)
+		);
+		$headers = array(
+				'Authorization: Bearer ' . $this->getAccessToken(),
+				'Content-Type: multipart/related; boundary=foo_bar_baz'
+		);
+		curl_setopt($ch, CURLOPT_URL, 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart' );
+		curl_setopt($ch, CURLOPT_POST, 1 );
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $postData );
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers );
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true );
+		$response = curl_exec($ch);
+    if (curl_errno($ch)) {
+			$error_msg = curl_error($ch);
+			curl_close($ch);
+			return "cURL Error: " . $error_msg;
+    }
+    curl_close($ch);
+    return $response;
+	}
+
+	public function updateTokens() {
+		$clientId				= $this->clientId;
+		$clientSecret		= $this->clientSecret;
+		$redirectUri		= $this->redirectURL;
+		$code						= $this->authorizationCode;
+
+		$ch = curl_init('https://accounts.google.com/o/oauth2/token');
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
+			'code' => $code,
+			'client_id' => $clientId,
+			'client_secret' => $clientSecret,
+			'redirect_uri' => $redirectUri,
+			'grant_type' => 'authorization_code',
+		)));
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+		$response = curl_exec($ch);
+		curl_close($ch);
+
+		if (!$response) {
+			die('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
+		}
+
+		$responseData = json_decode($response, true);
+
+		print_r( $responseData );
+
+		$this->accessToken = $responseData['access_token'];
+		$this->refreshToken = $responseData['refresh_token'];
+	}
+	public function upload_to_google_drive_full() {
+		// Define variables
+		$client_id				= $this->clientId;
+		$client_secret		= $this->clientSecret;
+		$refresh_token		= $this->refreshToken;
+		$folder_id				= $this->parentDirectory;
+		$file_path				= $this->theFiletoUpload;
+		$access_token			= $this->get_access_token();
+		print_r( [ $access_token ] );return false;
+
+		// Get an access token
+		$url = 'https://oauth2.googleapis.com/token';
+		$data = array(
+				'client_id' => $client_id,
+				'client_secret' => $client_secret,
+				'refresh_token' => $refresh_token,
+				'grant_type' => 'refresh_token'
+		);
+
+		$options = array(
+				'http' => array(
+						'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+						'method' => 'POST',
+						'content' => http_build_query($data),
+				),
+		);
+
+		$context = stream_context_create($options);
+		$result = file_get_contents($url, false, $context);
+
+		if ($result) {
+				$response_data = json_decode($result, true);
+				if (isset($response_data['access_token'])) {
+						$access_token = $response_data['access_token'];
+				}
+		}
+
+		if (!$access_token) {
+			wp_die('Could not get access token');
+		}
+
+		// Upload the file to Google Drive
+		$url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+
+		// Set the file metadata
+		$file_name = basename($file_path);
+		$file_mime_type = mime_content_type($file_path);
+		$file_metadata = array(
+				'name' => $file_name,
+				'parents' => array($folder_id)
+		);
+
+		$data = array(
+				'data' => json_encode($file_metadata),
+				'content' => file_get_contents($file_path),
+				'mimeType' => $file_mime_type,
+		);
+
+		$headers = array(
+				'Authorization: Bearer ' . $access_token,
+				'Content-Type: multipart/related; boundary=foo_bar_baz',
+				'Content-Length: ' . strlen(json_encode($file_metadata)) + filesize($file_path) + 101
+		);
+
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		$response = curl_exec($ch);
+		curl_close($ch);
+
+		if (!$response) {
+			wp_die('Error uploading file');
+		}
+
+		$response_data = json_decode($response, true);
+
+		// Print the file ID of the uploaded file
+		echo 'File ID: ' . $response_data['id'];
+
+	}
 }

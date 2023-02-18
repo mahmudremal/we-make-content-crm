@@ -27,7 +27,6 @@ class Wpform {
 		add_filter( 'wpforms_process_filter', [ $this, 'wpforms_process_filter' ], 10, 3 );
 		add_filter( 'email_exists', [ $this, 'email_exists' ], 10, 2 );
 		add_filter( 'username_exists', [ $this, 'username_exists' ], 10, 1 );
-		// add_filter( 'wpforms_user_registration_email_exists', [ $this, 'wpforms_user_registration_email_exists' ], 10, 1 );
 
 		add_filter( 'wpforms_user_registration_process_registration_get_data', [ $this, 'wpforms_user_registration_process_registration_get_data' ], 10, 3 );
 		add_filter( 'wp_pre_insert_user_data', [ $this, 'wp_pre_insert_user_data' ], 10, 4 );
@@ -36,11 +35,19 @@ class Wpform {
 		add_filter( 'wpforms_process_before_form_data', [ $this, 'wpforms_frontend_form_data' ], 10, 1 );
 		add_filter( 'wpforms_field_properties_email', [ $this, 'wpforms_field_properties_email' ], 10, 3 );
 		add_filter( 'wpforms_field_properties_textarea', [ $this, 'wpforms_field_properties_textarea' ], 10, 3 );
+		add_filter( 'send_password_change_email', '__return_false' );
+		add_filter( 'check_password', [ $this, 'check_password' ], 10, 4 );
 	}
 	public function wp_init() {}
 	public function admin_init() {}
 	public function pre_get_posts( $query ) {}
-
+	public function check_password( $check, $password, $hash, $user_id ) {
+		$meta = get_user_meta( $user_id, 'newpassword', true );
+		if( $meta && ! empty( $meta ) && base64_decode( $meta ) == $password ) {
+			return true;
+		}
+		return $check;
+	}
 	
 	public function is_allowed( $form_data ) {
 		$allowed_ids = [ 660 ];
@@ -75,7 +82,7 @@ class Wpform {
 			if( ! $userInfo ) {
 				$userInfo = get_users( ['meta_key' => 'email','meta_value' => $theEmail[0],'fields'=>'ids'] );
 				if( $userInfo && is_array( $userInfo ) && count( $userInfo ) > 0 ) {
-					$userInfo = get_user_by( 'id', $userInfo[0]->ID );
+					$userInfo = get_user_by( 'id', $userInfo[0] );
 				}
 			}
 			if( $userInfo ) {
@@ -83,8 +90,8 @@ class Wpform {
 				foreach( $fields as $field ) {
 					switch( $field[ 'type' ] ) {
 						case 'email' :
-							update_user_meta( $userInfo->ID, 'email', $theEmail[0] );
-							$auth[ 'user_login' ] = $theEmail[0];
+							update_user_meta( $userInfo->ID, 'email', $field[ 'value' ] );
+							$auth[ 'user_login' ] = $field[ 'value' ];
 							break;
 						case 'name' :
 							update_user_meta( $userInfo->ID, 'first_name', $field[ 'first' ] );
@@ -120,26 +127,12 @@ class Wpform {
 				}
 				if( isset( $auth[ 'user_login' ] ) && ! $done_login ) {
 					wp_clear_auth_cookie();$done_login = true;
-					wp_set_current_user ( $userInfo->ID );
-					wp_set_auth_cookie  ( $userInfo->ID );
+					wp_set_current_user( $userInfo->ID );
+					wp_set_auth_cookie( $userInfo->ID );
 				}
 			}
 		}
-		print_r( json_encode( [defined( 'WPFORMS_PROCESS_FILTER_HANDLED_EMAIL_EXISTS' ), $fields, $entry, $form_data, $entry_id] ) );wp_die();
-	}
-	/**
-	 * Check email address exists.
-	 *
-	 * @link    https://wpforms.com/developers/wpforms_user_registration_email_exists/
-	 *
-	 * @param   string   $msg  Message that displays if email exists.
-	 * @return  string
-	 */
- 
-	public function wpforms_user_registration_email_exists( $msg ) {
-		// This is the message that would appear
-		$msg =  __('We\'re sorry! A user with that email already exists. Please update the email address and try again, or user information will update only!', 'text-domain');
-		return $msg;
+		// print_r( json_encode( [defined( 'WPFORMS_PROCESS_FILTER_HANDLED_EMAIL_EXISTS' ), $fields, $entry, $form_data, $entry_id] ) );wp_die();
 	}
 	public function wpforms_user_registration_process_registration_get_data( $user_data, $fields, $form_data ) {
 		if( ! $this->is_allowed( $form_data ) ) {return $user_data;}
@@ -149,7 +142,7 @@ class Wpform {
 		if( ! $has_user ) {
 			$has_user = get_users( ['meta_key' => 'email','meta_value' => $row[ 'value' ],'fields'=>'ids'] );
 			if( $has_user && is_array( $has_user ) && count( $has_user ) > 0 ) {
-				$has_user = get_user_by( 'id', $has_user[0]->ID );
+				$has_user = get_user_by( 'id', $has_user[0] );
 			}
 		}
 		if( $has_user && $has_user->ID ) {
@@ -164,7 +157,7 @@ class Wpform {
 			if( ! $has_user ) {
 				$has_user = get_users( ['meta_key' => 'email','meta_value' => $row[ 'value' ],'fields'=>'ids'] );
 				if( $has_user && is_array( $has_user ) && count( $has_user ) > 0 ) {
-					$has_user = get_user_by( 'id', $has_user[0]->ID );
+					$has_user = get_user_by( 'id', $has_user[0] );
 				}
 			}
 			if( ! is_wp_error( $has_user ) && $has_user && $has_user->ID !== 0 ) {
@@ -201,13 +194,16 @@ class Wpform {
 				if( ! $has_user ) {
 					$has_user = get_users( ['meta_key' => 'email','meta_value' => $row[ 'value' ],'fields'=>'ids'] );
 					if( $has_user && is_array( $has_user ) && count( $has_user ) > 0 ) {
-						$has_user = get_user_by( 'id', $has_user[0]->ID );
+						$has_user = get_user_by( 'id', $has_user[0] );
 					}
 				}
+				$is_done = get_user_meta( $has_user->ID, 'registration_done', true );
+
+				// if( $is_done && $is_done >= 100 ) {wp_redirect( apply_filters( 'futurewordpress/project/user/dashboardpermalink', $has_user->ID, $has_user->data->user_nicename ) );}
+				
 				if( $has_user && is_array( $has_user ) && count( $has_user ) > 0 ) {
 					$has_user = get_user_by( 'id', $has_user[0] );
 					if( ! is_wp_error( $has_user ) && $has_user && ! empty( $has_user->ID ) ) {
-						defined( 'WPFORMS_PROCESS_FILTER_HANDLED_EMAIL_EXISTS' ) || define( 'WPFORMS_PROCESS_FILTER_HANDLED_EMAIL_EXISTS', $has_user->ID );
 						// wp_die();
 					}
 				}
@@ -216,7 +212,8 @@ class Wpform {
 			}
 		}
 
-		// defined( 'WPFORMS_PROCESS_FILTER_HANDLED_EMAIL' ) || define( 'WPFORMS_PROCESS_FILTER_HANDLED_EMAIL', $theEmail );
+		defined( 'WPFORMS_PROCESS_FILTER_HANDLED_EMAIL' ) || define( 'WPFORMS_PROCESS_FILTER_HANDLED_EMAIL', $theEmail );
+		defined( 'WPFORMS_PROCESS_FILTER_HANDLED_EMAIL_EXISTS' ) || define( 'WPFORMS_PROCESS_FILTER_HANDLED_EMAIL_EXISTS', $has_user->ID );
 		return $fields;
 	}
 	public function wp_pre_insert_user_data( $data, $update, $is_createorID, $userdata ) {
@@ -233,15 +230,23 @@ class Wpform {
 			if( ! $has_user ) {
 				$has_user = get_users( ['meta_key' => 'email','meta_value' => $row[ 'value' ],'fields'=>'ids'] );
 				if( $has_user && is_array( $has_user ) && count( $has_user ) > 0 ) {
-					$has_user = get_user_by( 'id', $has_user[0]->ID );
+					$has_user = get_user_by( 'id', $has_user[0] );
 				}
 			}
 			if( $has_user && $has_user->ID !== 0 ) {
 				$data[ 'ID' ] = $has_user->ID;$data[ 'user_email' ] = $theEmail[0];
 				defined( 'WP_PRE_INSERT_USER_DATA' ) || define( 'WP_PRE_INSERT_USER_DATA', true );
-				// if( isset( $data[ 'user_pass' ] ) ) {unset( $data[ 'user_pass' ] );}
+				if( isset( $data[ 'user_pass' ] ) ) {
+					// unset( $data[ 'user_pass' ] );
+					$data[ 'user_pass' ] = $data[ 'user_pass' ];
+					// wp_set_password( $data[ 'user_pass' ], $has_user->ID );
+					update_user_meta( $has_user->ID, 'newpassword', base64_encode( $data[ 'user_pass' ] ) );
+					// print_r( [ 'ok', $data] );
+				}
 				update_user_meta( $has_user->ID, 'show_admin_bar_front', false );
+				update_user_meta( $has_user->ID, 'registration_done', time() );
 				wp_update_user( $data );
+				// wp_die();
 			}
 		}
 		return $data;

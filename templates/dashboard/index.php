@@ -54,6 +54,9 @@ else :
     ], $title );
     return $title;
   }, 99, 1 );
+  if( $userInfo->meta->show_admin_bar_front === true ) {
+    update_user_meta( $userInfo->ID, 'show_admin_bar_front', 'false' );
+  }
   // echo '<pre style="display: none;">';print_r( $userInfo );echo '</pre>';
   get_header();
   ?>
@@ -374,7 +377,7 @@ else :
                 $payments[ 'data' ] = (array) isset( $payments[ 'data' ] ) ? $payments[ 'data' ] : [];
                 ?>
 
-                <div class="<?php echo esc_attr( ( count( $payments ) > 0 ) ? 'custom-table-effect' : '' ); ?> table-responsive  border rounded">
+                <div class="<?php echo esc_attr( ( count( $payments[ 'data' ] ) > 0 ) ? 'custom-table-effect' : '' ); ?> table-responsive  border rounded">
                   <table class="table mb-0" id="datatable" data-toggle="data-table">
                     <thead>
                       <tr class="bg-white">

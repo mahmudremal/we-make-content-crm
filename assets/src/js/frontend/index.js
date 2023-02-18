@@ -54,6 +54,7 @@ console.log(customer.id);
 			this.regWidget();this.handleTabHref();
 			this.submitArchiveFiles();this.trackWpformAjax();
 			this.setup_hooks();this.deleteArchive();
+			this.handlePayCardError();
 			// this.fetchDataWidthContract();
 			// this.accordion();
 			// console.log( 'frontend init...' );
@@ -81,57 +82,61 @@ console.log(customer.id);
 			} );
 		}
 		cancelSubscription() {
-			const thisClass = this;var node;
-			node = document.querySelector( '.fwp-sweetalert-field:not([data-handled])' );
-			if( node ) {
-				node.addEventListener( 'click', ( event ) => {
-					const swalWithBootstrapButtons = Swal.mixin({
-						customClass: {
-							confirmButton			: 'btn btn-danger',
-							cancelButton			: 'btn btn-primary'
-						},
-						buttonsStyling: false
-					})
-					swalWithBootstrapButtons.fire({
-						title: 'Attantion!',
-						text: thisClass.i18n.confirm_cancel_subscribe,
-						icon: 'warning',
-						confirmButtonText: thisClass.i18n.i_confirm_it,
-						// input: 'text',
-						// inputAttributes: {
-						//   autocapitalize: 'off'
-						// },
-						showCancelButton: true,
-						showLoaderOnConfirm: true,
-						preConfirm: (login) => {
-						  return fetch( thisClass.ajaxUrl + `?action=futurewordpress/project/action/cancelsubscription&userid=` + node.dataset.userid )
-							.then(response => {
-							  if (!response.ok) {
-								throw new Error(response.statusText)
-							  }
-							  return response.json()
+			const thisClass = this;var node, theInterval;
+			theInterval = setInterval(() => {
+				node = document.querySelector( '.fwp-sweetalert-field:not([data-handled])' );
+				if( node ) {
+					node.dataset.handled = true;
+					node.addEventListener( 'click', ( event ) => {
+						const swalWithBootstrapButtons = Swal.mixin({
+							customClass: {
+								confirmButton			: 'btn btn-danger',
+								cancelButton			: 'btn btn-primary'
+							},
+							buttonsStyling: false
+						})
+						swalWithBootstrapButtons.fire({
+							title: 'Attantion!',
+							text: thisClass.i18n.confirm_cancel_subscribe,
+							icon: 'warning',
+							confirmButtonText: thisClass.i18n.i_confirm_it,
+							// input: 'text',
+							// inputAttributes: {
+							//   autocapitalize: 'off'
+							// },
+							showCancelButton: true,
+							showLoaderOnConfirm: true,
+							preConfirm: (login) => {
+								return fetch( thisClass.ajaxUrl + `?action=futurewordpress/project/action/cancelsubscription&userid=` + node.dataset.userid )
+								.then(response => {
+									if (!response.ok) {
+									throw new Error(response.statusText)
+									}
+									return response.json()
+								})
+								.catch(error => {
+									Swal.showValidationMessage(
+									thisClass.i18n.request_failed + `: ${error}`
+									)
+								})
+							},
+							allowOutsideClick: () => !Swal.isLoading()
+							}).then((result) => {
+							if (result.isConfirmed ) {
+								Swal.fire({
+								// title: `${result.value.login}'s avatar`,
+								// imageUrl: result.value.avatar_url: 
+								title: ( result.value.success ) ? 'Success' : 'Failed',icon: ( result.value.success ) ? 'success' : 'error',
+								text: result.value?.data??'Request sent but doesn\'t update anything.',
+								}).then( () => {
+									location.reload();
+								} )
+							}
 							})
-							.catch(error => {
-							  Swal.showValidationMessage(
-								thisClass.i18n.request_failed + `: ${error}`
-							  )
-							})
-						},
-						allowOutsideClick: () => !Swal.isLoading()
-					  }).then((result) => {
-						if (result.isConfirmed ) {
-						  Swal.fire({
-							// title: `${result.value.login}'s avatar`,
-							// imageUrl: result.value.avatar_url: 
-							title: ( result.value.success ) ? 'Success' : 'Failed',icon: ( result.value.success ) ? 'success' : 'error',
-							text: result.value?.data??'Request sent but doesn\'t update anything.',
-						  }).then( () => {
-								location.reload();
-							} )
-						}
-					  })
-				} );
-			}
+					} );
+				}
+			}, 1000 );
+				
 		}
 		changePassword() {
 			const thisClass = this;var node;
@@ -176,63 +181,72 @@ console.log(customer.id);
 			}
 		}
 		toOpenEdit() {
-			const thisClass = this;var i, el;
-			document.querySelectorAll( '[id^=basic-editopen-]' ).forEach( ( pen ) => {
-				pen.addEventListener( 'click', ( e ) => {
-					el = pen.previousElementSibling;
-					if( el.hasAttribute( 'disabled' ) ) {
-						el.removeAttribute( 'disabled' );el.classList.remove( 'form-control-solid' );
-						i = pen.querySelector( 'i' );if( i ) {i.classList.remove( 'fa-pencil-alt' );i.classList.add( 'fa-circle-notch' );}
-						if( el.parentElement ) {el.parentElement.classList.remove( 'input-group-solid' );}
-						// fa-circle-notch | fa-times | afa-check | fa-spinner  | 'fa-spin'
-					} else {}
+			const thisClass = this;var i, el, theInterval;
+			theInterval = setInterval(() => {
+				document.querySelectorAll( '[id^=basic-editopen-]:not([data-handled])' ).forEach( ( pen ) => {
+					pen.dataset.handled = true;
+					pen.addEventListener( 'click', ( e ) => {
+						el = pen.previousElementSibling;
+						if( el.hasAttribute( 'disabled' ) ) {
+							el.removeAttribute( 'disabled' );el.classList.remove( 'form-control-solid' );
+							i = pen.querySelector( 'i' );if( i ) {i.classList.remove( 'fa-pencil-alt' );i.classList.add( 'fa-circle-notch' );}
+							if( el.parentElement ) {el.parentElement.classList.remove( 'input-group-solid' );}
+							// fa-circle-notch | fa-times | afa-check | fa-spinner  | 'fa-spin'
+						} else {}
+					} );
 				} );
-			} );
+			}, 1000 );
 		}
 		inputEventListner() {
-			const thisClass = this;var i, el, userid;
-			userid = document.querySelector( 'input[type="hidden"][name="userid"]' );
-			if( userid ) {userid = userid.value;} else {userid = false;}
-			document.querySelectorAll( 'input' ).forEach( ( input ) => {
-				input.addEventListener( 'change', ( e ) => {
-					el = input.nextElementSibling;
-					// console.log( [ el, input, this ] );
-					if( el && el.classList.contains( 'input-group-text' ) ) {
-						// input.setAttribute( 'disabled' );
-						i = el.querySelector( 'i' );
-						if( i ) {i.classList.remove( 'fa-circle-notch' );i.classList.add( 'fa-spinner', 'fa-spin' );}
-						//  | fa-times | fa-check |   | 
-						var formdata = new FormData();
-						formdata.append( 'action', 'futurewordpress/project/action/singlefield' );
-						formdata.append( 'field', input.name );
-						formdata.append( 'value', input.value );
-						formdata.append( 'userid', userid );
-						formdata.append( '_nonce', thisClass.ajaxNonce );
-						thisClass.sendToServer( formdata, (i)?i:false );
-					}
+			const thisClass = this;var i, el, userid, theInterval;
+			theInterval = setInterval(() => {
+				userid = document.querySelector( 'input[type="hidden"][name="userid"]:not([data-handled])' );
+				if( userid ) {userid.dataset.handled = true;userid = userid.value;} else {userid = false;}
+				document.querySelectorAll( 'input:not([data-handled])' ).forEach( ( input ) => {
+					input.dataset.handled = true;
+					input.addEventListener( 'change', ( e ) => {
+						el = input.nextElementSibling;
+						// console.log( [ el, input, this ] );
+						if( el && el.classList.contains( 'input-group-text' ) ) {
+							// input.setAttribute( 'disabled' );
+							i = el.querySelector( 'i' );
+							if( i ) {i.classList.remove( 'fa-circle-notch' );i.classList.add( 'fa-spinner', 'fa-spin' );}
+							//  | fa-times | fa-check |   | 
+							var formdata = new FormData();
+							formdata.append( 'action', 'futurewordpress/project/action/singlefield' );
+							formdata.append( 'field', input.name );
+							formdata.append( 'value', input.value );
+							formdata.append( 'userid', userid );
+							formdata.append( '_nonce', thisClass.ajaxNonce );
+							thisClass.sendToServer( formdata, (i)?i:false );
+						}
+					} );
 				} );
-			} );
+			}, 1000 );
 		}
 		toggleStatus() {
-			const thisClass = this;var userid;
-			userid = document.querySelector( 'input[type="hidden"][name="userid"]' );
-			if( userid ) {userid = userid.value;} else {userid = false;}
-			document.querySelectorAll( '.fwp-form-checkbox-pause-subscribe' ).forEach( ( el, ei ) => {
-				document.body.addEventListener( 'subscription-status-on subscription-status-off', () => {
-					Swal.fire( { position: 'top-end', icon: 'success', title: ( el.checked ) ? thisClass.i18n.you_paused : thisClass.i18n.you_un_paused, showConfirmButton: false, timer: 3500 } );
+			const thisClass = this;var userid, theInterval;
+			theInterval = setInterval(() => {
+				userid = document.querySelector( 'input[type="hidden"][name="userid"]:not([data-handled])' );
+				if( userid ) {userid.dataset.handled = true;userid = userid.value;} else {userid = false;}
+				document.querySelectorAll( '.fwp-form-checkbox-pause-subscribe:not([data-handled])' ).forEach( ( el, ei ) => {
+					el.dataset.handled = true;
+					document.body.addEventListener( 'subscription-status-on subscription-status-off', () => {
+						Swal.fire( { position: 'top-end', icon: 'success', title: ( el.checked ) ? thisClass.i18n.you_paused : thisClass.i18n.you_un_paused, showConfirmButton: false, timer: 3500 } );
+					} );
+					
+					el.addEventListener( 'change', ( event ) => {
+						var formdata = new FormData();
+							formdata.append( 'action', 'futurewordpress/project/action/singlefield' );
+							formdata.append( 'field', el.name );
+							formdata.append( 'value', ( el.checked ) ? 'on' : 'off' );
+							formdata.append( 'userid', userid );
+							formdata.append( '_nonce', thisClass.ajaxNonce );
+							thisClass.sendToServer( formdata );
+							// toast.show({title: ( el.checked ) ? thisClass.i18n.you_paused : thisClass.i18n.you_un_paused, position: 'topright', type: ( el.checked ) ? 'info' : 'alert' });
+					} );
 				} );
-				
-				el.addEventListener( 'change', ( event ) => {
-					var formdata = new FormData();
-						formdata.append( 'action', 'futurewordpress/project/action/singlefield' );
-						formdata.append( 'field', el.name );
-						formdata.append( 'value', ( el.checked ) ? 'on' : 'off' );
-						formdata.append( 'userid', userid );
-						formdata.append( '_nonce', thisClass.ajaxNonce );
-						thisClass.sendToServer( formdata );
-						// toast.show({title: ( el.checked ) ? thisClass.i18n.you_paused : thisClass.i18n.you_un_paused, position: 'topright', type: ( el.checked ) ? 'info' : 'alert' });
-				} );
-			} );
+			}, 1000 );
 		}
 		accordion() {
 			document.querySelectorAll( '.accordion' ).forEach( ( al, ai ) => {
@@ -257,16 +271,18 @@ console.log(customer.id);
 		
 		}
 		passwordToggle() {
-			document.querySelectorAll( '.input-group-text.password-toggle' ).forEach( ( el, ei ) => {
-				el.addEventListener( 'click', ( event ) => {
-						el.classList.toggle( 'showing' );
-						ei = el.nextElementSibling;
-						if( ei ) {
-								ei.type = ( ei.type == 'text' ) ? 'password' : 'text';
-						}
+			var theInterval = setInterval(() => {
+				document.querySelectorAll( '.input-group-text.password-toggle:not([data-handled])' ).forEach( ( el, ei ) => {
+					el.dataset.handled = true;
+					el.addEventListener( 'click', ( event ) => {
+							el.classList.toggle( 'showing' );
+							ei = el.nextElementSibling;
+							if( ei ) {
+									ei.type = ( ei.type == 'text' ) ? 'password' : 'text';
+							}
+					} );
 				} );
-			} );
-		
+			}, 1000 );
 		}
 		fetchDataWidthContract() {
 			document.querySelectorAll( '.document-sign-page *' ).forEach( ( e ) => {
@@ -566,6 +582,37 @@ console.log(customer.id);
 					} )
 				} )
 			}
+		}
+		handlePayCardError() {
+			var interval;
+			interval = setInterval(() => {
+				document.querySelectorAll( '.wpforms-error-container:not([data-handled])' ).forEach( ( e ) => {
+					e.dataset.handled = true;
+					if( e.innerText.includes( 'Credit Card Payment Error' ) ) {
+						var selector = '.wpforms-container-full .wpforms-form .wpforms-page-indicator.connector .wpforms-page-indicator-page', tabs = document.querySelectorAll( selector ), active = document.querySelector( selector + '.active' ),
+						container = document.querySelectorAll( 'div.wpforms-container-full .wpforms-form .wpforms-field-container .wpforms-page' ), submit;
+						if( active ) {
+							active.classList.remove( 'active' );
+							active.querySelector( '.wpforms-page-indicator-page-number' ).setAttribute( 'style', '' );
+							active.querySelector( '.wpforms-page-indicator-page-triangle' ).setAttribute( 'style', '' );
+							tabs[ ( tabs.length - 1 ) ].classList.add( 'active' );
+							tabs[ ( tabs.length - 1 ) ].querySelector( '.wpforms-page-indicator-page-number' ).style.backgroundColor = '#72b239';
+							tabs[ ( tabs.length - 1 ) ].querySelector( '.wpforms-page-indicator-page-triangle' ).style.borderTopColor = '#72b239';
+						}
+						else {console.log( 'error 2' );}
+						if( container.length >= 1 ) {
+							container.forEach( ( c ) => {
+								c.style.display = 'none';
+							} );
+							container[ ( container.length - 1 ) ].style.display = 'block';
+						}
+						else {console.log( 'error 3' );}
+						submit = document.querySelector( '.wpforms-submit-container' );
+						if( submit ) {submit.style.display = 'block';}
+					}
+					else {console.log( 'This error is not payment issue detected.' );}
+				} );
+			}, 100 );
 		}
 	}
 	new FutureWordPress_Frontend();

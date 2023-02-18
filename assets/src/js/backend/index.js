@@ -4,7 +4,10 @@ import Swal from "sweetalert2";
 import { toast } from 'toast-notification-alert';
 import flatpickr from "flatpickr";
 // import ClassicEditor from '@ckeditor5/ckeditor5-editor-classic/src/classiceditor';
-
+// import tinymce from 'tinymce';
+// import 'tinymce/themes/silver'; // you can use any theme you like
+// import 'tinymce/plugins/paste'; // you can use any plugin you need
+import Quill from "quill";
 
 ( function ( $ ) {
 	class FWPListivoBackendJS {
@@ -42,6 +45,7 @@ import flatpickr from "flatpickr";
 			this.sendRegLink();this.profileImgUpload();
 			this.printADiv();this.deletePayment();
 			this.deleteArchive();this.dropDownToggle();
+			this.Quill();// this.tinyMCE();
 		}
 		apex() {
 			var options = {
@@ -359,6 +363,42 @@ import flatpickr from "flatpickr";
 					toast.show({title: 'Inline Editor not properly Loaded.', position: 'bottomright', type: 'warn'});
         } );
 			} );
+		}
+		tinyMCE() {
+			document.querySelectorAll( '[data-tinymce]:not([data-handled])' ).forEach( ( el ) => {
+				el.dataset.handled = true;el.id = ( el.id ) ? el.id : 'tinymce-instance' + Math.random();
+				
+				// tinymce.init({
+				// 	selector: el.id,
+				// 	// plugins: 'paste',
+				// 	// toolbar: 'paste',
+				// 	// paste_as_text: true, // this option removes any formatting when pasting content into the editor
+				// 	// other options
+				// });
+			} );
+		}
+		Quill() {
+			var nodes, css, js, textarea, options;
+			nodes = document.querySelectorAll( '[data-tinymce]:not([data-handled])' );
+			nodes.forEach( ( el ) => {
+				el.dataset.handled = true;textarea = el.value;
+				options = {
+					debug: 'info',
+					modules: {
+						toolbar: true
+					},
+					placeholder: textarea,
+					readOnly: false,
+					theme: 'snow'
+				};
+				var quill = new Quill( el, options );
+				quill.root.style.height = '300px';
+				quill.setContents( quill.clipboard.convert( textarea ) );
+			} );
+			if( nodes.length >= 1 ) {
+				css = document.createElement( 'link' );css.rel = 'stylesheet';css.href = 'https://cdn.quilljs.com/1.3.6/quill.snow.css';document.head.appendChild( css );
+				// js = document.createElement( 'script' );js.type = 'text/javascript';js.src = 'https://cdn.quilljs.com/1.3.6/quill.core.js';document.body.appendChild( js );
+			}
 		}
 		
 	}

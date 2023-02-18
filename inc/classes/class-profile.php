@@ -27,6 +27,7 @@ class Profile {
 		add_action( 'wp_ajax_futurewordpress/project/filesystem/uploadavater', [ $this, 'uploadAvater' ], 10, 0 );
 
 		add_filter( 'login_redirect', [ $this, 'login_redirect' ], 10, 0 );
+		add_action( 'after_setup_theme', [ $this, 'remove_admin_bar' ], 10, 0 );
 	}
 	public function get_avatar( $avatar, $id_or_email, $size, $default, $alt ) {
 		$user = false;
@@ -128,5 +129,10 @@ class Profile {
 		$who = 'me'; // isset( $_POST['log'] ) ? strtolower( sanitize_user( $_POST['log'] ) ) : 'me';
     $redirect_to = apply_filters( 'futurewordpress/project/user/dashboardpermalink', false, $who );
     return $redirect_to;
+	}
+	public function remove_admin_bar() {
+		if( ! current_user_can( 'administrator' ) && ! is_admin() ) {
+			show_admin_bar( false );
+		}
 	}
 }

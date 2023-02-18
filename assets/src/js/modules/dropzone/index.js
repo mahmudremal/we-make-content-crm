@@ -53,20 +53,23 @@ import { toast } from 'toast-notification-alert';
       }
     }
 		initDropZone() {
-			const thisClass = this;var mapInterval, zones, dropzone, args;
+			const thisClass = this;var theInterval, zones, dropzone, args;
       Dropzone.autoDiscover = false;thisClass.dropzones = [];
       args = thisClass.getOptions();
-      zones = document.querySelectorAll( thisClass.selector );
-      // console.log( zones );
-      if( zones.length >= 1 ) {
-        // zones.forEach( function( e, i ) {
-          if( zones[0].dataset.config ) {args = args.extend( JSON.parse( zones[0].dataset.config ) );}
-          dropzone = new Dropzone( thisClass.selector, args );
-          thisClass.dropzones.push( { order: 'i', elem: 'e', zone: dropzone } );
-          thisClass.initHooks( dropzone );
-          // console.log( dropzone );
-        // } );
-      }
+      theInterval = setInterval(() => {
+        zones = document.querySelectorAll( thisClass.selector + ':not([data-handled])' );
+        // console.log( zones );
+        // if( zones.length >= 1 ) {
+          zones.forEach( function( zone, i ) {
+            zone.dataset.handled = true;
+            if( zone.dataset.config ) {args = args.extend( JSON.parse( zone.dataset.config ) );}
+            dropzone = new Dropzone( thisClass.selector, args );
+            thisClass.dropzones.push( { order: 'i', elem: 'e', zone: dropzone } );
+            thisClass.initHooks( dropzone );
+            // console.log( dropzone );
+          } );
+        // }
+      }, 1500 );
 		}
     previewTemplate() {
       return (`

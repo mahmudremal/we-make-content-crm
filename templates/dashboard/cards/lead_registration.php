@@ -5,16 +5,21 @@
  * @package WeMakeContentCMS
  */
 $userInfo = get_user_by( 'id', hex2bin( get_query_var( 'lead_registration' ) ) );
-// if( is_user_logged_in() ) {
-//   $user_slug = apply_filters( 'futurewordpress/project/system/getoption', 'permalink-dashboard', 'dashboard' ) . '/' . ( ( apply_filters( 'futurewordpress/project/system/getoption', 'permalink-userby', 'id' ) == 'id' ) ? $userInfo->ID : $userInfo->data->user_login );
-//   wp_redirect( site_url( $user_slug ) );
-// }
+if( is_user_logged_in() ) {
+  $user_slug = apply_filters( 'futurewordpress/project/system/getoption', 'permalink-dashboard', 'dashboard' ) . '/' . ( ( apply_filters( 'futurewordpress/project/system/getoption', 'permalink-userby', 'id' ) == 'id' ) ? $userInfo->ID : $userInfo->data->user_login );
+  wp_redirect( site_url( $user_slug ) );
+}
 // $_SESSION[ 'current-lead' ] = $userInfo->ID;
 if( get_transient( '_lead_user_registration-' . apply_filters( 'futurewordpress/project/user/visitorip', '' ) ) ) {
   delete_transient( '_lead_user_registration-' . apply_filters( 'futurewordpress/project/user/visitorip', '' ) );
 }
 set_transient( '_lead_user_registration-' . apply_filters( 'futurewordpress/project/user/visitorip', '' ), $userInfo->ID, 7200 );
 // if( function_exists( 'setcookie' ) ) {setcookie( '_lead_user_registration', $userInfo->ID, time()+31556926 );}
+
+$is_done = get_user_meta( $userInfo->ID, 'registration_done', true );
+if( $is_done && $is_done >= 100 ) {
+  wp_redirect( apply_filters( 'futurewordpress/project/user/dashboardpermalink', $userInfo->ID, $userInfo->data->user_nicename ) );
+}
 
 $regLink = get_user_meta( $userInfo->ID, 'contract_type', true );
 $regLink = apply_filters( 'futurewordpress/project/system/getoption', 'regis-link-url-' . $regLink, false );

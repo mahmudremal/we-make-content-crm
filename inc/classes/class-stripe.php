@@ -23,6 +23,8 @@ class Stripe {
 	protected function __construct() {
 		// Replace with your own Stripe secret key
 		// sk_test_51MYvdBI8VOGXMyoFiYpojuTUhvmS1Cxwhke4QK6jfJopnRN4fT8Qq6sy2Rmf2uvyHBtbafFpWVqIHBFoZcHp0vqq00HaOBUh1P
+		// pk_test_51LUu8gCBz3oLWOMl7XCRKB11tJrH9jByvD14FWXgD3jRrD5PO2Lzpwoaf0rhprQOS5ghTqUQKa61OAY2IJwU70TR00fPjGno9D
+		// sk_test_51LUu8gCBz3oLWOMlRLD2MrYZDhsU0gzmNGcqFouh5vXboLGsylT1MGx5t0UKYsHABS2T67KXcYgjgKNZRig1K42600z53h5FzU
 		// load class.
 		add_action( 'init', [ $this, 'setup_hooks' ], 10, 0 );
 	}
