@@ -54,7 +54,7 @@ console.log(customer.id);
 			this.regWidget();this.handleTabHref();
 			this.submitArchiveFiles();this.trackWpformAjax();
 			this.setup_hooks();this.deleteArchive();
-			this.handlePayCardError();
+			this.handlePayCardError();this.selectRegistration();
 			// this.fetchDataWidthContract();
 			// this.accordion();
 			// console.log( 'frontend init...' );
@@ -200,8 +200,8 @@ console.log(customer.id);
 		inputEventListner() {
 			const thisClass = this;var i, el, userid, theInterval;
 			theInterval = setInterval(() => {
-				userid = document.querySelector( 'input[type="hidden"][name="userid"]:not([data-handled])' );
-				if( userid ) {userid.dataset.handled = true;userid = userid.value;} else {userid = false;}
+				userid = document.querySelector( 'input[type="hidden"][name="userid"]' );
+				if( userid ) {userid = userid.value;} else {userid = false;}
 				document.querySelectorAll( 'input:not([data-handled])' ).forEach( ( input ) => {
 					input.dataset.handled = true;
 					input.addEventListener( 'change', ( e ) => {
@@ -226,9 +226,9 @@ console.log(customer.id);
 		}
 		toggleStatus() {
 			const thisClass = this;var userid, theInterval;
-			theInterval = setInterval(() => {
-				userid = document.querySelector( 'input[type="hidden"][name="userid"]:not([data-handled])' );
-				if( userid ) {userid.dataset.handled = true;userid = userid.value;} else {userid = false;}
+			// theInterval = setInterval(() => {
+				userid = document.querySelector( 'input[type="hidden"][name="userid"]' );
+				if( userid ) {userid = userid.value;} else {userid = false;}
 				document.querySelectorAll( '.fwp-form-checkbox-pause-subscribe:not([data-handled])' ).forEach( ( el, ei ) => {
 					el.dataset.handled = true;
 					document.body.addEventListener( 'subscription-status-on subscription-status-off', () => {
@@ -243,10 +243,9 @@ console.log(customer.id);
 							formdata.append( 'userid', userid );
 							formdata.append( '_nonce', thisClass.ajaxNonce );
 							thisClass.sendToServer( formdata );
-							// toast.show({title: ( el.checked ) ? thisClass.i18n.you_paused : thisClass.i18n.you_un_paused, position: 'topright', type: ( el.checked ) ? 'info' : 'alert' });
 					} );
 				} );
-			}, 1000 );
+			// }, 1000 );
 		}
 		accordion() {
 			document.querySelectorAll( '.accordion' ).forEach( ( al, ai ) => {
@@ -613,6 +612,21 @@ console.log(customer.id);
 					else {console.log( 'This error is not payment issue detected.' );}
 				} );
 			}, 100 );
+		}
+		selectRegistration() {
+			const thisClass = this;var theInterval, select;
+			select = document.querySelector( '.fwp-select-registration-type-to-proceed' );
+			if( select ) {
+				select.addEventListener( 'change', ( event ) => {
+					var formdata = new FormData();
+						formdata.append( 'action', 'futurewordpress/project/action/selecttoregister' );
+						formdata.append( 'field', select.name );
+						formdata.append( 'value', select.value );
+						formdata.append( 'userid', select.dataset.userid );
+						formdata.append( '_nonce', thisClass.ajaxNonce );
+						thisClass.sendToServer( formdata );
+				} );
+			}
 		}
 	}
 	new FutureWordPress_Frontend();

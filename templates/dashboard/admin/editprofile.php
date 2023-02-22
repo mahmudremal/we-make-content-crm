@@ -139,8 +139,8 @@ $is_edit_profile = ( ! empty( $args[ 'split' ][2] ) );
                     </div> -->
                     <div class="form-group">
                         <label class="form-label"><?php esc_html_e( 'Select Registration Link:', 'we-make-content-crm' ); ?></label>
-                        <select name="userinfo[contract_type]" class="selectpicker form-control" data-style="py-0" id="contract_type">
-                            <option><?php esc_html_e( 'Select a type', 'we-make-content-crm' ); ?></option>
+                        <select name="userinfo[contract_type]" class="selectpicker form-control" data-style="py-0" id="contract_type" data-current="<?php echo esc_attr( $userInfo->meta->contract_type ); ?>">
+                            <option value=""><?php esc_html_e( 'Select a type', 'we-make-content-crm' ); ?></option>
                             <?php foreach( $contractForms as $contract_key => $contract_text ) : ?>
                                 <option value="<?php echo esc_attr( $contract_key ); ?>" <?php echo esc_attr( ( $contract_key == $userInfo->meta->contract_type ) ? 'selected' : '' ); ?>><?php echo esc_html( $contract_text ); ?></option>
                             <?php endforeach; ?>

@@ -34,6 +34,8 @@ import Quill from "quill";
 				sent_passreset						: 'Password reset link sent Successfully!',
 				retainer_zero							: 'Retainer Amount Zero',
 				retainer_zerowarn					: 'You must set retainer amount before send a registration email.',
+				selectcontract						: 'Select Contract',
+				selectcontractwarn				: 'Please choose a contract to send the registration link. Once you have selected a contract and updated the form, you will be able to send the registration link.',
 				...i18n
 			}
 			this.setup_hooks();
@@ -140,7 +142,7 @@ import Quill from "quill";
 			// }, 3000 );
 		}
 		sendRegLink() {
-			const thisClass = this;var theInterval, selector, lead, retainer;
+			const thisClass = this;var theInterval, selector, lead, retainer, contract;
 			// theInterval = setInterval( () => {
 				document.querySelectorAll( '.lead-send-registration:not([data-handled])' ).forEach( ( el, ei ) => {
 					el.dataset.handled = true;
@@ -152,10 +154,17 @@ import Quill from "quill";
 					} );
 					el.addEventListener( 'click', ( event ) => {
 						retainer = document.querySelector( 'input#monthly_retainer' );
+						contract = document.querySelector( 'select#contract_type' );
 						if( retainer && retainer.getAttribute( 'value' ) == '' || retainer.getAttribute( 'value' ) <= 0 ) {
 							Swal.fire({
 								title: thisClass.i18n.retainer_zero,
 								text: thisClass.i18n.retainer_zerowarn,
+								type: 'warn'
+							})
+						} else if( contract && typeof contract.dataset.current === 'undefined' || contract.dataset.current == '' ) {
+							Swal.fire({
+								title: thisClass.i18n.selectcontract,
+								text: thisClass.i18n.selectcontractwarn,
 								type: 'warn'
 							})
 						} else {

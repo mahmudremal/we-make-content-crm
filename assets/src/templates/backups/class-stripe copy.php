@@ -26,19 +26,17 @@ class Stripe {
 		// pk_test_51LUu8gCBz3oLWOMl7XCRKB11tJrH9jByvD14FWXgD3jRrD5PO2Lzpwoaf0rhprQOS5ghTqUQKa61OAY2IJwU70TR00fPjGno9D
 		// sk_test_51LUu8gCBz3oLWOMlRLD2MrYZDhsU0gzmNGcqFouh5vXboLGsylT1MGx5t0UKYsHABS2T67KXcYgjgKNZRig1K42600z53h5FzU
 		// load class.
-		add_action( 'init', [ $this, 'setup_hooks' ], 10, 0 );
-
 		add_action( 'init', [ $this, 'init' ], 10, 0 );
+		add_action( 'init', [ $this, 'setup_hooks' ], 10, 0 );
 	}
 
 	public function setup_hooks() {
-		global $wpdb;$this->theTable	= $wpdb->prefix . 'fwp_stripe_subscriptions';
-		$this->stripePublishAble			= apply_filters( 'futurewordpress/project/system/getoption', 'stripe-publishablekey', false );
-		$this->stripeSecretKey				= apply_filters( 'futurewordpress/project/system/getoption', 'stripe-secretkey', false );
-		$this->productID							= 'prod_NJlPpW2S6i75vM';
-		$this->lastResult							= false;
-		$this->successUrl							= site_url( 'payment/stripe/{CHECKOUT_SESSION_ID}/success' );
-		$this->cancelUrl							= site_url( 'payment/stripe/{CHECKOUT_SESSION_ID}/cancel' );
+		global $wpdb;$this->theTable = $wpdb->prefix . 'fwp_stripe_subscriptions';
+		$this->stripePublishAble = apply_filters( 'futurewordpress/project/system/getoption', 'stripe-publishablekey', false );
+		// $this->stripeSecretKey = 'sk_test_51MYvdBI8VOGXMyoFiYpojuTUhvmS1Cxwhke4QK6jfJopnRN4fT8Qq6sy2Rmf2uvyHBtbafFpWVqIHBFoZcHp0vqq00HaOBUh1P';
+		$this->stripeSecretKey = apply_filters( 'futurewordpress/project/system/getoption', 'stripe-secretkey', false );
+		$this->productID = 'prod_NJlPpW2S6i75vM';
+		$this->lastResult = false;$this->successUrl = site_url( 'payment/stripe/{CHECKOUT_SESSION_ID}/success' );$this->cancelUrl = site_url( 'payment/stripe/{CHECKOUT_SESSION_ID}/cancel' );
 
 
 
@@ -56,21 +54,27 @@ class Stripe {
 
 		// $response = $this->stripe_payment_history( $this->customerIDfromEmail( 'radvix.flow@gmail.com' ) );
 
-		// print_r( $this->pauseSubscriptionUsingEmail( 'pause', 'nimoultv@gmail.com' ) );wp_die();
+		// print_r( $this->pauseSubscriptionUsingEmail( 'pause', 'radvix.flow@gmail.com' ) );wp_die();
 
 		// $subscription_data = $this->get_subscription_data_by_email( 'figosim608@mirtox.com' );print_r($subscription_data);
 		
 	}
 	public function init() {
-		if( ! isset( $_GET[ 'die_mode' ] ) ) {return;}
 		
-		$this->stripeSecretKey				= 'sk_test_51MYvdBI8VOGXMyoFiYpojuTUhvmS1Cxwhke4QK6jfJopnRN4fT8Qq6sy2Rmf2uvyHBtbafFpWVqIHBFoZcHp0vqq00HaOBUh1P';
-		$this->stripePublishAble			= 'pk_test_51LUu8gCBz3oLWOMl7XCRKB11tJrH9jByvD14FWXgD3jRrD5PO2Lzpwoaf0rhprQOS5ghTqUQKa61OAY2IJwU70TR00fPjGno9D';
-
-			// 'cus_NOgvvpyguFIFOL'
-		$response = $this->getStripeSubscriptionIdByCustomerID( $this->customerIDfromEmail( 'nimoultv@gmail.com' ) );
-		// $response = $this->get_all_subscriptions();
-		print_r( $this->lastResult );wp_die();
+		// if( ! isset( $_GET[ 'die_mode' ] ) ) {return;}
+		$response = $this->thePaymentlink( [
+			'quantity'	=> 1,
+			'price_data' => [
+				'currency' => apply_filters( 'futurewordpress/project/system/getoption', 'stripe-currency', 'usd' ),
+				'unit_amount' => (int) ( 320 * 100 ), // Unit amount in cent | number_format( $userInfo->meta->monthly_retainer, 2 ),
+				'product_data' => [
+					'name' => apply_filters( 'futurewordpress/project/system/getoption', 'stripe-productname', __( 'Subscription',   'we-make-content-crm' ) ),
+					'description' => apply_filters( 'futurewordpress/project/system/getoption', 'stripe-productdesc', __( 'Payment for',   'we-make-content-crm' ) . ' ' . get_option( 'blogname', 'We Make Content' ) ),
+					'images' => [ apply_filters( 'futurewordpress/project/system/getoption', 'stripe-productimg', esc_url( WEMAKECONTENTCMS_BUILD_URI . '/icons/Online payment_Flatline.svg' ) ) ],
+				],
+			]
+		], 'radvix.flow@gmail.com' );
+		print_r( [$response] );wp_die();
 	}
 	public function query_vars( $query_vars  ) {
 		$query_vars[] = 'pay_retainer';
@@ -281,13 +285,6 @@ class Stripe {
 	}
 
 	public function customerIDfromEmail( $email ) {
-		$userInfo = get_user_by( 'email', $email );
-		// if( $userInfo && ! empty( $userInfo->ID ) ) {
-		// 	$customer_id = get_user_meta( $userInfo->ID, 'stripe_customer_id', true );
-		// 	if( $customer_id && ! empty( $customer_id ) ) {
-		// 		return $customer_id;
-		// 	}
-		// }
 		$url = "https://api.stripe.com/v1/customers?email=" . urlencode($email);
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
@@ -299,15 +296,8 @@ class Stripe {
 		$response = curl_exec($ch);
 		curl_close($ch);
 		$data = json_decode($response);
-		if( isset( $data->data[0] ) && ! empty( $data->data[0]->id ) ) {
-			if( $userInfo && ! empty( $userInfo->ID ) ) {
-				update_user_meta( $userInfo->ID, 'stripe_customer_id', $data->data[0]->id );
-			}
-			$customer_id = $data->data[0]->id;
-			return $customer_id;
-		} else {
-			return false;
-		}
+		$customer_id = $data->data[0]->id;
+		return $customer_id;
 	}
 	public function stripe_payment_history( $customerID ) {
 		$ch = curl_init();
@@ -346,17 +336,15 @@ class Stripe {
     if( isset( $data[ 'error' ] ) ) {
       return false;
     } else {
-      return isset( $data[ 'data' ] ) ? $data : false;
+      return isset( $data[ 'data' ] ) ? $data[ 'data' ] : false;
     }
 	}
 	public function paymentHistory( $default, $email ) {
-		// $email = 'figosim608@mirtox.com';
 		if( ! $email ) {return $default;}
+		// $response = $this->stripe_payment_history( $this->customerIDfromEmail( 'radvix.flow@gmail.com' ) );
 		$customerID = $this->customerIDfromEmail( $email );
-		if( ! $customerID ) {return $default;}
-		// $payment_history = $this->stripe_payment_history( $customerID );
-		$payment_history = $this->paymentHistoryfromCustmerID( $customerID );
-		// print_r( json_encode( $payment_history ) );
+		$payment_history = $this->stripe_payment_history( $customerID );
+		// $payment_history = $this->paymentHistoryfromCustmerID( $customerID );
 		return ( $payment_history !== false ) ? $payment_history : $default;
 	}
 
@@ -369,6 +357,7 @@ class Stripe {
 		// 		// 	update_user_meta( $user_id, 'customer_id', $customer_id );
 		// 		// }
 		// 	}
+		
 		return ( $this->pauseSubscriptionUsingEmail( $status, $email ) );
 		// }
 	}
@@ -507,7 +496,6 @@ class Stripe {
 		$response = curl_exec($ch);
 		curl_close($ch);
 		$data = json_decode($response);
-		$this->lastResult = $data;
 		$subscription_id = $data->data[0]->id;
 		return $subscription_id;
 	}
@@ -548,37 +536,45 @@ class Stripe {
 	public function pauseSubscriptionUsingEmail( $action, $email ) {
 		$api_key = $this->stripeSecretKey;
 		$customer_id = $this->customerIDfromEmail( $email );
-		if( ! $customer_id ) {return false;}
 		$subscription_id = $this->getStripeSubscriptionIdByCustomerID( $customer_id );
-		// print_r( [$customer_id, $subscription_id, $email] );wp_die();
+		// print_r( [$customer_id, $subscription_id] );wp_die();
 		$status = in_array( $action, [ 'pause', 'unpause' ] ) ? $action : false;
 		if( ! $status ) {return $status;}
 		$is_success = $this->toggleStripeSubscriptionPause( $status, $subscription_id );
 		return ( $is_success );
 	}
 
-	public function get_all_subscriptions() {
-		// Set the API endpoint URL and the cURL options
-		$url = "https://api.stripe.com/v1/subscriptions";
+	public function get_subscription_data_by_email( $email ) {
+		// Set your Stripe API key
+		$stripe_key = $this->stripeSecretKey;
+
+		// Set the API endpoint URL
+		$url = "https://api.stripe.com/v1/subscriptions?customer[email]={$email}";
+
+		// Set the cURL options
 		$curl_options = array(
+			CURLOPT_URL => $url,
 			CURLOPT_RETURNTRANSFER => true,
-			CURLOPT_HTTPHEADER => array(
-				"Authorization: Bearer " . $this->stripeSecretKey
-			)
+			CURLOPT_USERPWD => $stripe_key,
 		);
-	
-		// Initialize cURL session and set the URL and options
-		$curl = curl_init($url);
+
+		// Initialize cURL
+		$curl = curl_init();
+
+		// Set cURL options
 		curl_setopt_array($curl, $curl_options);
-	
-		// Execute the cURL request and get the response
+
+		// Execute the cURL request
 		$response = curl_exec($curl);
+
+		// Close cURL
 		curl_close($curl);
 
-		// return $response;
-		// Decode the JSON response and return the subscription data
-		$subscriptions = json_decode($response, true);
-		return $subscriptions['data'];
+		// Parse the JSON response
+		$data = json_decode($response, true);
+
+		// Return the subscription data
+		return $data;
 	}
 	
 }

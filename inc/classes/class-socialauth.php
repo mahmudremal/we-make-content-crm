@@ -32,7 +32,7 @@ class SocialAuth {
 		$this->instagramAppSecret			= 'instagram-app-secret';
 		$this->instagramAppRedirect		= $this->socialAuthRedirect( false, 'instagram' );
 		add_filter( 'futurewordpress/project/socialauth/redirect', [ $this, 'socialAuthRedirect' ], 10, 2 );
-		add_filter( 'futurewordpress/project/socialauth/link', [ $this, 'socialAuthLink' ], 10, 2 );
+		add_filter( 'futurewordpress/project/socialauth/link', [ $this, 'socialAuthLink' ], 0, 2 );
 		add_filter( 'futurewordpress/project/rewrite/rules', [ $this, 'rewriteRules' ], 10, 1 );
 		add_filter( 'query_vars', [ $this, 'query_vars' ], 10, 1 );
 		add_filter( 'template_include', [ $this, 'template_include' ], 10, 1 );

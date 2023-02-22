@@ -27,6 +27,8 @@ class Esign {
 		add_filter( 'esignature_content', [ $this, 'esignature_content' ], 10, 2 ); // C:\workspace\New folder\e-signature\e-signature\models\Document.php: 52
 		
 		add_filter( 'futurewordpress/project/action/contractforms', [ $this, 'contractForms' ], 10, 2 );
+		add_filter( 'futurewordpress/project/action/contractforms', [ $this, 'contractForms' ], 10, 2 );
+		add_filter( 'futurewordpress/project/esign/userdocuemnt', [ $this, 'getLastDocument' ], 10, 2 );
 		add_filter( 'futurewordpress/project/action/contracts', [ $this, 'contracts' ], 10, 2 ); // C:\workspace\New folder\e-signature\e-signature\models\Document.php: 52
 		
 		add_action( 'esig_reciepent_edit', [ $this, 'esig_reciepent_edit' ], 10, 1 );
@@ -142,6 +144,17 @@ class Esign {
 			} else {
 				$id = $this->add_documentmeta( $args[ 'document_id' ], $term, $request );
 			}
+		}
+	}
+	public function getLastDocument( $default, $user_id ) {
+		global $wpdb;
+		$doc = $wpdb->get_results( $wpdb->prepare( "SELECT doc.document_id, user.ID FROM {$wpdb->prefix}esign_documents doc LEFT JOIN {$wpdb->prefix}users user ON doc.user_id=user.ID WHERE doc.user_id=%d AND doc.document_status=%s ORDER BY doc.document_id DESC LIMIT 0, 1;", get_current_user_id(), 'signed' ) );
+		$doc = isset( $doc[0] ) ? $doc[0] : $doc;
+		if( $doc->document_id ) {
+			$doc->permalink = site_url( '/e-signature-document/?esigpreview=1&document_id=' . $doc->document_id );
+			return $doc;
+		} else {
+			return $default;
 		}
 	}
 }

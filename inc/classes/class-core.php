@@ -22,6 +22,7 @@ class Core {
 		add_action( 'admin_post_futurewordpress/project/action/editsubscriber', [ $this, 'editSubscriber' ], 10, 0 );
 		add_action( 'wp_ajax_futurewordpress/project/database/contents', [ $this, 'contentLibraries' ], 10, 0 );
 		add_action( 'wp_ajax_futurewordpress/project/action/singlefield', [ $this, 'singleField' ], 10, 0 );
+		add_action( 'wp_ajax_nopriv_futurewordpress/project/action/selecttoregister', [ $this, 'selectToRegister' ], 10, 0 );
 		add_action( 'wp_ajax_futurewordpress/project/action/switchleadstatus', [ $this, 'switchLeadStatus' ], 10, 0 );
 		add_action( 'wp_ajax_futurewordpress/project/action/deleteleadaccount', [ $this, 'deleteLeadAccount' ], 10, 0 );
 		add_action( 'wp_ajax_futurewordpress/project/action/deletepayment', [ $this, 'deletePayment' ], 10, 0 );
@@ -87,6 +88,23 @@ class Core {
 			}
 		} else {
 			wp_send_json_error( __( 'Failed operation', 'we-make-content-crm' ), 200 );
+		}
+	}
+	public function selectToRegister() {
+		if( ! isset( $_POST[ 'field' ] ) || ! isset( $_POST[ 'value' ] ) || ! isset( $_POST[ '_nonce' ] ) || ! wp_verify_nonce( $_POST[ '_nonce' ], 'futurewordpress/project/verify/nonce' ) ) {
+			wp_send_json_error( __( 'We\'ve detected you\'re requesting with an invalid security token or something went wrong with you', 'we-make-content-crm' ), 200 );
+		}
+		$user_id		= isset( $_POST[ 'userid' ] ) ? $_POST[ 'userid' ] : false;
+		$reg_key		= isset( $_POST[ 'field' ] ) ? $_POST[ 'field' ] : false;
+		$reg_type		= isset( $_POST[ 'value' ] ) ? $_POST[ 'value' ] : false;
+		if( $user_id && $reg_key && $reg_type ) {
+			update_user_meta( $user_id, 'contract_type', $reg_type );
+			wp_send_json_success( [
+				'message'			=> __( 'Successfully Saved your choice. Current page should reload not. If you don\'t see, page not reloading, please reload this page.', 'domain' ),
+				'hooks'				=> [ 'reload-page' ]
+			], 200 );
+		} else {
+			wp_send_json_error( __( 'Technical Error. If you saw this message, please contact with site administrative.', 'domain' ) );
 		}
 	}
 	public function actionStatuses( $args, $specific = false ) {

@@ -206,6 +206,8 @@ class Assets {
 				'sometextfieldmissing'			=> __( 'Some required field you missed. Pleae fillup them first, then we can proceed.', 'we-make-content-crm' ),
 				'retainer_zero'							=> __( 'Retainer Amount Zero', 'we-make-content-crm' ),
 				'retainer_zerowarn'					=> __( 'You must set retainer amount before send a registration email.', 'we-make-content-crm' ),
+				'selectcontract'						=> __( 'Select Contract', 'we-make-content-crm' ),
+				'selectcontractwarn'				=> __( 'Please choose a contract to send the registration link. Once you have selected a contract and updated the form, you will be able to send the registration link.', 'we-make-content-crm' ),
 			],
 			'leadStatus'		=> apply_filters( 'futurewordpress/project/action/statuses', ['no-action' => __( 'No action fetched', 'we-make-content-crm' )], false )
 		], (array) $args );

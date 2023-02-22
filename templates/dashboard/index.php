@@ -134,23 +134,34 @@ else :
             <ul class="list-inline m-0 p-0">
               <li class="d-flex mb-4 align-items-center active">
               <img src="https://templates.iqonic.design/product/qompac-ui/html/dist/assets/images/shapes/02.png" data-img="<?php echo esc_url( WEMAKECONTENTCMS_BUILD_URI . '/icons/Content creation_Flatline.svg' ); ?>" alt="story-img" class="rounded-pill avatar-70 p-1 border bg-soft-light img-fluid" loading="lazy">
-              <div class="ms-3">
-                <a class="" href="#" target="_blank">
-                  <h5><?php esc_html_e( 'Content Calendar',   'we-make-content-crm' ); ?></h5>
-                  <!-- <p class="mb-0">Added 1 hour ago</p> -->
-                </a>
-              </div>
+                <div class="ms-3">
+                  <a class="" href="#" target="_blank">
+                    <h5><?php esc_html_e( 'Content Calendar',   'we-make-content-crm' ); ?></h5>
+                    <!-- <p class="mb-0">Added 1 hour ago</p> -->
+                  </a>
+                </div>
               </li>
               <li class="d-flex mb-4 align-items-center">
-              <!-- https://templates.iqonic.design/product/qompac-ui/html/dist/assets/images/shapes/04.png -->
-              <img src="https://templates.iqonic.design/product/qompac-ui/html/dist/assets/images/shapes/06.png" data-img="<?php echo esc_url( WEMAKECONTENTCMS_BUILD_URI . '/icons/Information carousel_Monochromatic.svg' ); ?>" alt="story-img" class="rounded-pill avatar-70 p-1 border img-fluid bg-soft-danger" loading="lazy">
-              <div class="ms-3">
-                <a class="" href="#" target="_blank">
-                  <h5><?php esc_html_e( 'Content Library',   'we-make-content-crm' ); ?></h5>
-                  <!-- <p class="mb-0">Added 1 hour ago</p> -->
-                </a>
-              </div>
+                <!-- https://templates.iqonic.design/product/qompac-ui/html/dist/assets/images/shapes/04.png -->
+                <img src="https://templates.iqonic.design/product/qompac-ui/html/dist/assets/images/shapes/06.png" data-img="<?php echo esc_url( WEMAKECONTENTCMS_BUILD_URI . '/icons/Information carousel_Monochromatic.svg' ); ?>" alt="story-img" class="rounded-pill avatar-70 p-1 border img-fluid bg-soft-danger" loading="lazy">
+                <div class="ms-3">
+                  <a class="" href="#" target="_blank">
+                    <h5><?php esc_html_e( 'Content Library',   'we-make-content-crm' ); ?></h5>
+                    <!-- <p class="mb-0">Added 1 hour ago</p> -->
+                  </a>
+                </div>
               </li>
+              <?php $doc = (object) apply_filters( 'futurewordpress/project/esign/userdocuemnt', false, $userInfo->ID );if( $doc && $doc->permalink ) : ?>
+              <li class="d-flex mb-4 align-items-center">
+                <img src="https://templates.iqonic.design/product/qompac-ui/html/dist/assets/images/shapes/04.png" data-img="<?php echo esc_url( WEMAKECONTENTCMS_BUILD_URI . '/icons/Information carousel_Monochromatic.svg' ); ?>" alt="story-img" class="rounded-pill avatar-70 p-1 border img-fluid bg-soft-danger" loading="lazy">
+                <div class="ms-3">
+                  <a class="" href="<?php echo esc_url( $doc->permalink ); ?>" target="_blank">
+                    <h5><?php esc_html_e( 'Docuemnt Signed',   'we-make-content-crm' ); ?></h5>
+                    <!-- <p class="mb-0">Added 1 hour ago</p> -->
+                  </a>
+                </div>
+              </li>
+              <?php endif; ?>
             </ul>
           </div>
         </div>
@@ -288,7 +299,7 @@ else :
                 <?php $archives = apply_filters( 'futurewordpress/project/filesystem/ziparchives', [], $userInfo->ID ); ?>
 
                 <div class="<?php echo esc_attr( ( count( $archives ) > 0 ) ? 'custom-table-effect' : '' ); ?> table-responsive  border rounded">
-                  <table class="table mb-0" id="datatable" data-toggle="data-table">
+                  <table class="table mb-0 fwp-datatable-field" data-toggle="data-table">
                     <thead>
                       <tr class="bg-white">
                         <th scope="col"><?php esc_html_e( 'Uploaded time',   'we-make-content-crm' ); ?></th>
@@ -374,11 +385,11 @@ else :
               <div class="card-body">
 
                 <?php $payments = apply_filters( 'futurewordpress/project/payment/stripe/payment_history', [], empty( $userInfo->data->user_email ) ?  $userInfo->meta->email : $userInfo->data->user_email );
-                $payments[ 'data' ] = (array) isset( $payments[ 'data' ] ) ? $payments[ 'data' ] : [];
+                $payments[ 'data' ] = isset( $payments[ 'data' ] ) ? (array) $payments[ 'data' ] : [];
                 ?>
 
                 <div class="<?php echo esc_attr( ( count( $payments[ 'data' ] ) > 0 ) ? 'custom-table-effect' : '' ); ?> table-responsive  border rounded">
-                  <table class="table mb-0" id="datatable" data-toggle="data-table">
+                  <table class="table mb-0 fwp-datatable-field" data-toggle="data-table">
                     <thead>
                       <tr class="bg-white">
                         <th><?php esc_html_e( 'Name',   'we-make-content-crm' ); ?></th>

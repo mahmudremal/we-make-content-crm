@@ -16,13 +16,14 @@ if( ! is_user_logged_in() ) {
     wp_redirect( apply_filters( 'futurewordpress/project/socialauth/link', false, $auth_provider ) );
   } else if( $behaveing == 'capture' ) {
     // Handle Social Data from Callback $_GET[ 'code' ]. This data is access token.
+    do_action( 'futurewordpress/project/googledrive/fetchauth', $_GET );
     if( is_user_logged_in() ) {
       $prev = get_user_meta( get_current_user_id(), 'google_auth_code', true );
       if( $prev ) {
-        update_user_meta( get_current_user_id(), 'google_auth_code', $_GET[ 'code' ], $prev );
+        // update_user_meta( get_current_user_id(), 'google_auth_code', $_GET[ 'code' ], $prev );
         // echo 'OLD';
       } else {
-        add_user_meta( get_current_user_id(), 'google_auth_code', $_GET[ 'code' ] );
+        // add_user_meta( get_current_user_id(), 'google_auth_code', $_GET[ 'code' ] );
         // echo 'New';
       }
       wp_redirect( apply_filters( 'futurewordpress/project/user/dashboardpermalink', get_current_user_id(), 'me' ) );

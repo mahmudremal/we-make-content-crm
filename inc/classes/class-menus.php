@@ -354,6 +354,12 @@ class Menus {
 					'default'				=> true
 				],
 				[
+					'id' 						=> 'auth-connectdrive',
+					'label'					=> __( 'Connect with Google Drive?', 'we-make-content-crm' ),
+					'description'		=> sprintf( __( 'Click on this %slink%s and allow access to connect with it.', 'we-make-content-crm' ), '<a href="'. site_url( '/auth/drive/redirect/' ) . '" target="_blank">', '</a>' ),
+					'type'					=> 'textcontent'
+				],
+				[
 					'id' 						=> 'auth-googleclientid',
 					'label'					=> __( 'Google Client ID', 'we-make-content-crm' ),
 					'description'		=> __( 'Your Google client or App ID, that you created for Authenticate.', 'we-make-content-crm' ),
@@ -364,6 +370,13 @@ class Menus {
 					'id' 						=> 'auth-googleclientsecret',
 					'label'					=> __( 'Google Client Secret', 'we-make-content-crm' ),
 					'description'		=> __( 'Your Google client or App Secret. Is required here.', 'we-make-content-crm' ),
+					'type'					=> 'text',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'auth-googledrivefolder',
+					'label'					=> __( 'Storage Folder ID', 'we-make-content-crm' ),
+					'description'		=> __( 'ID of that specific folder where you want to sync files.', 'we-make-content-crm' ),
 					'type'					=> 'text',
 					'default'				=> ''
 				],
@@ -405,6 +418,13 @@ class Menus {
 					'description'		=> __( 'if anytime we found empty retainer amount, so what will be replace there?', 'we-make-content-crm' ),
 					'type'					=> 'text',
 					'default'				=> 'N/A'
+				],
+				[
+					'id' 						=> 'signature-defaultcontract',
+					'label'					=> __( 'Default contract form', 'we-make-content-crm' ),
+					'description'		=> __( 'When admin doesn\'t select a registration from before sending it to client, user is taken to this contract. It should be a page where a simple wp-form will apear with client name, service type, retainer amount if necessery.', 'we-make-content-crm' ),
+					'type'					=> 'url',
+					'default'				=> ''
 				],
 			]
 		];
