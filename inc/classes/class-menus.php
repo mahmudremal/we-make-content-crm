@@ -459,7 +459,7 @@ class Menus {
 					'description'		=> __( 'The template, used on registration link sending mail.', 'we-make-content-crm' ),
 					'type'					=> 'textarea',
 					'default'				=> "Dear [Name],\nWe are delighted to invite you to join us for [Event/Service/Product], a [brief description of event/service/product].\n[Event/Service/Product] offers [brief summary of benefits or features]. As a valued member of our community, we would like to extend a special invitation for you to be part of this exciting opportunity.\nTo register, simply click on the link below:\n[Registration link]\nShould you have any questions or require additional information, please do not hesitate to contact us at [contact information].\nWe look forward to seeing you at [Event/Service/Product].\nBest regards,\n[Your Name/Company Name]",
-					'attr'					=> [ 'data-tinymce' => true ]
+					'attr'					=> [ 'data-a-tinymce' => true ]
 				],
 				[
 					'id' 						=> 'email-passresetsubject',

@@ -115,6 +115,7 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 		// $msg = [ 'status' => 'success', 'message' => __( get_FwpOption( 'msg_profile_edit_success_txt', 'Changes saved' ), FUTUREWORDPRESS_PROJECT_TEXT_DOMAIN ) ];
 		// set_transient( 'status_successed_message-' . get_current_user_id(), $msg, 300 );
 		// wp_safe_redirect( wp_get_referer() );
+
 		return ( $mail_sent );
   }
 
@@ -231,14 +232,14 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 		// https://countryflagsapi.com/svg/
 		return ( $country ) ? 'https://flagpedia.net/data/flags/icon/36x27/' . strtolower( $country ) . '.webp' : false;
 	}
-	public function dashboardPermalink( $id, $user = false ) {
+	public function dashboardPermalink( $id, $user = 'me' ) {
 		if( ! defined( 'FUTUREWORDPRESS_PROJECT_DASHBOARDPERMALINK' ) ) {
 			$dashboard_permalink = apply_filters( 'futurewordpress/project/system/getoption', 'permalink-dashboard', 'dashboard' );
 			$dashboard_permalink = site_url( $dashboard_permalink );
 			define( 'FUTUREWORDPRESS_PROJECT_DASHBOARDPERMALINK', $dashboard_permalink );
 		}
 		$profile = ( apply_filters( 'futurewordpress/project/system/getoption', 'permalink-userby', 'id' ) == 'id' ) ? FUTUREWORDPRESS_PROJECT_DASHBOARDPERMALINK . '/' . ( ( $id ) ? $id : 'me' ) : FUTUREWORDPRESS_PROJECT_DASHBOARDPERMALINK . '/' . $user;
-		return $profile . '/profile';
+		return $profile . '/' . apply_filters( 'futurewordpress/project/profile/defaulttab', 'profile' );
 	}
 	public function visitorIP() {
 		if ( ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
@@ -252,7 +253,15 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 	}
 	public function noticeManager( $action, $type, $data ) {
 		$notices = get_option( 'fwp_we_make_content_admin_notice', [] );
-		if( $action == 'get' ) {return $notices;}
+		if( $action == 'get' ) {
+			// foreach( $notices as $i => $notice ) {
+			// 	if( $notice[ 'data' ][ 'time' ] && date_create('15 days ago') >= $notice[ 'data' ][ 'time' ] ) {
+			// 		unset( $notices[ $i ] );
+			// 	}
+			// }
+			// update_option( 'fwp_we_make_content_admin_notice', $notices );
+			return $notices;
+		}
 		if( $action == 'add' ) {$notices[] = (object) $data;update_option( 'fwp_we_make_content_admin_notice', $notices );}
 		if( $action == 'filter' ) {$sortedNotices = [];
 			foreach( $notices as $i => $notice ) {

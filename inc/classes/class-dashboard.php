@@ -192,7 +192,7 @@ class Dashboard {
   public function defaultUserMeta( $meta = [] ) {
     return wp_parse_args( (array) $meta, [
       'subscribe'           => false,
-      'enable_subscription' => false,
+      'enable_subscription' => 'on',
       'subscription_id'     => '',
       'monthly_retainer'    => '',
       'content_calendar'    => '',

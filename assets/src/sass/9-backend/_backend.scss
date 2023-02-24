@@ -51,6 +51,7 @@
 .iq-banner ~ #wpbody #wpbody-content .dashboard__body-start #page_layout {
   // width: 90%;
   margin-top: -8rem;
+  max-width: unset;
 }
 .popup-action-menu {
   position: absolute;

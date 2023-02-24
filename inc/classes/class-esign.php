@@ -1,6 +1,6 @@
 <?php
 /**
- * LoadmorePosts
+ * WP E-Signature integration plugin.
  *
  * @package WeMakeContentCMS
  */
@@ -27,7 +27,7 @@ class Esign {
 		add_filter( 'esignature_content', [ $this, 'esignature_content' ], 10, 2 ); // C:\workspace\New folder\e-signature\e-signature\models\Document.php: 52
 		
 		add_filter( 'futurewordpress/project/action/contractforms', [ $this, 'contractForms' ], 10, 2 );
-		add_filter( 'futurewordpress/project/action/contractforms', [ $this, 'contractForms' ], 10, 2 );
+		// add_filter( 'futurewordpress/project/action/contractforms', [ $this, 'contractForms' ], 10, 2 );
 		add_filter( 'futurewordpress/project/esign/userdocuemnt', [ $this, 'getLastDocument' ], 10, 2 );
 		add_filter( 'futurewordpress/project/action/contracts', [ $this, 'contracts' ], 10, 2 ); // C:\workspace\New folder\e-signature\e-signature\models\Document.php: 52
 		
@@ -146,15 +146,34 @@ class Esign {
 			}
 		}
 	}
-	public function getLastDocument( $default, $user_id ) {
+	public function getLastDocument( $default, $userInfo ) {
 		global $wpdb;
-		$doc = $wpdb->get_results( $wpdb->prepare( "SELECT doc.document_id, user.ID FROM {$wpdb->prefix}esign_documents doc LEFT JOIN {$wpdb->prefix}users user ON doc.user_id=user.ID WHERE doc.user_id=%d AND doc.document_status=%s ORDER BY doc.document_id DESC LIMIT 0, 1;", get_current_user_id(), 'signed' ) );
+		// $doc = $wpdb->get_results( $wpdb->prepare( "SELECT doc.document_id, user.ID FROM {$wpdb->prefix}esign_documents doc LEFT JOIN {$wpdb->prefix}users user ON doc.user_id=user.ID WHERE doc.user_id=%d AND doc.document_status=%s ORDER BY doc.document_id DESC LIMIT 0, 1;", $userInfo->ID, 'signed' ) );
+		// $doc = $wpdb->get_results( $wpdb->prepare( "SELECT document_id FROM {$wpdb->prefix}esign_documents WHERE user_id=%d AND document_status=%s ORDER BY document_id DESC LIMIT 0, 1;", $userInfo->ID, 'signed' ) );
+
+		$prepared = $wpdb->prepare( "SELECT du.user_id AS esign_user_id, du.signer_name, du.signer_email, ed.document_id, ed.document_type, ed.document_status, ed.document_uri, ed.last_modified, wu.ID AS user_id, eu.wp_user_id, eu.user_email, ed.document_checksum, ei.invite_hash FROM {$wpdb->prefix}esign_document_users du LEFT JOIN {$wpdb->prefix}esign_documents ed ON ed.document_id=du.document_id LEFT JOIN {$wpdb->prefix}esign_users eu ON eu.user_id=du.user_id LEFT JOIN {$wpdb->prefix}users wu ON wu.user_email=eu.user_email LEFT JOIN {$wpdb->prefix}esign_invitations ei ON ei.document_id=ed.document_id WHERE ed.document_status=%s AND du.user_id=%d OR du.signer_email=%s ORDER BY ed.document_id DESC LIMIT 0, 1;", 'signed', $userInfo->ID, ( ! empty( $userInfo->data->user_email ) ? $userInfo->data->user_email : $userInfo->meta->email ) );
+		$doc = $wpdb->get_results( $prepared );
+		// print_r( $prepared );print_r( $doc );
 		$doc = isset( $doc[0] ) ? $doc[0] : $doc;
 		if( $doc->document_id ) {
-			$doc->permalink = site_url( '/e-signature-document/?esigpreview=1&document_id=' . $doc->document_id );
+			if( false && $doc->user_id !== $doc->wp_user_id ) {
+				$wpdb->update( $wpdb->prefix . 'esign_users', [
+					'wp_user_id'				=> $doc->user_id,
+					'is_signer'					=> 1
+				], [
+					'wp_user_id'				=> $doc->wp_user_id,
+					'user_email'				=> $doc->user_email
+				] );
+			}
+			$hash = base64_encode( json_encode( [
+				'invite'				=> $doc->invite_hash,
+				'csum'					=> $doc->document_checksum
+			] ) );
+			$doc->permalink = site_url( '/e-signature-document/?wpesig=' . $hash );
 			return $doc;
 		} else {
 			return $default;
 		}
 	}
+
 }

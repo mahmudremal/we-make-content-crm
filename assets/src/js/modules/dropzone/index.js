@@ -33,9 +33,9 @@ import { toast } from 'toast-notification-alert';
       this.selector = '.fwp-dropzone-field';
       // reference  https://developer.mozilla.org/en-US/docs/Web/API/FileReader/    http://community.sitepoint.com/t/get-video-duration-before-upload/30623/4
       this.videoControl = {
-        videoMaxTime: "00:30",
-        audioMaxTime: "00:30",
-        uploadMaxSize: 31457280
+        videoMaxTime: "20:30:00",
+        audioMaxTime: "20:30:00",
+        uploadMaxSize: 629145600
       };
       // https://davidwalsh.name/html5-video-duration
 
@@ -233,7 +233,7 @@ import { toast } from 'toast-notification-alert';
         /**
          * The maximum filesize (in MiB) that is allowed to be uploaded.
          */
-        maxFilesize: 256,
+        maxFilesize: 20480,
       
         /**
          * The name of the file param that gets transferred.

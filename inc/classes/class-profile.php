@@ -26,8 +26,12 @@ class Profile {
 
 		add_action( 'wp_ajax_futurewordpress/project/filesystem/uploadavater', [ $this, 'uploadAvater' ], 10, 0 );
 
-		add_filter( 'login_redirect', [ $this, 'login_redirect' ], 10, 0 );
+		add_filter( 'login_redirect', [ $this, 'login_redirect' ], 199, 0 );
 		add_action( 'after_setup_theme', [ $this, 'remove_admin_bar' ], 10, 0 );
+
+		// add_filter( 'woocommerce_get_myaccount_page_permalink', [ $this, 'woocommerce_get_myaccount_page_permalink' ], 10, 1 );
+		add_filter( 'woocommerce_login_redirect', [ $this, 'woocommerce_login_redirect' ], 10, 2 );
+		add_filter( 'futurewordpress/project/profile/defaulttab', [ $this, 'defaultTab' ], 1, 1 );
 	}
 	public function get_avatar( $avatar, $id_or_email, $size, $default, $alt ) {
 		$user = false;
@@ -59,6 +63,9 @@ class Profile {
 			$url = 'https://templates.iqonic.design/product/qompac-ui/html/dist/assets/images/shapes/02.png?';
 		}
 		return $url;
+	}
+	public function defaultTab( $default ) {
+		return 'archive';
 	}
 
 	public function get_avatar_data( $args, $id_or_email ) {
@@ -102,7 +109,7 @@ class Profile {
 	}
 	public function uploadAvater() {
 		check_ajax_referer( 'futurewordpress/project/verify/nonce', '_nonce' );
-		$user_id = $_POST[ 'lead' ];
+		$user_id = is_admin() ? $_POST[ 'lead' ] : get_current_user_id();
 		$upload_dir = apply_filters( 'futurewordpress/project/filesystem/uploaddir', false );
 		$custom_avatar = get_user_meta( $user_id, 'custom_avatar', true );
 		$oldFilePATH = str_replace( [site_url('/')], [ABSPATH], $custom_avatar );
@@ -114,13 +121,9 @@ class Profile {
 		// wp_send_json_success( $newFileName );
 		if( $upload_dir && move_uploaded_file( $_FILES[ 'avater' ][ 'tmp_name' ], $upload_dir . '/' . $newFileName ) ) {
 			$newFileURL = str_replace( [ABSPATH], [site_url('/')], $upload_dir . '/' . $newFileName );
-			if( $custom_avatar ) {
-				update_user_meta( $user_id, 'custom_avatar', $newFileURL );
-			} else {
-				add_user_meta( $user_id, 'custom_avatar', $newFileURL );
-			}
+			update_user_meta( $user_id, 'custom_avatar', $newFileURL );
 			// '<img src="' . $newFileURL . '" alt="" class="mr-2" height="30px" width="auto" />' . 
-			wp_send_json_success( __( 'Profile Image Updated Successfully.', 'we-make-content-crm' ), 200 );
+			wp_send_json_success( __( 'Profile Image Updated Successfully.' . get_user_meta( $user_id, 'custom_avatar', true ), 'we-make-content-crm' ), 200 );
 		} else {
 			wp_send_json_error( __( 'Profile Image upload failed.', 'we-make-content-crm' ) );
 		}
@@ -134,5 +137,11 @@ class Profile {
 		if( ! current_user_can( 'administrator' ) && ! is_admin() ) {
 			show_admin_bar( false );
 		}
+	}
+	public function woocommerce_get_myaccount_page_permalink( $permalink ) {
+		return apply_filters( 'futurewordpress/project/user/dashboardpermalink', false, 'me' );
+	}
+	public function woocommerce_login_redirect( $redirect, $user ) {
+		return apply_filters( 'futurewordpress/project/user/dashboardpermalink', false, 'me' );
 	}
 }

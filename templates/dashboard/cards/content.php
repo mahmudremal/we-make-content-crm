@@ -3,7 +3,7 @@
   <input type="hidden" name="action" value="futurewordpress/project/action/dashboard">
   <input type="hidden" name="userid" value="<?php echo esc_attr( $userInfo->ID ); ?>">
   <?php wp_nonce_field( 'futurewordpress/project/nonce/dashboard', '_nonce', true, true ); ?>
-  <div class="card-body mw-800px py-20">
+  <div class="card-body mw-800px">
     <?php if( $alert = (array) get_transient( 'futurewordpress/project/transiant/dashboard/' . get_current_user_id() ) && isset( $alert[ 'type' ] ) && isset( $alert[ 'message' ] ) ) : ?>
       <?php delete_transient( 'futurewordpress/project/transiant/dashboard/' . get_current_user_id() ); ?>
       <!--begin::Alert-->

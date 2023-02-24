@@ -48,6 +48,7 @@ class Stripe {
 		add_filter( 'futurewordpress/project/payment/stripe/payment_history', [ $this, 'paymentHistory' ], 10, 2 );
 		add_filter( 'futurewordpress/project/payment/stripe/subscriptionToggle', [ $this, 'subscriptionToggle' ], 10, 3 );
 		add_filter( 'futurewordpress/project/payment/stripe/subscriptionCancel', [ $this, 'subscriptionCancel' ], 10, 3 );
+		add_filter( 'futurewordpress/project/payment/stripe/getsubscriptionby', [ $this, 'getSubscriptionBy' ], 10, 2 );
 
 		add_filter( 'futurewordpress/project/rewrite/rules', [ $this, 'rewriteRules' ], 10, 1 );
 		add_filter( 'query_vars', [ $this, 'query_vars' ], 10, 1 );
@@ -63,14 +64,26 @@ class Stripe {
 	}
 	public function init() {
 		if( ! isset( $_GET[ 'die_mode' ] ) ) {return;}
-		
-		$this->stripeSecretKey				= 'sk_test_51MYvdBI8VOGXMyoFiYpojuTUhvmS1Cxwhke4QK6jfJopnRN4fT8Qq6sy2Rmf2uvyHBtbafFpWVqIHBFoZcHp0vqq00HaOBUh1P';
-		$this->stripePublishAble			= 'pk_test_51LUu8gCBz3oLWOMl7XCRKB11tJrH9jByvD14FWXgD3jRrD5PO2Lzpwoaf0rhprQOS5ghTqUQKa61OAY2IJwU70TR00fPjGno9D';
+		$notices = get_option( 'fwp_we_make_content_admin_notice', [] );
+		foreach( $notices as $i => $notice ) {
+			$notices[ $i ][ 'data' ][ 'time' ] = strtotime( $notices[ $i ][ 'data' ][ 'time' ] );
+			// if( $notice[ 'data' ][ 'time' ] && strtotime( '-15 days' ) >= $notice[ 'data' ][ 'time' ] ) {
+				// unset( $notices[ $i ] );
+				// print_r( [strtotime( '-15 days' ), $notice[ 'data' ][ 'time' ]]);
+			// }
+		}
+		// print_r( $notices );
+		// $this->stripeSecretKey				= 'sk_test_51MYvdBI8VOGXMyoFiYpojuTUhvmS1Cxwhke4QK6jfJopnRN4fT8Qq6sy2Rmf2uvyHBtbafFpWVqIHBFoZcHp0vqq00HaOBUh1P';
+		// $this->stripePublishAble			= 'pk_test_51LUu8gCBz3oLWOMl7XCRKB11tJrH9jByvD14FWXgD3jRrD5PO2Lzpwoaf0rhprQOS5ghTqUQKa61OAY2IJwU70TR00fPjGno9D';
 
 			// 'cus_NOgvvpyguFIFOL'
-		$response = $this->getStripeSubscriptionIdByCustomerID( $this->customerIDfromEmail( 'nimoultv@gmail.com' ) );
-		// $response = $this->get_all_subscriptions();
-		print_r( $this->lastResult );wp_die();
+		// $response = $this->getStripeSubscriptionIdByCustomerID( $this->customerIDfromEmail( 'kokarih486@wiroute.com' ) );
+		// // $response = $this->get_all_subscriptions();
+		// $subscription = $this->lastResult->data[0];
+		// print_r( [
+		// 	$subscription
+		// ] );
+		wp_die();
 	}
 	public function query_vars( $query_vars  ) {
 		$query_vars[] = 'pay_retainer';
@@ -371,6 +384,32 @@ class Stripe {
 		// 	}
 		return ( $this->pauseSubscriptionUsingEmail( $status, $email ) );
 		// }
+	}
+	public function getSubscriptionBy( $default, $args = [] ) {
+		$args = (object) wp_parse_args( $args, [
+			'by'						=> 'email',
+			'email'					=> '',
+			'customer_id'		=> '',
+			'object'				=> 'first'
+		] );
+		switch( $args->by ) {
+			case 'email':
+				$customerID = $this->customerIDfromEmail( $args->email );
+				break;
+			default:
+				$customerID = $args->customer_id;
+				break;
+		}
+		$response = $this->getStripeSubscriptionIdByCustomerID( $customerID );
+		$subscription = $this->lastResult->data[0];
+		switch( $args->object ) {
+			case 'list':
+				return $this->lastResult;
+				break;
+			default:
+				return isset( $this->lastResult->data[0] ) ? $this->lastResult->data[0] : false;
+				break;
+		}
 	}
 	protected function getStripeSubscriptionIdByEmail( $email ) {
 		$url = "https://api.stripe.com/v1/customers?email=" . urlencode($email);

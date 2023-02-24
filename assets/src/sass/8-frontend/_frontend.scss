@@ -11,7 +11,7 @@
 }
 .input-group {
   span[id^="basic-editopen-"] {border-radius: 0 5px 5px 0 !important;}
-  &.input-group-solid .input-group-text[id^=basic-pre-addons] {
+  &.input-group .input-group-text[id^=basic-pre-addons] {
     @include mq($until: 500px) {
       display: none;
     }
@@ -98,12 +98,6 @@ div.wpforms-container-full .wpforms-form .wpforms-field {
 
 
 .fwp-body {
-  .content .container,
-  .content .container .container_inner.page_container_inner,
-  .content_inner {
-    background: #ffffff9e;
-    border-radius: 10px;
-  }
   div.wpforms-container-full {
     .wpforms-form {
       .wpforms-field {
@@ -262,5 +256,140 @@ div.wpforms-container-full .wpforms-form .wpforms-field {
   }
   .fwp-body .wpforms-container-full .wpforms-form .wpforms-one-half:nth-child(2) {
     margin-top: 20px;
+  }
+}
+
+$primaryColor: #FFCF02;
+$primaryColorb4: #ffd102b4;
+$primaryColor1f: #FFCF021f;
+$primaryColor0d: #ffcf020d;
+.fwp-body {
+  .content .content_inner {
+    background: #ffffff9e;
+    .container.content-inner {
+      border-radius: 10px;
+      background: none;
+    }
+  }
+  .main-content {
+    .iq-navbar-header {
+      height: 215px;
+    }
+    .nav-pills {
+      .nav-link {
+        font-size: 15px;
+        color: #333;
+        &:hover, &:focus, &:active {
+          color: #333;
+        }
+      }
+      .nav-link.active, .show > .nav-link {
+        color: #333;
+        background-color: $primaryColor;
+      }
+    }
+  }
+  &.no-header-bg {
+    .content {
+      padding: unset;
+      background: #ffffff9e;
+      .content_inner {
+        background: none;
+        padding-bottom: 80px;
+      }
+      .main-content {
+        .iq-navbar-header {
+          height: 150px;
+        }
+      }
+      .container {
+        background: none;
+        &.content-inner {
+          .row > div > .card.h-12 {
+            margin-bottom: 2rem;
+            height: 100%;
+          }
+        }
+      }
+    }
+  }
+  
+  .pause-unpause-subscription-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .btn-check:active+.btn.btn-light-primary, .btn-check:checked+.btn.btn-light-primary, .btn.btn-light-primary.active, .btn.btn-light-primary.show, .btn.btn-light-primary:active:not(.btn-active), .btn.btn-light-primary:focus:not(.btn-active), .btn.btn-light-primary:hover:not(.btn-active), .show>.btn.btn-light-primary,
+  .btn.btn-primary, .btn-check:active+.btn.btn-primary, .btn-check:checked+.btn.btn-primary, .btn.btn-primary.active, .btn.btn-primary.show, .btn.btn-primary:active:not(.btn-active), .btn.btn-primary:focus:not(.btn-active), .btn.btn-primary:hover:not(.btn-active), .show>.btn.btn-primary {
+    color: #333;
+    border-color: $primaryColor;
+    background-color: $primaryColor;
+    &:hover, &:active, &:focus {
+      border-color: $primaryColor;
+      background-color: $primaryColor !important;;
+    }
+  }
+  .btn.btn-light-primary {
+    color: $primaryColor;
+    border-color: $primaryColor1f;
+    background-color: $primaryColor1f;
+    &:hover, &:active {
+      border-color: $primaryColor;
+      background-color: $primaryColor !important;
+    }
+  }
+  .custom-table-effect .table tbody tr:after {
+    background: $primaryColor1f;
+  }
+  .custom-table-effect .table tbody tr:hover:after {
+    background: $primaryColor;
+  }
+  .dropzone {
+    background-color: $primaryColor1f;
+    border-color: $primaryColor;
+    .dz-preview.dz-file-preview .dz-image {
+      background: $primaryColor1f;
+    }
+  }
+  .form-select.form-select-solid {
+    background: $primaryColor0d;
+    border-color: $primaryColor0d;
+  }
+  .text-primary {
+    color: $primaryColor  !important;
+  }
+  .bg-primary {
+    background: $primaryColor  !important;
+  }
+  .input-group span[id^="basic-editopen-"] {
+    i.fa-check {
+      color: $primaryColor;
+    }
+  }
+
+
+
+  // Toast
+  #igho-toast-container > div {
+    &.toast info {
+      background-color: $primaryColorb4;
+      border-color: $primaryColor;
+    }
+    @include mq($until: 480px) {
+      width: auto;
+    }
+  }
+  .swal2-actions {
+    .swal2-styled.swal2-confirm {
+      color: #333;
+      background-color: $primaryColor;
+    }
+    .swal2-loader {
+      background: none;
+      border-color: none;
+      border-top-color: $primaryColor;
+      border-bottom-color: $primaryColor;
+    }
   }
 }

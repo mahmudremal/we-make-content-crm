@@ -262,6 +262,8 @@ class Core {
 			
 			if( apply_filters( 'futurewordpress/project/mailsystem/sendmail', $args ) ) {
 				wp_send_json_success( [ 'message' => __( 'Registration Link sent successfully!', 'we-make-content-crm' ), 'hooks' => [ 'sent-registration-' . $_POST[ 'lead' ] ] ], 200 );
+			} else {
+				wp_send_json_error( __( 'Mail not sent.', 'we-make-content-crm' ), 200 );
 			}
 		}
 		wp_send_json_error( __( 'Unexpected status requested.', 'we-make-content-crm' ), 200 );
@@ -306,22 +308,23 @@ class Core {
 	public function toggleSubscption( $user_id, $meta_key, $meta_value ) {
 		$lastchanged = get_usermeta( $user_id, 'subscription_last_changed' );
 		$userInfo = get_user_by( 'id', $user_id );
-		if( $lastchanged && $lastchanged == date( 'd M, Y' ) ) {
+		if( $meta_value == 'off' && $lastchanged && $lastchanged == date( 'M, Y' ) ) {
 			wp_send_json_success( [ 'message' => __( 'You can\'t change it while it is under pending review. You can change your subscription status once a day maximum. Please wait until it release.', 'we-make-content-crm' ), 'hooks' => [] ], 200 );
 		} else {
-			$status = ( $meta_value == 'on' ) ? 'unpause' : 'pause';
+			$status = ( $meta_value == 'off' ) ? 'pause' : 'unpause';
 			if( apply_filters( 'futurewordpress/project/payment/stripe/subscriptionToggle', $status, ( ! empty( $userInfo->data->user_email ) ? $userInfo->data->user_email : get_user_meta( $user_id, 'email', true ) ), $user_id ) ) {
-				if( $lastchanged ) {update_user_meta( $user_id, 'subscription_last_changed', date( 'd M, Y' ) );} else {add_user_meta( $user_id, 'subscription_last_changed', date( 'd M, Y' ) );}
+				if( $lastchanged ) {update_user_meta( $user_id, 'subscription_last_changed', date( 'M, Y' ) );} else {add_user_meta( $user_id, 'subscription_last_changed', date( 'd M, Y' ) );}
 				update_user_meta( $user_id, $meta_key, $meta_value );
 				$notice = apply_filters( 'futurewordpress/project/notices/manager', 'add', 'cancelSubscription', [
 					'type'						=> 'warn',
 					'message'					=> sprintf( __( '%s %s his Subscription', 'we-make-content-crm' ), '<a href="' . admin_url( 'admin.php?page=crm_dashboard&path=leads/edit/' . $userInfo->ID . '/' ) . '" target="_blank">' . get_user_meta( $userInfo->ID, 'first_name', true ) . ' ' . get_user_meta( $userInfo->ID, 'last_name', true ) . '</a>', strtoupper( $status ) ),
 					'data'						=> [
-						'time'					=> wp_date( 'Y-M-d H:i:s' ),
+						'time'					=> time(),
+						'wp_date'				=> wp_date( 'Y-M-d H:i:s' ),
 						'user'					=> $user_id
 					]
 				] );
-				wp_send_json_success( [ 'message' => __( 'User subscription Changed Successfully', 'we-make-content-crm' ), 'hooks' => ['subscription-status-' . $meta_value ] ], 200 );
+				wp_send_json_success( [ 'message' => __( 'User subscription Changed Successfully', 'we-make-content-crm' ), 'hooks' => ['subscription-status-success' ] ], 200 );
 			} else {
 				wp_send_json_error( __( 'Failed to Switch subscription! Please contact with administrative for assistance.', 'we-make-content-crm' ), 200 );
 			}

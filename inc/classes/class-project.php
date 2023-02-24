@@ -46,7 +46,7 @@ class Project {
 	}
 
 	protected function setup_hooks() {
-		add_action( 'body_class', [ $this, 'body_class' ], 10, 1 );
+		add_filter( 'body_class', [ $this, 'body_class' ], 10, 1 );
 		add_action( 'init', [ $this, 'init' ], 10, 0 );
 
 		
@@ -59,7 +59,9 @@ class Project {
 	public function body_class( $classes ) {
 		$classes = (array) $classes;
 		$classes[] = 'fwp-body';
-		$classes[] = 'is-admin';
+		if( is_admin() ) {
+			$classes[] = 'is-admin';
+		}
 		return $classes;
 	}
 	public function init() {

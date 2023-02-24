@@ -208,6 +208,8 @@ class Assets {
 				'retainer_zerowarn'					=> __( 'You must set retainer amount before send a registration email.', 'we-make-content-crm' ),
 				'selectcontract'						=> __( 'Select Contract', 'we-make-content-crm' ),
 				'selectcontractwarn'				=> __( 'Please choose a contract to send the registration link. Once you have selected a contract and updated the form, you will be able to send the registration link.', 'we-make-content-crm' ),
+				'subscription_toggled'			=> __( 'Thank you for submitting your request. We have reviewed and accepted it, and it is now pending for today. You will have the option to change your decision tomorrow. Thank you for your patience and cooperation.', 'we-make-content-crm' ),
+				'say2wait2pause'						=> __( 'You\'ve already paused your subscription this month. Please wait until next month to pause again. If you need further assistance, please contact our administrative team.', 'we-make-content-crm' ),
 			],
 			'leadStatus'		=> apply_filters( 'futurewordpress/project/action/statuses', ['no-action' => __( 'No action fetched', 'we-make-content-crm' )], false )
 		], (array) $args );

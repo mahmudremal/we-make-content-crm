@@ -6,7 +6,7 @@
  */
 $userInfo = get_user_by( 'id', hex2bin( get_query_var( 'lead_registration' ) ) );
 if( is_user_logged_in() ) {
-  $user_slug = apply_filters( 'futurewordpress/project/system/getoption', 'permalink-dashboard', 'dashboard' ) . '/' . ( ( apply_filters( 'futurewordpress/project/system/getoption', 'permalink-userby', 'id' ) == 'id' ) ? $userInfo->ID : $userInfo->data->user_login );
+  $user_slug = apply_filters( 'futurewordpress/project/user/dashboardpermalink', $userInfo->ID, $userInfo->data->user_nicename );
   wp_redirect( site_url( $user_slug ) );exit;
 }
 // $_SESSION[ 'current-lead' ] = $userInfo->ID;

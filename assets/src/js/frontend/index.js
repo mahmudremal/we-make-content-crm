@@ -1,4 +1,10 @@
-import Swal from "sweetalert2";
+/**
+ * Frontend Script.
+ * 
+ * @package FutureWordPress WeMakeContent.
+ */
+
+import Swal from "sweetalert2"; // "success", "error", "warning", "info" or "question"
 import { toast } from 'toast-notification-alert';
 import validator from 'validator';
 
@@ -46,15 +52,18 @@ console.log(customer.id);
 				rqemail										: 'You provide a wrong email address. Please fix.',
 				passnotmatched						: 'Password not matched',
 				are_u_sure								: 'Are you sure?',
+				subscription_toggled			: 'Thank you for submitting your request. We have reviewed and accepted it, and it is now pending for today. You will have the option to change your decision tomorrow. Thank you for your patience and cooperation.',
+				say2wait2pause						: 'You\'ve already paused your subscription this month. Please wait until next month to pause again. If you need further assistance, please contact our administrative team.',
 				...i18n
 			}
 			this.init();this.toOpenEdit();this.inputEventListner();
 			this.cancelSubscription();this.changePassword();
-			this.toggleStatus();this.passwordToggle();
+			this.passwordToggle();this.toggleSubscriptions();
 			this.regWidget();this.handleTabHref();
 			this.submitArchiveFiles();this.trackWpformAjax();
 			this.setup_hooks();this.deleteArchive();
 			this.handlePayCardError();this.selectRegistration();
+			// this.toggleStatus();
 			// this.fetchDataWidthContract();
 			// this.accordion();
 			// console.log( 'frontend init...' );
@@ -627,6 +636,49 @@ console.log(customer.id);
 						thisClass.sendToServer( formdata );
 				} );
 			}
+		}
+		toggleSubscriptions() {
+			const thisClass = this;var userid, theInterval;
+			// theInterval = setInterval(() => {
+				userid = document.querySelector( 'input[type="hidden"][name="userid"]' );
+				if( userid ) {userid = userid.value;} else {userid = false;}
+				document.querySelectorAll( '.pause-unpause-subscription:not([data-handled])' ).forEach( ( el, ei ) => {
+					el.dataset.handled = true;
+					document.body.addEventListener( 'subscription-status-success', () => {
+						Swal.fire( { position: 'top-end', icon: 'success', title: thisClass.i18n.subscription_toggled, showConfirmButton: false, timer: 6500 } );
+						// console.log( thisClass.lastAjax );
+						el.innerText = el.dataset?.pendingTitle??'Pending';
+						el.disabled = true;
+						el.classList.remove( 'btn-outline-warning', 'border-active', 'btn-primary' );
+						el.classList.add( 'btn-light' );
+					} );
+					el.addEventListener( 'click', ( event ) => {
+						event.preventDefault();
+						if( event.target.dataset.current == 'pending' ) {
+							Swal.fire( {
+								icon: 'info',
+								title: thisClass.i18n.say2wait2pause
+							} )
+						} else {
+							Swal.fire( {
+								icon: 'warning',
+								title: thisClass.i18n.are_u_sure,
+								showCancelButton: true
+							} ).then( (result) => {
+								if( result.isConfirmed ) {
+									var formdata = new FormData();
+									formdata.append( 'action', 'futurewordpress/project/action/singlefield' );
+									formdata.append( 'field', el.name );
+									formdata.append( 'value', ( event.target.dataset.current == 'pause' ) ? 'off' : 'on' );
+									formdata.append( 'userid', userid );
+									formdata.append( '_nonce', thisClass.ajaxNonce );
+									thisClass.sendToServer( formdata );
+								}
+							} );
+						}
+					} );
+				} );
+			// }, 1000 );
 		}
 	}
 	new FutureWordPress_Frontend();

@@ -25,7 +25,7 @@ $notices = (array) apply_filters( 'futurewordpress/project/notices/manager', 'ge
                   $notice = (object) $notice;
                   ?>
                   <tr id="notice-<?php echo esc_html( $i ); ?>" class="border-<?php echo esc_attr( $notice->type ); ?>">
-                    <td class="text-dark"><?php echo esc_html( wp_date( 'd, M', strtotime( $notice->data->time ) ) ); ?></td>
+                    <td class="text-dark"><?php echo esc_html( wp_date( 'd, M', $notice->data->time ) ); ?></td>
                     <td class="text-dark"><?php echo wp_kses_post( $notice->message ); ?></td>
                     <td class="text-dark"><?php echo esc_html( $notice->type ); ?></td>
                   </tr>

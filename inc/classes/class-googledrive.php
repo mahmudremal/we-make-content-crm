@@ -68,9 +68,9 @@ class GoogleDrive {
 		$this->clientId							= apply_filters( 'futurewordpress/project/system/getoption', 'auth-googleclientid', '719552948296-d14739tknbd33tv16b932pb859kcvums.apps.googleusercontent.com' );
 	}
 	public function developmentMode() {
-		
-		$this->parentDirectory = '1YGPIeK95atQJpgOCqmgcexVj7zZthcVG';
 		if( ! isset( $_GET[ 'googletest' ] ) ) {return;}
+		
+		// $this->parentDirectory = '1YGPIeK95atQJpgOCqmgcexVj7zZthcVG';
 		// $this->fetchAccessToken();
 		
 		// $this->get_access_token( isset( $_GET[ 'code' ] ) ? $_GET[ 'code' ] : false );
@@ -594,5 +594,24 @@ class GoogleDrive {
 		}
 		curl_close($curl);
 	}
+	public function downloadFileFromGoogleDrive($fileId, $saveTo) {
+		$url = "https://drive.google.com/uc?export=download&id=" . $fileId;
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		$headers = curl_exec($ch);
+		preg_match('/filename="(.*?)"/', $headers, $matches);
+		$filename = $matches[1];
+
+		$saveFilePath = $saveTo . '/' . $filename;
+		$fp = fopen($saveFilePath, 'w');
+		
+		curl_setopt($ch, CURLOPT_FILE, $fp);
+		curl_exec($ch);
+		curl_close($ch);
+		fclose($fp);
+		return true;
+	}
+	
 	
 }
