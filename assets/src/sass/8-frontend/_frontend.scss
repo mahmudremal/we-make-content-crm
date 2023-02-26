@@ -454,4 +454,20 @@ Registration Form Design
     border-color: $primaryColor;
     background-color: $primaryColor;
   }
+  .upload-icone {
+    height: 35px;
+    width: 35px;
+  }
+  .profile-img-edit input.file-upload.profile-image-upload {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    background: #333;
+    opacity: 0;
+    visibility: visible;
+    display: block;
+  }
 }

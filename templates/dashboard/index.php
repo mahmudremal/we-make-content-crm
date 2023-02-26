@@ -148,8 +148,12 @@ else :
           </div>
           <div class="card-body">
             
-            <div class="prof ile-img profile-logo profile-logo1 mb-4 text-center">
-              <img src="<?php echo esc_url( get_avatar_url( $userInfo->ID, ['size' => '100'] ) ); ?>" alt="userInfo-Profile" class="theme-color-default-img img-fluid rounded-pill avatar-100" loading="lazy">
+            <div class="prof ile-img profile-img-edit position-relative profile-logo1 mb-4 text-center m-auto" style="width: max-content;">
+              <img src="<?php echo esc_url( get_avatar_url( $userInfo->ID, ['size' => '100'] ) ); ?>" alt="userInfo-Profile" class="theme-color-default-img img-fluid rounded-pill avatar-100" loading="lazy" data-default="<?php echo esc_url( get_avatar_url( $userInfo->ID, ['size' => '100'] ) ); ?>" id="profile-image-preview">
+              <div class="upload-icone bg-primary">
+                <svg class="upload-button icon-14" width="14" height="14" viewBox="0 0 24 24"><path fill="#333" d="M14.06,9L15,9.94L5.92,19H5V18.08L14.06,9M17.66,3C17.41,3 17.15,3.1 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18.17,3.09 17.92,3 17.66,3M14.06,6.19L3,17.25V21H6.75L17.81,9.94L14.06,6.19Z"></path></svg>
+                <input type="file" class="form-control file-upload profile-image-upload" name="profile-image" accept="image/*" data-preview="#profile-image-preview" data-lead="<?php echo esc_attr( $userInfo->ID ); ?>">
+              </div>
             </div>
             <div class="align-items-center text-center mb-3">
               <h4 class="me-2 h4"><?php echo esc_html( $userInfo->meta->first_name . ' ' . $userInfo->meta->last_name ); ?></h4>

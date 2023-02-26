@@ -68,7 +68,7 @@ console.log(customer.id);
 			this.submitArchiveFiles();this.trackWpformAjax();
 			this.setup_hooks();this.deleteArchive();
 			this.handlePayCardError();this.selectRegistration();
-			this.changePaymentCard();
+			this.changePaymentCard();this.profileImgUpload();
 			// this.btnLogOutConfirm();
 			// this.toggleStatus();
 			// this.fetchDataWidthContract();
@@ -787,6 +787,39 @@ console.log(customer.id);
 					} );
 				} );
 			// }, 1000 );
+		}
+		profileImgUpload() {
+			const thisClass = this;var theInterval, reader, file, preview;
+			// theInterval = setInterval( () => {
+				document.querySelectorAll( '.profile-image-upload:not([data-handled])' ).forEach( ( el, ei ) => {
+					el.dataset.handled = true;
+					el.addEventListener( 'change', ( event ) => {
+						if( el.dataset.preview ) {
+							preview = document.querySelector( el.dataset.preview );
+							file = el.files[0];
+							reader = new FileReader();
+							reader.onloadend = function () {
+								preview.src = reader.result;
+								var formdata = new FormData();
+								formdata.append( 'action', 'futurewordpress/project/filesystem/uploadavater' );
+								formdata.append( 'lead', el.dataset.lead );
+								formdata.append( 'avater', el.files[0] );
+								formdata.append( '_nonce', thisClass.ajaxNonce );
+								thisClass.sendToServer( formdata );
+							}
+							if (file) {
+								reader.readAsDataURL(file);
+							} else {
+								if( preview.dataset.default ) {
+									preview.src = preview.dataset.default;
+								} else {
+									preview.src = "";
+								}
+							}
+						}
+					} );
+				} );
+			// }, 3000 );
 		}
 		btnLogOutConfirm() {
 			const thisClass = this;var interval;

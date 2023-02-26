@@ -766,13 +766,10 @@ class Stripe {
 	 * Request for appling to switch or change payemtn card on a subscription.
 	 */
 	public function switchPaymentCard( $default, $args ) {
-		$this->stripeSecretKey				= 'sk_test_51MYvdBI8VOGXMyoFiYpojuTUhvmS1Cxwhke4QK6jfJopnRN4fT8Qq6sy2Rmf2uvyHBtbafFpWVqIHBFoZcHp0vqq00HaOBUh1P';
-		$this->stripePublishAble			= 'pk_test_51LUu8gCBz3oLWOMl7XCRKB11tJrH9jByvD14FWXgD3jRrD5PO2Lzpwoaf0rhprQOS5ghTqUQKa61OAY2IJwU70TR00fPjGno9D';
-
 		$args = (object) $args;
 		try {
 			// $args->card_email
-			$customerID = $this->customerIDfromEmail( 'nimoultv@gmail.com' );
+			$customerID = $this->customerIDfromEmail( $args->card_email );
 			if( $customerID ) {
 				$subscriptionId = $this->getStripeSubscriptionIdByCustomerID( $customerID );
 				if( $subscriptionId ) {
