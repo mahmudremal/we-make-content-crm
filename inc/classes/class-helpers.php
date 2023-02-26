@@ -102,13 +102,13 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 	 */
 	public function sendMail( $args = [] ) {
 		$request = wp_parse_args( $args, [
-			'id' => 0, 'to' => '', 'name' => '', 'email' => '', 'subject' => '', 'message' => ''
+			'id' => 0, 'to' => '', 'name' => '', 'email' => '', 'subject' => '', 'message' => '', 'type' => 'text/plain'
 		] );
 		// can be verify by "id" as company ID Author ID
 		$to = $request[ 'to' ];
 		$subject = $request[ 'subject' ];
 		$body = $request[ 'message' ];
-		$headers = [ 'Content-Type: text/plain; charset=UTF-8' ];
+		$headers = [ 'Content-Type: ' . $request[ 'type' ] . '; charset=UTF-8' ];
 		$headers[] = 'Reply-To: ' . $request[ 'name' ] . ' <' . $request[ 'email' ] . '>';
 
 		$mail_sent = wp_mail( $to, $subject, $body, $headers );

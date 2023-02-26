@@ -29,6 +29,7 @@ class Core {
 		add_action( 'wp_ajax_futurewordpress/project/action/sendregistration', [ $this, 'sendRegistration' ], 10, 0 );
 		add_action( 'wp_ajax_futurewordpress/project/action/sendpasswordreset', [ $this, 'sendPasswordReset' ], 10, 0 );
 		add_action( 'wp_ajax_futurewordpress/project/action/registerexisting', [ $this, 'registerExisting' ], 10, 0 );
+		add_action( 'wp_ajax_futurewordpress/project/action/switchpayementcard', [ $this, 'switchPayementCard' ], 10, 0 );
 
 		add_action( 'admin_post_futurewordpress/project/action/changepassword', [ $this, 'changePassword' ], 10, 0 );
 
@@ -100,11 +101,11 @@ class Core {
 		if( $user_id && $reg_key && $reg_type ) {
 			update_user_meta( $user_id, 'contract_type', $reg_type );
 			wp_send_json_success( [
-				'message'			=> __( 'Successfully Saved your choice. Current page should reload not. If you don\'t see, page not reloading, please reload this page.', 'domain' ),
+				'message'			=> __( 'Successfully Saved your choice. Current page should reload not. If you don\'t see, page not reloading, please reload this page.', 'we-make-content-crm' ),
 				'hooks'				=> [ 'reload-page' ]
 			], 200 );
 		} else {
-			wp_send_json_error( __( 'Technical Error. If you saw this message, please contact with site administrative.', 'domain' ) );
+			wp_send_json_error( __( 'Technical Error. If you saw this message, please contact with site administrative.', 'we-make-content-crm' ) );
 		}
 	}
 	public function actionStatuses( $args, $specific = false ) {
@@ -259,6 +260,7 @@ class Core {
 			
 			$args[ 'subject' ] = str_replace( $instead, $replace, apply_filters( 'futurewordpress/project/system/getoption', 'email-registationsubject', 'Invitation to Register for ' . get_option( 'blogname', site_url() ) ) );
 			$args[ 'message' ] = str_replace( $instead, $replace, apply_filters( 'futurewordpress/project/system/getoption', 'email-registationbody', 'Email not set. Sorry for inturrupt.' ) );
+			$args[ 'type' ] = 'text/html';
 			
 			if( apply_filters( 'futurewordpress/project/mailsystem/sendmail', $args ) ) {
 				wp_send_json_success( [ 'message' => __( 'Registration Link sent successfully!', 'we-make-content-crm' ), 'hooks' => [ 'sent-registration-' . $_POST[ 'lead' ] ] ], 200 );
@@ -306,14 +308,14 @@ class Core {
 		}
 	}
 	public function toggleSubscption( $user_id, $meta_key, $meta_value ) {
-		$lastchanged = get_usermeta( $user_id, 'subscription_last_changed' );
 		$userInfo = get_user_by( 'id', $user_id );
-		if( $meta_value == 'off' && $lastchanged && $lastchanged == date( 'M, Y' ) ) {
-			wp_send_json_success( [ 'message' => __( 'You can\'t change it while it is under pending review. You can change your subscription status once a day maximum. Please wait until it release.', 'we-make-content-crm' ), 'hooks' => [] ], 200 );
+
+		if( false && $meta_value == 'off' && ! apply_filters( 'futurewordpress/project/payment/stripe/allowswitchpause', true, 'pause', $userInfo->ID ) ) {
+			wp_send_json_success( [ 'message' => __( 'You can\'t change now. You can only pause you retainer once every 60 days. Please wait until it release.', 'we-make-content-crm' ), 'hooks' => [] ], 200 );
 		} else {
 			$status = ( $meta_value == 'off' ) ? 'pause' : 'unpause';
 			if( apply_filters( 'futurewordpress/project/payment/stripe/subscriptionToggle', $status, ( ! empty( $userInfo->data->user_email ) ? $userInfo->data->user_email : get_user_meta( $user_id, 'email', true ) ), $user_id ) ) {
-				if( $lastchanged ) {update_user_meta( $user_id, 'subscription_last_changed', date( 'M, Y' ) );} else {add_user_meta( $user_id, 'subscription_last_changed', date( 'd M, Y' ) );}
+				update_user_meta( $user_id, 'subscription_last_changed', time() );
 				update_user_meta( $user_id, $meta_key, $meta_value );
 				$notice = apply_filters( 'futurewordpress/project/notices/manager', 'add', 'cancelSubscription', [
 					'type'						=> 'warn',
@@ -324,11 +326,13 @@ class Core {
 						'user'					=> $user_id
 					]
 				] );
-				wp_send_json_success( [ 'message' => __( 'User subscription Changed Successfully', 'we-make-content-crm' ), 'hooks' => ['subscription-status-success' ] ], 200 );
+				// 'message' => __( 'User subscription Changed Successfully', 'we-make-content-crm' ), 
+				wp_send_json_success( [ 'hooks' => ['subscription-status-' . $status ] ], 200 );
 			} else {
 				wp_send_json_error( __( 'Failed to Switch subscription! Please contact with administrative for assistance.', 'we-make-content-crm' ), 200 );
 			}
 		}
+		// wp_send_json_error( 'failed', 200 );
 	}
 	public function cancelSubscription() {
 		if( ! apply_filters( 'futurewordpress/project/system/isactive', 'stripe-cancelsubscription' ) ) {
@@ -348,6 +352,29 @@ class Core {
 			wp_send_json_success( __( 'You successfully Cancelled your subscriptions. A notification to was sent to the Administrative.', 'we-make-content-crm' ), 200 );
 		} else {
 			wp_send_json_error( __( 'Subscription calcelletion failed. Please contact with site administrative for further assistance.', 'we-make-content-crm' ), 200 );
+		}
+	}
+	public function switchPayementCard() {
+		if( ! isset( $_POST[ '_nonce' ] ) || ! wp_verify_nonce( $_POST[ '_nonce' ], 'futurewordpress/project/verify/nonce' ) ) {
+			wp_send_json_error( __( 'We\'ve detected you\'re requesting with an invalid security token.', 'we-make-content-crm' ), 200 );
+		}
+		if( ! isset( $_POST[ 'card' ] ) || ! isset( $_POST[ 'card' ][ 'number' ] ) || ! isset( $_POST[ 'card' ][ 'exp_month' ] ) || ! isset( $_POST[ 'card' ][ 'exp_year' ] ) || ! isset( $_POST[ 'card' ][ 'cvc' ] ) ) {wp_send_json_error( __( 'Some required fields are missing. If you belive it should not to be, please contact to the administrative.',   'we-make-content-crm' ), 200 );}
+		$userInfo = get_user_by( 'id', is_admin() ? $_POST[ 'userid' ] : get_current_user_id() );
+		$userMeta = array_map( function( $a ){ return $a[0]; }, (array) get_user_meta( $userInfo->ID ) );
+		$userInfo = (object) wp_parse_args( $userInfo, [ 'id' => '', 'meta' => (object) wp_parse_args( $userMeta, apply_filters( 'futurewordpress/project/usermeta/defaults', (array) $userMeta ) ) ] );
+			
+		$card = $_POST[ 'card' ];
+		$args = [
+			'card_email'			=> empty( $userInfo->data->user_email ) ? $userInfo->meta->email : $userInfo->data->user_email,
+			'card_number'			=> $card[ 'number' ],
+			'card_month'			=> $card[ 'exp_month' ],
+			'card_year'			=> $card[ 'exp_year' ],
+			'card_cvc'			=> $card[ 'cvc' ]
+		];
+		if( apply_filters( 'futurewordpress/project/payment/stripe/switchpaymentcard', false, $args ) ) {
+			wp_send_json_success( __( 'Added Payment Card and is now activated for subscription.', 'we-make-content-crm' ), 200 );
+		} else {
+			wp_send_json_error( __( 'Something went wrong while trying to update stripe.', 'we-make-content-crm' ) );
 		}
 	}
 	public function registerExisting() {

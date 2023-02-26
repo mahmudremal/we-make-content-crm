@@ -4,6 +4,10 @@
 @import "icons";
 @import "map";
 
+$primaryColor: #FFCF02;
+$primaryColorb4: #ffd102b4;
+$primaryColor1f: #FFCF021f;
+$primaryColor0d: #ffcf020d;
 
 /* General Settings */
 .modal-backdrop.fade.show {
@@ -63,8 +67,8 @@ div.wpforms-container-full .wpforms-form .wpforms-field {
       display: block;
       min-width: 100%;
       .wpforms-field-row-block {
-        padding: 10px !important;
-        margin-left: 0 !important;
+        // padding: 10px !important;
+        // margin-left: 0 !important;
       }
     }
   }
@@ -108,14 +112,27 @@ div.wpforms-container-full .wpforms-form .wpforms-field {
         display: flex;
         flex-wrap: wrap;
         margin-top: calc(-1 * var(--bs-gutter-y));
-        margin-right: calc(-.5 * var(--bs-gutter-x));
-        margin-left: calc(-.5 * var(--bs-gutter-x));
+        // margin-right: calc(-.5 * var(--bs-gutter-x));
+        // margin-left: calc(-.5 * var(--bs-gutter-x));
         .wpforms-field-label {
           font-size: 22px;
           margin-left: 10px;
         }
-        &.wpforms-field-name:first-child {
-          margin-bottom: 0;
+        &.wpforms-field-name {
+          margin-right: 0 !important;
+          &:first-child {
+            margin-bottom: 0;
+          }
+          .wpforms-field-row-block {
+            &.wpforms-one-half {
+              &:first-child {
+                padding-left: 0 !important;
+              }
+              &:last-child {
+                padding-right: 0 !important;
+              }
+            }
+          }
         }
       }
       .wpforms-field-stripe-credit-card-cardnumber,
@@ -137,7 +154,7 @@ div.wpforms-container-full .wpforms-form .wpforms-field {
           background-color: #fff;
         }
         &.wpforms-field-name .wpforms-field-row .wpforms-field-row-block {
-          width: 50%;
+          // width: 50%;
         }
       }
       .wpforms-one-half {
@@ -215,11 +232,18 @@ div.wpforms-container-full .wpforms-form .wpforms-field {
       }
       .wpforms-error-container {
         padding: 10px;
-        background: #f57272;
+        background: #ffdf4df0;
         margin-bottom: 20px;
         border: none;
-        font-size: 16px;
-        font-weight: 100;
+        font-size: 18px;
+        color: #333;
+        font-weight: bolder;
+        -webkit-text-stroke: .6px #333;
+        -webkit-text-stroke-width: medium;
+      }
+      .wpforms-field-stripe-credit-card {
+        margin-bottom: 0;
+        padding-bottom: 0;
       }
     }
     .wpforms-submit-container {
@@ -237,15 +261,24 @@ div.wpforms-container-full .wpforms-form .wpforms-field {
         }
       }
     }
+    .wpforms-field-container .wpforms-page {
+      max-width: 95vw;
+      margin: auto;
+      position: relative;
+      display: block;
+      padding: 20px;
+    }
   }
 }
 
 @media (max-width: 600px) {
-  .content .container .container_inner.page_container_inner, .full_page_container_inner {
-    padding: 10px 0 0;
-    margin: auto;
-    width: auto;
-    max-width: 90vw;
+  .content {
+    .container .container_inner.page_container_inner, .full_page_container_inner {
+      padding: 10px 0 0;
+      margin: auto;
+      width: auto;
+      max-width: 90vw;
+    }
   }
   div.wpforms-container-full .wpforms-form .wpforms-field.wpforms-field-name .wpforms-field-row .wpforms-field-row-block {
     width: 100% !important;
@@ -259,16 +292,15 @@ div.wpforms-container-full .wpforms-form .wpforms-field {
   }
 }
 
-$primaryColor: #FFCF02;
-$primaryColorb4: #ffd102b4;
-$primaryColor1f: #FFCF021f;
-$primaryColor0d: #ffcf020d;
 .fwp-body {
-  .content .content_inner {
-    background: #ffffff9e;
-    .container.content-inner {
-      border-radius: 10px;
-      background: none;
+  .content {
+    padding-bottom: 0 !important;
+    .content_inner {
+      background: #ffffff9e;
+      .container.content-inner {
+        border-radius: 10px;
+        background: none;
+      }
     }
   }
   .main-content {
@@ -391,5 +423,35 @@ $primaryColor0d: #ffcf020d;
       border-top-color: $primaryColor;
       border-bottom-color: $primaryColor;
     }
+  }
+}
+
+/**
+Registration Form Design
+*/
+.fwp-body {
+  div.wpforms-container-full .wpforms-form label.wpforms-error {
+    font-size: 15px;
+    margin-top: 10px;
+  }
+  .input-group.input-group-solid .form-control+.input-group-text {
+    border-left-color: transparent;
+  }
+  .input-group-text {
+    border-color: transparent;
+    &:first-child {
+      padding-right: 5px;
+      + input {
+        border-left-color: transparent;
+        @include mq($from: 500px) {
+          padding-left: 5px;
+        }
+      }
+    }
+  }
+  .btn-outline-warning {
+    color: #333;
+    border-color: $primaryColor;
+    background-color: $primaryColor;
   }
 }

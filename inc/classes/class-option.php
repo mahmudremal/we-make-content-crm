@@ -161,12 +161,13 @@ class Option {
 		switch( $field['type'] ) {
 
 			case 'text':
-			case 'url':
+			case 'email':
 			case 'password':
 			case 'number':
 			case 'date':
 			case 'time':
 			case 'color':
+			case 'url':
 				$html .= '<input id="' . esc_attr( $field['id'] ) . '" type="' . $field['type'] . '" name="' . esc_attr( $option_name ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" value="' . $data . '"' . $this->attributes( $field ) . '/>' . "\n";
 			break;
 

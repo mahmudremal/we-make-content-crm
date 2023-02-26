@@ -149,17 +149,17 @@ class Dashboard {
   }
   public function adminTitle( $default ) {
     if( $args[ 'split' ][0] == 'leads' && $args[ 'split' ][1] == 'edit' || $args[ 'split' ][1] == 'add' ) {
-      return __( 'Edit Lead', 'domain' );
+      return __( 'Edit Lead', 'we-make-content-crm' );
     } else if( $args[ 'split' ][0] == '' || $args[ 'split' ][0] == 'leads' && $args[ 'split' ][1] === false ) {
-      return __( 'Leads', 'domain' );
+      return __( 'Leads', 'we-make-content-crm' );
     } else if( $args[ 'split' ][0] == 'payments' && $args[ 'split' ][1] == false ) {
-      return __( 'Payments', 'domain' );
+      return __( 'Payments', 'we-make-content-crm' );
     } else if( $args[ 'split' ][1] == 'stripe_logs' ) {
-      return __( 'Stripe Logs', 'domain' );
+      return __( 'Stripe Logs', 'we-make-content-crm' );
     } else if( $args[ 'split' ][0] == 'archives' ) {
-      return __( 'Archive Uploaded', 'domain' );
+      return __( 'Archive Uploaded', 'we-make-content-crm' );
     } else if( $args[ 'split' ][0] == 'notices' ) {
-      return __( 'Notices', 'domain' );
+      return __( 'Notices', 'we-make-content-crm' );
     } else {}
   }
   public function adminNotices() {

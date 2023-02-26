@@ -21,6 +21,6 @@
         </div>
     </div>
     <div class="iq-header-img">
-        <img src="https://templates.iqonic.design/product/qompac-ui/html/dist/assets/images/dashboard/top-header.png" alt="header" class="theme-color-default-img img-fluid w-100 h-100 animated-scaleX" loading="lazy">
+        <img src="<?php echo esc_url( WEMAKECONTENTCMS_BUILD_URI . '/img/top-header.png' ); ?>" alt="header" class="theme-color-default-img img-fluid w-100 h-100 animated-scaleX" loading="lazy">
     </div>
 </div>

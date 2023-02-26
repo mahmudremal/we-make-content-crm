@@ -9,9 +9,9 @@
                 <div class="col-md-8">
                   <div class="card  d-flex justify-content-center mb-0">
                     <div class="card-body">
-                      <h2 class="mt-3 mb-4"><?php esc_html_e( 'Select Registration', 'domain' ); ?></h2>
+                      <h2 class="mt-3 mb-4"><?php esc_html_e( 'Select Registration', 'we-make-content-crm' ); ?></h2>
                       <p class="cnf-mail mb-1">
-                      <?php esc_html_e( 'We\'re sorry, but it seems like the admin hasn\'t selected a specific registration type for you. In order to proceed with the registration process, please choose the appropriate registration type from the available options on the registration page. Thank you for your cooperation.', 'domain' ); ?>
+                      <?php esc_html_e( 'We\'re sorry, but it seems like the admin hasn\'t selected a specific registration type for you. In order to proceed with the registration process, please choose the appropriate registration type from the available options on the registration page. Thank you for your cooperation.', 'we-make-content-crm' ); ?>
                       </p>
                       <div class="d-inline-block w-100 mt-3">
                         <div class="form-group">

@@ -40,7 +40,7 @@ $is_edit_profile = ( ! empty( $args[ 'split' ][2] ) );
         <input type="hidden" name="userid" value="<?php echo esc_attr( ( $is_edit_profile ) ? $args[ 'split' ][2] : 'new' ); ?>">
         <?php wp_nonce_field( 'futurewordpress/project/nonce/editsubscriber', '_nonce', true, true ); ?>
         <div class="col-xl-3 col-lg-4">
-            <div class="card">
+            <div class="card px-2">
                 <div class="card-header">
                     <div class="d-flex justify-content-between">
                         <div class="d-flex align-items-center">
@@ -50,7 +50,7 @@ $is_edit_profile = ( ! empty( $args[ 'split' ][2] ) );
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-card">
-                        <div class="form-group">
+                        <div class="form-group text-center">
                             <div class="profile-img-edit position-relative">
                                 <img src="<?php echo esc_url( get_avatar_url( $userInfo->ID, ['size' => '100'] ) ); ?>" alt="profile-pic" class="theme-color-default-img profile-pic rounded avatar-100" loading="lazy" id="profile-image-preview" data-default="<?php echo esc_url( get_avatar_url( $userInfo->ID, ['size' => '100'] ) ); ?>">
                                 <div class="upload-icone bg-primary">
@@ -76,18 +76,6 @@ $is_edit_profile = ( ! empty( $args[ 'split' ][2] ) );
                             </select>
                         </div>
                         <div class="form-group">
-                            <div class="form-check d-block">
-                                <input class="form-check-input" type="checkbox" name="userinfo[enable_subscription]" value="on" id="user-status-toggle" <?php echo esc_attr( in_array( $userInfo->meta->enable_subscription, [ true, 'on' ] ) ? 'checked' : '' ); ?>>
-                                <label class="form-check-label" for="user-status-toggle">
-                                    Enable Subscription
-                                </label>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="monthly_retainer"><?php esc_html_e( 'Monthly Retainer:', 'we-make-content-crm' ); ?></label>
-                            <input type="text" class="form-control" id="monthly_retainer" name="userinfo[monthly_retainer]" value="<?php echo esc_attr( $userInfo->meta->monthly_retainer ); ?>" placeholder="$2000" data-registration="<?php echo site_url( 'lead-registration/source-email/' . bin2hex( $userInfo->ID ) . '/' ); ?>">
-                        </div>
-                        <div class="form-group">
                             <label class="form-label" for="content_calendar"><?php esc_html_e( 'Content Calendar:', 'we-make-content-crm' ); ?></label>
                             <input type="text" class="form-control" id="content_calendar" name="userinfo[content_calendar]" value="<?php echo esc_url( $userInfo->meta->content_calendar ); ?>" placeholder="Celandly URI">
                         </div>
@@ -106,8 +94,11 @@ $is_edit_profile = ( ! empty( $args[ 'split' ][2] ) );
                 </div>
                 <div class="card-body">
                     <div class="form-group">
+                        <button type="submit" class="btn btn-primary mt-2"><?php echo esc_html( ( $is_edit_profile ) ? __( 'Update User', 'we-make-content-crm' ) : __( 'Add New User', 'we-make-content-crm' ) ); ?></button>
                         <a class="btn btn-primary btn-outline mt-2" href="<?php echo esc_url( apply_filters( 'futurewordpress/project/user/dashboardpermalink', $userInfo->ID, $userInfo->data->user_nicename ) ); ?>" role="button" target="_blank"><?php esc_html_e( 'View Frontend', 'we-make-content-crm' ); ?></a>
-                        <button type="button" class="btn btn-danger btn-outline mt-2 delete-lead-user" data-id="<?php echo esc_attr( $userInfo->ID ); ?>" data-user-info="<?php echo esc_attr( json_encode( [ 'displayname' => $userInfo->display_name, 'role' => $userInfo->user_role ] ) ); ?>" role="button"><?php esc_html_e( 'Delete Account', 'we-make-content-crm' ); ?></button>
+                        <?php if( apply_filters( 'futurewordpress/project/system/isactive', 'general-leaddelete' ) ) : ?>
+                            <button type="button" class="btn btn-danger btn-outline mt-2 delete-lead-user" data-id="<?php echo esc_attr( $userInfo->ID ); ?>" data-user-info="<?php echo esc_attr( json_encode( [ 'displayname' => $userInfo->display_name, 'role' => $userInfo->user_role ] ) ); ?>" role="button"><?php esc_html_e( 'Delete Account', 'we-make-content-crm' ); ?></button>
+                        <?php endif; ?>
                         <button type="button" class="btn btn-success btn-outline mt-2 lead-send-registration" data-id="<?php echo esc_attr( $userInfo->ID ); ?>" data-user-info="<?php echo esc_attr( $userInfo->display_name ); ?>" role="button"><?php esc_html_e( 'Mail Registration', 'we-make-content-crm' ); ?></button>
                     </div>
                 </div>
@@ -119,24 +110,36 @@ $is_edit_profile = ( ! empty( $args[ 'split' ][2] ) );
                     </div>
                 </div>
                 <div class="card-body">
-                    <!-- <div class="form-group">
-                        <label class="form-label"><?php esc_html_e( 'Document type:', 'we-make-content-crm' ); ?></label>
-                        <select name="userinfo[document_type]" class="selectpicker form-control" data-style="py-0" id="contract_type">
-                            <option><?php esc_html_e( 'Select a type', 'we-make-content-crm' ); ?></option>
-                            <?php foreach( $userDocuments as $document_key => $document_text ) : ?>
-                                <option value="<?php echo esc_attr( $document_key ); ?>" <?php echo esc_attr( ( $document_key == $userInfo->meta->document_type ) ? 'selected' : '' ); ?>><?php echo esc_html( $document_text ); ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                    <?php if( false ) : ?>
+                        <div class="form-group">
+                            <label class="form-label"><?php esc_html_e( 'Document type:', 'we-make-content-crm' ); ?></label>
+                            <select name="userinfo[document_type]" class="selectpicker form-control" data-style="py-0" id="contract_type">
+                                <option><?php esc_html_e( 'Select a type', 'we-make-content-crm' ); ?></option>
+                                <?php foreach( $userDocuments as $document_key => $document_text ) : ?>
+                                    <option value="<?php echo esc_attr( $document_key ); ?>" <?php echo esc_attr( ( $document_key == $userInfo->meta->document_type ) ? 'selected' : '' ); ?>><?php echo esc_html( $document_text ); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label"><?php esc_html_e( 'Contract type:', 'we-make-content-crm' ); ?></label>
+                            <select name="userinfo[contract_type]" class="selectpicker form-control" data-style="py-0" id="contract_type">
+                                <option><?php esc_html_e( 'Select a type', 'we-make-content-crm' ); ?></option>
+                                <?php foreach( $userContracts as $contract_key => $contract_text ) : ?>
+                                    <option value="<?php echo esc_attr( $contract_key ); ?>" <?php echo esc_attr( ( $contract_key == $userInfo->meta->contract_type ) ? 'selected' : '' ); ?>><?php echo esc_html( $contract_text ); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    <?php endif; ?>
+                    <div class="form-group">
+                        <div class="form-check d-block">
+                            <input class="form-check-input" type="checkbox" name="userinfo[enable_subscription]" value="on" id="user-status-toggle" <?php echo esc_attr( in_array( $userInfo->meta->enable_subscription, [ true, 'on' ] ) ? 'checked' : '' ); ?>>
+                            <label class="form-check-label" for="user-status-toggle"><?php esc_html_e( 'Enable Subscription', 'we-make-content-crm' ); ?></label>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label"><?php esc_html_e( 'Contract type:', 'we-make-content-crm' ); ?></label>
-                        <select name="userinfo[contract_type]" class="selectpicker form-control" data-style="py-0" id="contract_type">
-                            <option><?php esc_html_e( 'Select a type', 'we-make-content-crm' ); ?></option>
-                            <?php foreach( $userContracts as $contract_key => $contract_text ) : ?>
-                                <option value="<?php echo esc_attr( $contract_key ); ?>" <?php echo esc_attr( ( $contract_key == $userInfo->meta->contract_type ) ? 'selected' : '' ); ?>><?php echo esc_html( $contract_text ); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div> -->
+                        <label class="form-label" for="monthly_retainer"><?php esc_html_e( 'Monthly Retainer:', 'we-make-content-crm' ); ?></label>
+                        <input type="text" class="form-control" id="monthly_retainer" name="userinfo[monthly_retainer]" value="<?php echo esc_attr( $userInfo->meta->monthly_retainer ); ?>" placeholder="$2000" data-registration="<?php echo site_url( 'lead-registration/source-email/' . bin2hex( $userInfo->ID ) . '/' ); ?>">
+                    </div>
                     <div class="form-group">
                         <label class="form-label"><?php esc_html_e( 'Select Registration Link:', 'we-make-content-crm' ); ?></label>
                         <select name="userinfo[contract_type]" class="selectpicker form-control" data-style="py-0" id="contract_type" data-current="<?php echo esc_attr( $userInfo->meta->contract_type ); ?>">
@@ -223,7 +226,6 @@ $is_edit_profile = ( ! empty( $args[ 'split' ][2] ) );
                         <!-- <div class="checkbox my-2">
                             <label class="form-label"><input class="form-check-input me-2" type="checkbox" value="" id="flexchexked">Enable Two-Factor-Authentication</label>
                         </div> -->
-                        <button type="submit" class="btn btn-primary mt-2"><?php echo esc_html( ( $is_edit_profile ) ? __( 'Update User', 'we-make-content-crm' ) : __( 'Add New User', 'we-make-content-crm' ) ); ?></button>
                     </div>
                 </div>
             </div>
@@ -245,6 +247,19 @@ $is_edit_profile = ( ! empty( $args[ 'split' ][2] ) );
                                 <input type="url" class="form-control" id="meeting_link" name="userinfo[meeting_link]" value="<?php echo esc_attr( $userInfo->meta->meeting_link ); ?>" placeholder="<?php esc_attr_e( 'Meeting Link', 'we-make-content-crm' ); ?>">
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-full-width">
+                <div class="card-header d-flex justify-content-between">
+                    <div class="header-title">
+                    <h4 class="card-title"><?php esc_html_e( 'Contract Services:', 'we-make-content-crm' ); ?></h4>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label class="form-label" for="services"><?php esc_html_e( 'Services:', 'we-make-content-crm' ); ?></label>
+                        <textarea class="form-control" name="userinfo[services]" id="services" cols="30" rows="10"><?php echo esc_html( $userInfo->meta->services ); ?></textarea>
                     </div>
                 </div>
             </div>
@@ -276,13 +291,29 @@ $is_edit_profile = ( ! empty( $args[ 'split' ][2] ) );
             <div class="card card-full-width">
                 <div class="card-header d-flex justify-content-between">
                     <div class="header-title">
-                    <h4 class="card-title"><?php esc_html_e( 'Contract Services:', 'we-make-content-crm' ); ?></h4>
+                    <h4 class="card-title"><?php echo esc_html( ( $is_edit_profile ) ? __( 'Additional Q/A.', 'we-make-content-crm' ) : __( 'New User Information', 'we-make-content-crm' ) ); ?></h4>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="form-group">
-                        <label class="form-label" for="services"><?php esc_html_e( 'Services:', 'we-make-content-crm' ); ?></label>
-                        <textarea class="form-control" name="userinfo[services]" id="services" cols="30" rows="10"><?php echo esc_html( $userInfo->meta->services ); ?></textarea>
+                    <div class="new-user-info">
+                        <div class="row">
+                            <div class="form-group col-md-6">
+                                <label class="form-label" for="question1"><?php esc_html_e( 'Question #1', 'we-make-content-crm' ); ?></label>
+                                <input type="text" class="form-control" id="question1" name="userinfo[question1]" value="<?php echo esc_attr( $userInfo->meta->question1 ); ?>">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="form-label" for="question2"><?php esc_html_e( 'Question #2', 'we-make-content-crm' ); ?></label>
+                                <input type="text" class="form-control" id="question2" name="userinfo[question2]" value="<?php echo esc_attr( $userInfo->meta->question2 ); ?>">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="form-label" for="question3"><?php esc_html_e( 'Question #3', 'we-make-content-crm' ); ?></label>
+                                <input type="text" class="form-control" id="question3" name="userinfo[question3]" value="<?php echo esc_attr( $userInfo->meta->question3 ); ?>">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="form-label" for="question4"><?php esc_html_e( 'Question #4', 'we-make-content-crm' ); ?></label>
+                                <input type="text" class="form-control" id="question4" name="userinfo[question4]" value="<?php echo esc_attr( $userInfo->meta->question4 ); ?>">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

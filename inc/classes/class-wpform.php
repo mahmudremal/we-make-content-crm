@@ -211,6 +211,7 @@ class Wpform {
 				// $fields[ $i ][ 'value' ] = $theEmail[1];
 			}
 		}
+		// print_r( $fields );wp_die();
 
 		defined( 'WPFORMS_PROCESS_FILTER_HANDLED_EMAIL' ) || define( 'WPFORMS_PROCESS_FILTER_HANDLED_EMAIL', $theEmail );
 		defined( 'WPFORMS_PROCESS_FILTER_HANDLED_EMAIL_EXISTS' ) || define( 'WPFORMS_PROCESS_FILTER_HANDLED_EMAIL_EXISTS', $has_user->ID );

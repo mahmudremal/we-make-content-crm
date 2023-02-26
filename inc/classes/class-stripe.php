@@ -13,6 +13,7 @@ use \WP_Query;
 class Stripe {
 
 	use Singleton;
+	private $userInfo;
 	private $theTable;
 	private $cancelUrl;
 	private $lastResult;
@@ -36,7 +37,7 @@ class Stripe {
 		$this->stripePublishAble			= apply_filters( 'futurewordpress/project/system/getoption', 'stripe-publishablekey', false );
 		$this->stripeSecretKey				= apply_filters( 'futurewordpress/project/system/getoption', 'stripe-secretkey', false );
 		$this->productID							= 'prod_NJlPpW2S6i75vM';
-		$this->lastResult							= false;
+		$this->lastResult							= false;$this->userInfo = false;
 		$this->successUrl							= site_url( 'payment/stripe/{CHECKOUT_SESSION_ID}/success' );
 		$this->cancelUrl							= site_url( 'payment/stripe/{CHECKOUT_SESSION_ID}/cancel' );
 
@@ -49,41 +50,13 @@ class Stripe {
 		add_filter( 'futurewordpress/project/payment/stripe/subscriptionToggle', [ $this, 'subscriptionToggle' ], 10, 3 );
 		add_filter( 'futurewordpress/project/payment/stripe/subscriptionCancel', [ $this, 'subscriptionCancel' ], 10, 3 );
 		add_filter( 'futurewordpress/project/payment/stripe/getsubscriptionby', [ $this, 'getSubscriptionBy' ], 10, 2 );
+		add_filter( 'futurewordpress/project/payment/stripe/switchpaymentcard', [ $this, 'switchPaymentCard' ], 10, 2 );
+
+		add_filter( 'futurewordpress/project/payment/stripe/allowswitchpause', [ $this, 'allowSitchPause' ], 10, 3 );
 
 		add_filter( 'futurewordpress/project/rewrite/rules', [ $this, 'rewriteRules' ], 10, 1 );
 		add_filter( 'query_vars', [ $this, 'query_vars' ], 10, 1 );
 		add_filter( 'template_include', [ $this, 'template_include' ], 10, 1 );
-
-
-		// $response = $this->stripe_payment_history( $this->customerIDfromEmail( 'radvix.flow@gmail.com' ) );
-
-		// print_r( $this->pauseSubscriptionUsingEmail( 'pause', 'nimoultv@gmail.com' ) );wp_die();
-
-		// $subscription_data = $this->get_subscription_data_by_email( 'figosim608@mirtox.com' );print_r($subscription_data);
-		
-	}
-	public function init() {
-		if( ! isset( $_GET[ 'die_mode' ] ) ) {return;}
-		$notices = get_option( 'fwp_we_make_content_admin_notice', [] );
-		foreach( $notices as $i => $notice ) {
-			$notices[ $i ][ 'data' ][ 'time' ] = strtotime( $notices[ $i ][ 'data' ][ 'time' ] );
-			// if( $notice[ 'data' ][ 'time' ] && strtotime( '-15 days' ) >= $notice[ 'data' ][ 'time' ] ) {
-				// unset( $notices[ $i ] );
-				// print_r( [strtotime( '-15 days' ), $notice[ 'data' ][ 'time' ]]);
-			// }
-		}
-		// print_r( $notices );
-		// $this->stripeSecretKey				= 'sk_test_51MYvdBI8VOGXMyoFiYpojuTUhvmS1Cxwhke4QK6jfJopnRN4fT8Qq6sy2Rmf2uvyHBtbafFpWVqIHBFoZcHp0vqq00HaOBUh1P';
-		// $this->stripePublishAble			= 'pk_test_51LUu8gCBz3oLWOMl7XCRKB11tJrH9jByvD14FWXgD3jRrD5PO2Lzpwoaf0rhprQOS5ghTqUQKa61OAY2IJwU70TR00fPjGno9D';
-
-			// 'cus_NOgvvpyguFIFOL'
-		// $response = $this->getStripeSubscriptionIdByCustomerID( $this->customerIDfromEmail( 'kokarih486@wiroute.com' ) );
-		// // $response = $this->get_all_subscriptions();
-		// $subscription = $this->lastResult->data[0];
-		// print_r( [
-		// 	$subscription
-		// ] );
-		wp_die();
 	}
 	public function query_vars( $query_vars  ) {
 		$query_vars[] = 'pay_retainer';
@@ -108,6 +81,20 @@ class Stripe {
 	public function paymentMethods() {
 		$methods = [ 'acss_debit', 'affirm', 'afterpay_clearpay', 'alipay', 'au_becs_debit', 'bacs_debit', 'bancontact', 'blik', 'boleto', 'card', 'customer_balance', 'eps', 'fpx', 'giropay', 'grabpay', 'ideal', 'klarna', 'konbini', 'link', 'oxxo', 'p24', 'paynow', 'pix', 'promptpay', 'sepa_debit', 'sofort', 'us_bank_account', 'wechat_pay' ];
 		$result = [];foreach( $methods as $method ) {$result[ $method ] = $method;}return $result;
+	}
+	public function allowSitchPause( $default, $todo, $user_id ) {
+		if( $todo == 'unpause' ) {
+			return true;
+		} else {
+			$lastdid = get_usermeta( $user_id, 'subscription_last_changed', true );
+			$someDate = new \DateTime( date( 'Y-M-d H:i:s', (int) $lastdid ) );
+			$now = new \DateTime();
+			if( $someDate->diff($now)->days > 60 ) {
+				// The date was more than 60 days ago.
+				return true;
+			}
+			return false;
+		}
 	}
 
 	private function insertIntoTable( $json ) {
@@ -294,13 +281,13 @@ class Stripe {
 	}
 
 	public function customerIDfromEmail( $email ) {
-		$userInfo = get_user_by( 'email', $email );
-		// if( $userInfo && ! empty( $userInfo->ID ) ) {
-		// 	$customer_id = get_user_meta( $userInfo->ID, 'stripe_customer_id', true );
-		// 	if( $customer_id && ! empty( $customer_id ) ) {
-		// 		return $customer_id;
-		// 	}
-		// }
+		$this->userInfo = $userInfo = get_user_by( 'email', $email );
+		if( $userInfo && ! empty( $userInfo->ID ) ) {
+			$customer_id = get_user_meta( $userInfo->ID, 'stripe_customer_id', true );
+			if( $customer_id && ! empty( $customer_id ) ) {
+				return $customer_id;
+			}
+		}
 		$url = "https://api.stripe.com/v1/customers?email=" . urlencode($email);
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
@@ -312,6 +299,8 @@ class Stripe {
 		$response = curl_exec($ch);
 		curl_close($ch);
 		$data = json_decode($response);
+		$this->lastResult = $data;
+		
 		if( isset( $data->data[0] ) && ! empty( $data->data[0]->id ) ) {
 			if( $userInfo && ! empty( $userInfo->ID ) ) {
 				update_user_meta( $userInfo->ID, 'stripe_customer_id', $data->data[0]->id );
@@ -411,7 +400,7 @@ class Stripe {
 				break;
 		}
 	}
-	protected function getStripeSubscriptionIdByEmail( $email ) {
+	protected function getStripeCustomerIdByEmail( $email ) {
 		$url = "https://api.stripe.com/v1/customers?email=" . urlencode($email);
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
@@ -422,41 +411,10 @@ class Stripe {
 		));
 		$response = curl_exec($ch);
 		curl_close($ch);
-		$data = json_decode($response);
+		$data = json_decode( $response, true );
+		$this->lastResult = $data;
 		$customer_id = $data->data[0]->id;
 		return $customer_id;
-
-
-		
-		$curl = curl_init();
-		curl_setopt_array($curl, array(
-				CURLOPT_URL => "https://api.stripe.com/v1/customers?email=" . $email,
-				CURLOPT_RETURNTRANSFER => true,
-				CURLOPT_ENCODING => "",
-				CURLOPT_MAXREDIRS => 10,
-				CURLOPT_TIMEOUT => 30,
-				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-				CURLOPT_CUSTOMREQUEST => "GET",
-				CURLOPT_HTTPHEADER => array(
-					"Authorization: Bearer "
-				),
-		));
-		$response = curl_exec($curl);
-		$err = curl_error($curl);
-		curl_close($curl);
-		if( ! $err ) {
-			$data = json_decode($response);
-			// print_r( $data );
-			if (!empty($data->data)) {
-				foreach ($data->data as $customer) {
-					if ( ! empty( $customer->subscriptions->data ) ) {
-						$subscription_id = $customer->subscriptions->data[0]->id;
-						return $subscription_id;
-					}
-				}
-			}
-		}
-		return false;
 	}
 	protected function stripe_subscription_toggle( $customer_id, $status ) {
     $url = "https://api.stripe.com/v1/subscriptions?customer=" . urlencode( $customer_id );
@@ -545,10 +503,21 @@ class Stripe {
 		));
 		$response = curl_exec($ch);
 		curl_close($ch);
-		$data = json_decode($response);
+		$data = json_decode( $response, true );
 		$this->lastResult = $data;
-		$subscription_id = $data->data[0]->id;
-		return $subscription_id;
+		if( isset( $data[ 'error' ] ) ) {
+			if( isset( $data[ 'error' ][ 'code' ] ) && $data[ 'error' ][ 'code' ] == 'resource_missing' && $this->userInfo !== false ) {
+				update_user_meta( $this->userInfo->ID, 'stripe_customer_id', false );
+			}
+			return false;
+		} else {
+			if( isset( $data[ 'data' ][0] ) && isset( $data[ 'data' ][0][ 'id' ] ) ) {
+				$subscription_id = $data[ 'data' ][0][ 'id' ];
+				return $subscription_id; 
+			} else {
+				return false;
+			}
+		}
 	}
 	private function toggleStripeSubscriptionPause( $action, $subscription_id ) {
 		$url = "https://api.stripe.com/v1/subscriptions/" . urlencode( $subscription_id );
@@ -582,8 +551,6 @@ class Stripe {
 		// print_r( $response );wp_die();
 		return true;
 	}
-
-
 	public function pauseSubscriptionUsingEmail( $action, $email ) {
 		$api_key = $this->stripeSecretKey;
 		$customer_id = $this->customerIDfromEmail( $email );
@@ -595,7 +562,6 @@ class Stripe {
 		$is_success = $this->toggleStripeSubscriptionPause( $status, $subscription_id );
 		return ( $is_success );
 	}
-
 	public function get_all_subscriptions() {
 		// Set the API endpoint URL and the cURL options
 		$url = "https://api.stripe.com/v1/subscriptions";
@@ -619,5 +585,221 @@ class Stripe {
 		$subscriptions = json_decode($response, true);
 		return $subscriptions['data'];
 	}
+
+	
+	public function init() {
+		if( ! isset( $_GET[ 'die_mode' ] ) ) {return;}
+		// $notices = get_option( 'fwp_we_make_content_admin_notice', [] );
+		// foreach( $notices as $i => $notice ) {
+		// 	$notices[ $i ][ 'data' ][ 'time' ] = strtotime( $notices[ $i ][ 'data' ][ 'time' ] );
+		// 	// if( $notice[ 'data' ][ 'time' ] && strtotime( '-15 days' ) >= $notice[ 'data' ][ 'time' ] ) {
+		// 		// unset( $notices[ $i ] );
+		// 		// print_r( [strtotime( '-15 days' ), $notice[ 'data' ][ 'time' ]]);
+		// 	// }
+		// }
+		// print_r( $notices );
+		$this->stripeSecretKey				= 'sk_test_51MYvdBI8VOGXMyoFiYpojuTUhvmS1Cxwhke4QK6jfJopnRN4fT8Qq6sy2Rmf2uvyHBtbafFpWVqIHBFoZcHp0vqq00HaOBUh1P';
+		$this->stripePublishAble			= 'pk_test_51LUu8gCBz3oLWOMl7XCRKB11tJrH9jByvD14FWXgD3jRrD5PO2Lzpwoaf0rhprQOS5ghTqUQKa61OAY2IJwU70TR00fPjGno9D';
+
+			// 'cus_NOgvvpyguFIFOL'
+		// $response = $this->stripe_payment_history( $this->customerIDfromEmail( 'radvix.flow@gmail.com' ) );
+		// print_r( $this->pauseSubscriptionUsingEmail( 'pause', 'nimoultv@gmail.com' ) );wp_die();
+		// $subscription_data = $this->get_subscription_data_by_email( 'figosim608@mirtox.com' );print_r($subscription_data);
+		// $response = $this->getStripeSubscriptionIdByCustomerID( $this->customerIDfromEmail( 'info@futurewordpress.com' ) );
+		// print_r( $this->lastResult );
+		// // $response = $this->get_all_subscriptions();
+		// $subscription = $this->lastResult->data[0];
+		// print_r( [
+		// 	$subscription
+		// ] );
+
+		wp_die();
+	}
+
+	/**
+	 * Payment Card Related functions.
+	 */
+	public function getOrCreateCardToken( $cardNumber, $expMonth, $expYear, $cvc ) {
+		$url = 'https://api.stripe.com/v1/tokens';
+		$headers = array(
+			'Authorization: Bearer ' . $this->stripeSecretKey,
+			'Content-Type: application/x-www-form-urlencoded'
+		);
+		$fields = [
+			'card[number]'		=> $cardNumber,
+			'card[exp_month]'	=> $expMonth,
+			'card[exp_year]'	=> $expYear,
+			'card[cvc]'				=> $cvc
+		];
+		
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($fields));
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		
+		$response = curl_exec($ch);
+		
+		curl_close($ch);
+		
+		$responseArray = json_decode( $response, true );
+		$this->lastResult = $responseArray;
+		
+		if (isset($responseArray['error'])) {
+			return false;
+		} else {
+			return $responseArray['id'];
+		}
+	}
+	/**
+	 * Update the expiration date for an existing card token
+	 */
+	public function updateCardExpiration( $cardToken, $expMonth, $expYear ) {
+		$url = 'https://api.stripe.com/v1/tokens/' . $cardToken;
+		$headers = array(
+			'Authorization: Bearer ' . $this->stripeSecretKey,
+			'Content-Type: application/x-www-form-urlencoded'
+		);
+		
+		$fields = [
+			'card[exp_month]' => $expMonth,
+			'card[exp_year]' => $expYear
+		];
+		
+		$ch = curl_init();
+		curl_setopt( $ch, CURLOPT_URL, $url );
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, 'POST' );
+		curl_setopt( $ch, CURLOPT_POSTFIELDS, http_build_query( $fields) );
+		curl_setopt( $ch, CURLOPT_HTTPHEADER, $headers );
+		
+		$response = curl_exec( $ch );
+		curl_close( $ch );
+		$responseArray = json_decode( $response, true );
+		$this->lastResult = $responseArray;
+		if( isset( $responseArray[ 'error' ] ) ) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+	public function getOrCreatePaymentMethod( $cardToken ) {
+    // Create payment method from card token
+    $url = 'https://api.stripe.com/v1/payment_methods';
+    $headers = [
+			'Authorization: Bearer ' . $this->stripeSecretKey,
+			'Content-Type: application/x-www-form-urlencoded'
+		];
+    $fields = [
+			'type' => 'card',
+			'card[token]' => $cardToken
+		];
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($fields));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    $response = curl_exec($ch);
+    curl_close($ch);
+    $this->lastResult = $paymentMethod = json_decode( $response, true );
+		if( isset( $paymentMethod[ 'error' ] ) ) {
+			return false;
+		}
+		return $paymentMethod[ 'id' ];
+	}
+	/**
+	 * Attach payment method to customer
+	 */
+	public function attachPaymentMethodToCustomer( $customerId, $paymentMethodId ) {
+    $url = "https://api.stripe.com/v1/payment_methods/$paymentMethodId/attach";
+    $headers = [
+			'Authorization: Bearer ' . $this->stripeSecretKey,
+			'Content-Type: application/x-www-form-urlencoded'
+		];
+    $fields = [ 'customer' => $customerId ];
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($fields));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    $response = json_decode(curl_exec($ch), true);
+    curl_close($ch);
+    $this->lastResult = $response;
+    if (isset($response['error'])) {
+        return false;
+    } else {
+        return $response['id'];
+    }
+	}
+	/**
+	 * Update subscription to use payment method
+	 */
+	public function addPaymentMethodToSubscription( $subscriptionId, $paymentMethodId ) {
+    $url = "https://api.stripe.com/v1/subscriptions/$subscriptionId";
+    $headers = [
+			'Authorization: Bearer ' . $this->stripeSecretKey,
+			'Content-Type: application/x-www-form-urlencoded'
+		];
+    $fields = [ 'default_payment_method' => $paymentMethodId ];
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($fields));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    $response = curl_exec($ch);
+    curl_close($ch);
+    $this->lastResult = $response = json_decode( $response, true );
+		if( isset( $response[ 'error' ] ) ) {
+			return false;
+		} else {
+			return $response[ 'id' ];
+		}
+	}
+
+
+
+	/**
+	 * Request for appling to switch or change payemtn card on a subscription.
+	 */
+	public function switchPaymentCard( $default, $args ) {
+		$this->stripeSecretKey				= 'sk_test_51MYvdBI8VOGXMyoFiYpojuTUhvmS1Cxwhke4QK6jfJopnRN4fT8Qq6sy2Rmf2uvyHBtbafFpWVqIHBFoZcHp0vqq00HaOBUh1P';
+		$this->stripePublishAble			= 'pk_test_51LUu8gCBz3oLWOMl7XCRKB11tJrH9jByvD14FWXgD3jRrD5PO2Lzpwoaf0rhprQOS5ghTqUQKa61OAY2IJwU70TR00fPjGno9D';
+
+		$args = (object) $args;
+		try {
+			// $args->card_email
+			$customerID = $this->customerIDfromEmail( 'nimoultv@gmail.com' );
+			if( $customerID ) {
+				$subscriptionId = $this->getStripeSubscriptionIdByCustomerID( $customerID );
+				if( $subscriptionId ) {
+					$cardToken = $this->getOrCreateCardToken( $args->card_number, $args->card_month, $args->card_year, $args->card_cvc );
+					if( $cardToken ) {
+						$paymentMethod = $this->getOrCreatePaymentMethod( $cardToken );
+						if( $paymentMethod ) {
+							$isAttachedMethod = $this->attachPaymentMethodToCustomer( $customerID, $paymentMethod );
+							if( $isAttachedMethod ) {
+								$addPayMethod2Subscribe = $this->addPaymentMethodToSubscription( $subscriptionId, $paymentMethod );
+								if( $addPayMethod2Subscribe ) {
+									return true;
+								}
+							}
+						}
+					}
+				}
+			}
+			return $default;
+		} catch(\Exception $e) {
+			$this->lastError = $e->getMessage();
+			// print_r( [$this->lastError, $this->lastResult] );
+			return $default;
+		}
+	}
+	
+
+
 	
 }

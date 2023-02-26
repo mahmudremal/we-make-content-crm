@@ -6,6 +6,7 @@
         margin-left: 140px;
       }
       #wpbody-content {
+        min-height: 100vh;
         > div {
           display: none;
         }
@@ -14,6 +15,7 @@
         }
         .dashboard__body-start {
           display: block;
+          margin: 10px;
           .card-block.card-height {
             max-width: unset;
           }
@@ -23,6 +25,11 @@
           .card-full-width {
             width: 100%;
             max-width: unset;
+            padding: unset;
+          }
+          .profile-img-edit {
+            width: fit-content;
+            margin: auto;
           }
         }
       }
@@ -49,9 +56,10 @@
   }
 }
 .iq-banner ~ #wpbody #wpbody-content .dashboard__body-start #page_layout {
-  // width: 90%;
-  margin-top: -8rem;
   max-width: unset;
+  padding: unset;
+  margin: auto;
+  margin-top: -8rem;
 }
 .popup-action-menu {
   position: absolute;

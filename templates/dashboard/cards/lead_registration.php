@@ -45,7 +45,7 @@ if( $regLink && ! empty( $regLink ) && ! $needToSelect ) {
   if( ! empty( $defaultContract ) ) {
     wp_redirect( $defaultContract );exit;
   } else {
-    wp_die( __( 'Regisatration link not found.', 'domain' ) );
+    wp_die( __( 'Regisatration link not found.', 'we-make-content-crm' ) );
   }
 }
 

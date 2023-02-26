@@ -28,7 +28,7 @@ class Esign {
 		
 		add_filter( 'futurewordpress/project/action/contractforms', [ $this, 'contractForms' ], 10, 2 );
 		// add_filter( 'futurewordpress/project/action/contractforms', [ $this, 'contractForms' ], 10, 2 );
-		add_filter( 'futurewordpress/project/esign/userdocuemnt', [ $this, 'getLastDocument' ], 10, 2 );
+		add_filter( 'futurewordpress/project/esign/userdocument', [ $this, 'getLastDocument' ], 10, 2 );
 		add_filter( 'futurewordpress/project/action/contracts', [ $this, 'contracts' ], 10, 2 ); // C:\workspace\New folder\e-signature\e-signature\models\Document.php: 52
 		
 		add_action( 'esig_reciepent_edit', [ $this, 'esig_reciepent_edit' ], 10, 1 );
@@ -74,13 +74,15 @@ class Esign {
 			'{{todays_date}}',
 			'{{retainer_amount}}',
 			'{{site_name}}',
+			// " with a street address of <u>Alabama\nUnited States of America\n</u>"
 		];
 		$replace = [
 			$this->get_documentmeta( $doc, 'client_name' ),
 			$this->get_documentmeta( $doc, 'client_address' ),
 			$this->get_documentmeta( $doc, 'todays_date' ),
 			$this->get_documentmeta( $doc, 'retainer_amount' ),
-			get_option( 'blogname', 'We Make Content' )
+			get_option( 'blogname', 'We Make Content' ),
+			// ''
 		];
 		// print_r( [ $doc, $document, $userInfo, $args, $replace ] );wp_die();
 		return [ $args, $replace ];
@@ -151,7 +153,13 @@ class Esign {
 		// $doc = $wpdb->get_results( $wpdb->prepare( "SELECT doc.document_id, user.ID FROM {$wpdb->prefix}esign_documents doc LEFT JOIN {$wpdb->prefix}users user ON doc.user_id=user.ID WHERE doc.user_id=%d AND doc.document_status=%s ORDER BY doc.document_id DESC LIMIT 0, 1;", $userInfo->ID, 'signed' ) );
 		// $doc = $wpdb->get_results( $wpdb->prepare( "SELECT document_id FROM {$wpdb->prefix}esign_documents WHERE user_id=%d AND document_status=%s ORDER BY document_id DESC LIMIT 0, 1;", $userInfo->ID, 'signed' ) );
 
-		$prepared = $wpdb->prepare( "SELECT du.user_id AS esign_user_id, du.signer_name, du.signer_email, ed.document_id, ed.document_type, ed.document_status, ed.document_uri, ed.last_modified, wu.ID AS user_id, eu.wp_user_id, eu.user_email, ed.document_checksum, ei.invite_hash FROM {$wpdb->prefix}esign_document_users du LEFT JOIN {$wpdb->prefix}esign_documents ed ON ed.document_id=du.document_id LEFT JOIN {$wpdb->prefix}esign_users eu ON eu.user_id=du.user_id LEFT JOIN {$wpdb->prefix}users wu ON wu.user_email=eu.user_email LEFT JOIN {$wpdb->prefix}esign_invitations ei ON ei.document_id=ed.document_id WHERE ed.document_status=%s AND du.user_id=%d OR du.signer_email=%s ORDER BY ed.document_id DESC LIMIT 0, 1;", 'signed', $userInfo->ID, ( ! empty( $userInfo->data->user_email ) ? $userInfo->data->user_email : $userInfo->meta->email ) );
+		/**
+		 * document status should be "signed" on first argument if we want to get only last signed document.
+		 * But if we want to know if last document is signed or not.
+		 * So I make is like, document status is not equal empty or random (eg. trash).
+		 * du.user_id=%d OR  $userInfo->ID,
+		 */
+		$prepared = $wpdb->prepare( "SELECT du.user_id AS esign_user_id, du.signer_name, du.signer_email, ed.document_id, ed.document_type, ed.document_status, ed.document_uri, ed.last_modified, wu.ID AS user_id, eu.wp_user_id, eu.user_email, ed.document_checksum, ei.invite_hash FROM {$wpdb->prefix}esign_document_users du LEFT JOIN {$wpdb->prefix}esign_documents ed ON ed.document_id=du.document_id LEFT JOIN {$wpdb->prefix}esign_users eu ON eu.user_id=du.user_id LEFT JOIN {$wpdb->prefix}users wu ON wu.user_email=eu.user_email LEFT JOIN {$wpdb->prefix}esign_invitations ei ON ei.document_id=ed.document_id WHERE ed.document_status!=%s AND du.signer_email=%s ORDER BY ed.document_id DESC LIMIT 0, 1;", 'trash', ( ! empty( $userInfo->data->user_email ) ? $userInfo->data->user_email : $userInfo->meta->email ) );
 		$doc = $wpdb->get_results( $prepared );
 		// print_r( $prepared );print_r( $doc );
 		$doc = isset( $doc[0] ) ? $doc[0] : $doc;

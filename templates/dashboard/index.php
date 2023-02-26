@@ -8,6 +8,9 @@ is_user_logged_in() || auth_redirect();
 
 global $currenttab;global $user_profile;global $userInfo;global $errorHappens;
 $user_profile = get_query_var( 'user_profile' );
+if( empty( $user_profile ) || $user_profile == 0 ) {
+  wp_die( __( 'You\'ve visited on an outdated link, or your link is no longer valid. We didn\'t idetify the user with this permalink. That\'s all we know', 'we-make-content-crm' ), __( 'Link broken', 'we-make-content-crm' ) );
+}
 if( $user_profile == 'me' ) {
   $userInfo = wp_get_current_user();
   // print_r( $userInfo );
@@ -15,7 +18,7 @@ if( $user_profile == 'me' ) {
   exit;
 }
 $currenttab = get_query_var( 'currenttab' );
-$allowedTabs = [ 'archive', 'payments', 'settings' ]; // 'profile', 
+$allowedTabs = [ 'archive', 'payments', 'settings', 'contact' ]; // 'profile', 
 $errorHappens = false;
 // if( get_current_user_id() == $user_profile ) {}
 // print_r( get_userdata( $user_profile ) );
@@ -111,7 +114,7 @@ else :
                 <?php endif; ?>
                 <?php if( in_array( 'archive', $allowedTabs ) ) : ?>
                 <li class="nav-item" role="presentation">
-                  <a class="nav-link active show" data-bs-toggle="tab" href="#profile-archive" role="tab" aria-selected="false"><?php esc_html_e( 'Archive',   'we-make-content-crm' ); ?></a>
+                  <a class="nav-link active show" data-bs-toggle="tab" href="#profile-archive" role="tab" aria-selected="false"><?php esc_html_e( 'Submit Videos',   'we-make-content-crm' ); ?></a>
                 </li>
                 <?php endif; ?>
                 <?php if( in_array( 'payments', $allowedTabs ) ) : ?>
@@ -121,10 +124,16 @@ else :
                 <?php endif; ?>
                 <?php if( in_array( 'settings', $allowedTabs ) ) : ?>
                 <li class="nav-item" role="presentation">
-                  <a class="nav-link" data-bs-toggle="tab" href="#profile-settings" role="tab" aria-selected="false" tabindex="-1"><?php esc_html_e( 'Settings',   'we-make-content-crm' ); ?></a>
+                  <a class="nav-link" data-bs-toggle="tab" href="#profile-settings" role="tab" aria-selected="false" tabindex="-1"><?php esc_html_e( 'Your Social Media Handles',   'we-make-content-crm' ); ?></a>
+                </li>
+                <?php endif; ?>
+                <?php if( in_array( 'contact', $allowedTabs ) && apply_filters( 'futurewordpress/project/system/isactive', 'social-contact' ) ) : ?>
+                <li class="nav-item" role="presentation">
+                  <a class="nav-link" data-bs-toggle="tab" href="#profile-contact" role="tab" aria-selected="false" tabindex="-1"><?php esc_html_e( 'Contact us now!',   'we-make-content-crm' ); ?></a>
                 </li>
                 <?php endif; ?>
               </ul>
+              <a href="<?php echo wp_logout_url(); ?>" class="btn btn-soft-danger btn-logout-confirm nav-link nav nav-pills mb-0 text-center profile-tab nav-slider"><?php esc_html_e( 'Logout', 'we-make-content-crm' ); ?></a>
             </div>
           </div>
         </div>
@@ -181,12 +190,15 @@ else :
                   </a>
                 </div>
               </li>
-              <?php $doc = (object) apply_filters( 'futurewordpress/project/esign/userdocuemnt', false, $userInfo );if( $doc && $doc->permalink ) : ?>
-              <li class="d-flex mb-4 align-items-center">
+              <?php $doc = apply_filters( 'futurewordpress/project/esign/userdocument', false, $userInfo );$doc = ( $doc && is_array( $doc ) ) ? (object) $doc: $doc;if( $doc && $doc->permalink ) : ?>
+              <li class="d-flex mb-4 align-items-center position-relative">
                 <img src="<?php echo esc_url( WEMAKECONTENTCMS_BUILD_URI . '/icons/contract-document-svgrepo-com.svg' ); ?>" data-img="<?php echo esc_url( WEMAKECONTENTCMS_BUILD_URI . '/icons/Information carousel_Monochromatic.svg' ); ?>" alt="story-img" class="rounded-pill avatar-70 p-1 border img-fluid bg-soft-danger" loading="lazy">
+                <?php if( $doc->document_status != 'signed' ) : ?>
+                  <span class="badge border border-danger bg-danger" style="position: absolute;top: -10px;left: 30px;color: black;"><?php esc_html_e( 'Action Needed',   'we-make-content-crm' ); ?></span>
+                <?php endif; ?>
                 <div class="ms-3">
                   <a class="" href="<?php echo esc_url( $doc->permalink ); ?>" target="_blank">
-                    <h5><?php esc_html_e( 'Docuemnt Signed',   'we-make-content-crm' ); ?></h5>
+                    <h5><?php echo esc_html( ( $doc->document_status == 'signed' ) ? __( 'Document Signed',   'we-make-content-crm' ) : __( 'Sign Document',   'we-make-content-crm' ) ); ?></h5>
                     <!-- <p class="mb-0">Added 1 hour ago</p> -->
                   </a>
                 </div>
@@ -273,7 +285,7 @@ else :
                     <div class="row">
                       <div class="col-md-6">
                         <select class="form-select form-select-lg form-select-solid mb-2" name="month" data-control="select2" data-placeholder="<?php esc_attr_e( 'Upload for...', 'we-make-content-crm' ); ?>">
-                        <?php $months = [ 'Jan', 'Fav', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dev' ]; ?>
+                        <?php $months = [ 'Jan', 'Fab', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dev' ]; ?>
                         <?php foreach( $months as $i => $month ) :
                           $dateObj   = DateTime::createFromFormat( '!m', ( $i + 1 ) );
                           $monthName = $dateObj->format('F'); ?>
@@ -313,7 +325,7 @@ else :
                         </div>
                       </div>
                       <div class="com-md-12">
-                        <button type="button" class="btn btn-light-primary fw-bold btn-sm mt-3 submit-archive-files" data-config="<?php echo esc_attr( json_encode( [
+                        <button type="button" class="btn btn-light-primary fw-bold col-12 mt-3 submit-archive-files" data-config="<?php echo esc_attr( json_encode( [
                           'title' => __( 'A short title', 'we-make-content-crm' ),
                           'text' => __( 'Choose a title for your monthly archive. To update your archive, simply re-upload your files and resubmit - the new files will replace the previous ones.', 'we-make-content-crm' ),
                           'icon' => 'info',
@@ -420,13 +432,27 @@ else :
                   <?php if( ! apply_filters( 'futurewordpress/project/system/isactive', 'stripe-cancelsubscription' ) ) : ?>
                     <?php
                       $is_active = in_array( $userInfo->meta->enable_subscription, [ 'on' ] );
-                      $lastchanged = get_usermeta( $userInfo->ID, 'subscription_last_changed' );
-                      $dida_pause = false; // ( $lastchanged && $lastchanged == date( 'M, Y' ) );
+                      $lastchanged = get_usermeta( $userInfo->ID, 'subscription_last_changed', true );
+                      $dida_pause = ( ! apply_filters( 'futurewordpress/project/payment/stripe/allowswitchpause', true, $is_active ? 'pause' : 'unpause', $userInfo->ID ) ); // ( $lastchanged && $lastchanged == date( 'M, Y' ) ) 
+                      $dida_pause = false;
                       $is_pending = false; // ( $lastchanged && $lastchanged == date( 'M, Y' ) );
+                      $config = [
+                        'popup_title'       => __( 'Enter payment card details', 'we-make-content-crm' ),
+                        'card_number'       => __( 'Card Number:', 'we-make-content-crm' ),
+                        'expire_month'      => __( 'Expiration month:', 'we-make-content-crm' ),
+                        'expire_year'       => __( 'Expiration year:', 'we-make-content-crm' ),
+                        'card_ccv'          => __( 'CVC:', 'we-make-content-crm' ),
+                        'pls_fillall'       => __( 'Please fillup all fields first.', 'we-make-content-crm' ),
+                        'pls_fixwrngcdnm'   => __( 'Seems you\'ve inputed a wrong card number', 'we-make-content-crm' ),
+                        'pls_fillmonth'          => __( 'Please input Month in numeric format', 'we-make-content-crm' ),
+                        'pls_fixyear'          => __( 'Card expiration year should be future date.', 'we-make-content-crm' ),
+                        'pls_fixccv'          => __( 'Please provide valid CVC number.', 'we-make-content-crm' ),
+                      ];
                     ?>
                     <div class="btn-group btn-group-sm">
-                      <button class="pause-unpause-subscription btn <?php echo esc_attr( $is_pending ? 'btn-light' : ( $is_active ? 'btn-outline-warning border-active' : 'btn-primary' ) ); ?>" type="button" role="button" name="meta-enable_subscription" data-current="<?php echo esc_attr( $is_active ? ( ( $dida_pause && $is_active ) ? 'pending' : 'pause' ) : 'unpause' ); ?>" data-pause-title="<?php esc_attr_e( 'Pause My Retainer', 'domain' ); ?>" data-unpause-title="<?php esc_attr_e( 'Resume My Retainer', 'domain' ); ?>" data-pending-title="<?php esc_attr_e( 'Pending', 'domain' ); ?>" <?php echo esc_attr( $is_pending ? 'data-handled=true disabled' : '' ); ?>>
-                        <?php echo esc_html( $is_pending ? __( 'Pending', 'domain' ) : ( $is_active ? __( 'Pause My Retainer', 'domain' ) : __( 'Resume My Retainer', 'domain' ) ) ); ?>
+                      <button class="btn btn-soft-success border-active change-payment-card" type="button" role="button" name="change-payment-card" data-config="<?php echo esc_attr( json_encode( $config ) ); ?>" data-userid="<?php echo esc_attr( $userInfo->ID ); ?>"><?php esc_html_e( 'Change Payment Card',   'we-make-content-crm' ); ?></button>
+                      <button class="pause-unpause-subscription btn <?php echo esc_attr( $is_pending ? 'btn-light' : ( $is_active ? 'btn-outline-warning border-active' : 'btn-primary' ) ); ?>" type="button" role="button" name="meta-enable_subscription" data-current="<?php echo esc_attr( $is_active ? ( ( $dida_pause && $is_active ) ? 'pending' : 'pause' ) : 'unpause' ); ?>" data-pause-title="<?php esc_attr_e( 'Pause My Retainer', 'we-make-content-crm' ); ?>" data-unpause-title="<?php esc_attr_e( 'Resume My Retainer', 'we-make-content-crm' ); ?>" data-pending-title="<?php esc_attr_e( 'Pending', 'we-make-content-crm' ); ?>" <?php echo esc_attr( $is_pending ? 'data-handled=true disabled' : '' ); ?>>
+                        <?php echo esc_html( $is_pending ? __( 'Pending', 'we-make-content-crm' ) : ( $is_active ? __( 'Pause My Retainer', 'we-make-content-crm' ) : __( 'Resume My Retainer', 'we-make-content-crm' ) ) ); ?>
                       </button>
                     </div>
                     <?php endif; ?>
@@ -502,6 +528,90 @@ else :
               </div>
               <div class="card-body">
                 <?php include WEMAKECONTENTCMS_DIR_PATH . '/templates/dashboard/cards/content.php'; ?>
+              </div>
+            </div>
+          </div>
+          <?php endif; ?>
+          <?php if( in_array( 'contact', $allowedTabs ) && apply_filters( 'futurewordpress/project/system/isactive', 'social-contact' ) ) : ?>
+          <div id="profile-contact" class="tab-pane fade" role="tabpanel">
+            
+            <div class="card">
+              <div class="card-header d-flex justify-content-between">
+                <div class="header-title">
+                  <h4 class="card-title"><?php esc_html_e( 'Contact us now!',   'we-make-content-crm' ); ?></h4>
+                </div>
+              </div>
+              <div class="card-body">
+
+                <div class="row">
+
+                  <?php $social = apply_filters( 'futurewordpress/project/system/getoption', 'social-telegram', false );if( $social && ! empty( $social ) ) : ?>
+                  <div class="col-lg-4 col-md-6">
+                    <div class="card bg-soft-warning">
+                      <a class="card-body" href="<?php echo esc_url( apply_filters( 'futurewordpress/project/system/getoption', 'social-telegram', false ) ); ?>" target="_blank">
+                        <div class="d-block justify-content-between align-items-center">
+                          <div class="rounded p-3 text-center">
+                            <svg width="100px" height="100px" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Telegram" role="img" viewBox="0 0 512 512"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><rect width="512" height="512" rx="15%" fill="#ffcf01"></rect><path fill="#c8daea" d="M199 404c-11 0-10-4-13-14l-32-105 245-144"></path><path fill="#a9c9dd" d="M199 404c7 0 11-4 16-8l45-43-56-34"></path><path fill="#f6fbfe" d="M204 319l135 99c14 9 26 4 30-14l55-258c5-22-9-32-24-25L79 245c-21 8-21 21-4 26l83 26 190-121c9-5 17-3 11 4"></path></g></svg>
+                          </div>
+                          <div class="text-center mt-3">
+                            <h3 class="counter" style="visibility: visible;"><?php esc_html_e( 'Telegram',   'we-make-content-crm' ); ?></h3>
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                  <?php endif; ?>
+                  <?php $social = apply_filters( 'futurewordpress/project/system/getoption', 'social-whatsapp', false );if( $social && ! empty( $social ) ) : ?>
+                  <div class="col-lg-4 col-md-6">
+                    <div class="card bg-soft-warning">
+                      <a class="card-body" href="<?php echo esc_url( apply_filters( 'futurewordpress/project/system/getoption', 'social-whatsapp', false ) ); ?>" target="_blank">
+                        <div class="d-block justify-content-between align-items-center">
+                          <div class="rounded p-3 text-center">
+                            <svg width="100px" height="100px" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="WhatsApp" role="img" viewBox="0 0 512 512" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><rect width="512" height="512" rx="15%" fill="#ffcf01"></rect><path fill="#ffcf01" stroke="#ffffff" stroke-width="26" d="M123 393l14-65a138 138 0 1150 47z"></path><path fill="#ffffff" d="M308 273c-3-2-6-3-9 1l-12 16c-3 2-5 3-9 1-15-8-36-17-54-47-1-4 1-6 3-8l9-14c2-2 1-4 0-6l-12-29c-3-8-6-7-9-7h-8c-2 0-6 1-10 5-22 22-13 53 3 73 3 4 23 40 66 59 32 14 39 12 48 10 11-1 22-10 27-19 1-3 6-16 2-18"></path></g></svg>
+                          </div>
+                          <div class="text-center mt-3">
+                            <h3 class="counter" style="visibility: visible;"><?php esc_html_e( 'WhatsApp',   'we-make-content-crm' ); ?></h3>
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                  <?php endif; ?>
+                  <?php $social = apply_filters( 'futurewordpress/project/system/getoption', 'social-email', false );if( $social && ! empty( $social ) ) : ?>
+                  <div class="col-lg-4 col-md-6">
+                    <div class="card bg-soft-warning">
+                      <a class="card-body" href="mailto:<?php echo esc_attr( apply_filters( 'futurewordpress/project/system/getoption', 'social-email', false ) ); ?>">
+                        <div class="d-block justify-content-between align-items-center">
+                          <div class="rounded p-3 text-center">
+                            <svg width="100px" height="100px" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Email" role="img" viewBox="0 0 512 512" stroke="#ffcf01"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><rect width="512" height="512" rx="15%" fill="#ffcf01"></rect><rect width="356" height="256" x="78" y="128" fill="#ffffff" rx="8%"></rect><path fill="none" stroke="#ffcf01" stroke-width="20" d="M434 128L269 292c-7 8-19 8-26 0L78 128m0 256l129-128m227 128L305 256"></path></g></svg>
+                          </div>
+                          <div class="text-center mt-3">
+                            <h3 class="counter" style="visibility: visible;"><?php esc_html_e( 'Email',   'we-make-content-crm' ); ?></h3>
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                  <?php endif; ?>
+                  <?php $social = apply_filters( 'futurewordpress/project/system/getoption', 'social-contactus', false );if( $social && ! empty( $social ) ) : ?>
+                  <div class="col-lg-12 col-md-12">
+                    <div class="card">
+                      <a class="card-body" href="<?php echo esc_url( apply_filters( 'futurewordpress/project/system/getoption', 'social-contactus', false ) ); ?>" target="_blank">
+                        <div class="d-block justify-content-between align-items-center">
+                          <div class="rounded p-3 text-center">
+                            <img src="<?php echo esc_url( WEMAKECONTENTCMS_BUILD_URI . '/icons/Team meeting_Monochromatic.svg' ); ?>" alt="Contact Us" height="" width="">
+                          </div>
+                          <div class="text-center mt-3">
+                            <h3 class="counter" style="visibility: visible;"><?php esc_html_e( 'Contact US',   'we-make-content-crm' ); ?></h3>
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                  <?php endif; ?>
+
+                </div>
+                
               </div>
             </div>
           </div>

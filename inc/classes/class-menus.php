@@ -20,6 +20,7 @@ class Menus {
 		
     add_filter( 'futurewordpress/project/settings/general', [ $this, 'general' ], 10, 1 );
     add_filter( 'futurewordpress/project/settings/fields', [ $this, 'menus' ], 10, 1 );
+		add_action( 'in_admin_header', [ $this, 'in_admin_header' ], 100, 0 );
 	}
 	public function register_menus() {
 		register_nav_menus([
@@ -60,6 +61,36 @@ class Menus {
 		}
 		return $child_menus;
 	}
+	public function in_admin_header() {
+		if( ! isset( $_GET[ 'page' ] ) || $_GET[ 'page' ] != 'crm_dashboard' ) {return;}
+		
+		remove_all_actions('admin_notices');
+		remove_all_actions('all_admin_notices');
+		// add_action('admin_notices', function () {echo 'My notice';});
+	}
+	/**
+	 * Supply necessry tags that could be replace on frontend.
+	 * 
+	 * @return string
+	 * @return array
+	 */
+	public function commontags( $html = false ) {
+		$arg = [];$tags = [
+			'username', 'sitename', 
+		];
+		if( $html === false ) {return $tags;}
+		foreach( $tags as $tag ) {
+			$arg[] = sprintf( "%s{$tag}%s", '<code>{', '}</code>' );
+		}
+		return implode( ', ', $arg );
+	}
+	public function contractTags( $tags ) {
+		$arg = [];
+		foreach( $tags as $tag ) {
+			$arg[] = sprintf( "%s{$tag}%s", '<code>{', '}</code>' );
+		}
+		return implode( ', ', $arg );
+	}
 
   /**
    * WordPress Option page.
@@ -98,6 +129,13 @@ class Menus {
 					'type'					=> 'checkbox',
 					'default'				=> ''
 				],
+				[
+					'id' 						=> 'general-leaddelete',
+					'label'					=> __( 'Delete User', 'we-make-content-crm' ),
+					'description'		=> __( 'Enable this option to apear a possibility to delete user/lead with one click. If it\'s disabled, then user delete option on list and single user details page will gone until turn it on.', 'we-make-content-crm' ),
+					'type'					=> 'checkbox',
+					'default'				=> false
+				],
 			]
 		];
 		$args['permalink'] 		= [
@@ -125,6 +163,13 @@ class Menus {
 			'title'							=> __( 'Dashboard', 'we-make-content-crm' ),
 			'description'				=> __( 'Dashboard necessery fields, text and settings can configure here. Some tags on usable fields can be replace from here.', 'we-make-content-crm' ) . $this->commontags( true ),
 			'fields'						=> [
+				[
+					'id' 						=> 'dashboard-disablemyaccount',
+					'label'					=> __( 'Disable My Account', 'we-make-content-crm' ),
+					'description'		=> __( 'Disable WooCommerce My Account dashboard and form redirect user to new dashboard. If you enable it, it\'ll apply. But be aware, WooCommerce orders and paid downloads are listed on My Account page.', 'we-make-content-crm' ),
+					'type'					=> 'checkbox',
+					'default'				=> false
+				],
 				[
 					'id' 						=> 'dashboard-title',
 					'label'					=> __( 'Dashboard title', 'we-make-content-crm' ),
@@ -394,6 +439,47 @@ class Menus {
 				],
 			]
 		];
+		$args['social'] 		= [
+			'title'							=> __( 'Social', 'we-make-content-crm' ),
+			'description'				=> __( 'Setup your social links her for client dashboard only. Only people who loggedin, can access these social links.', 'we-make-content-crm' ),
+			'fields'						=> [
+				[
+					'id' 						=> 'social-contact',
+					'label'					=> __( 'Enable Contact', 'we-make-content-crm' ),
+					'description'		=> __( 'Enable contact now tab on client dashboard.', 'we-make-content-crm' ),
+					'type'					=> 'checkbox',
+					'default'				=> true
+				],
+				[
+					'id' 						=> 'social-telegram',
+					'label'					=> __( 'Telegram', 'we-make-content-crm' ),
+					'description'		=> __( 'Provide Telegram messanger link here.', 'we-make-content-crm' ),
+					'type'					=> 'url',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'social-whatsapp',
+					'label'					=> __( 'WhatsApp', 'we-make-content-crm' ),
+					'description'		=> __( 'Provide WhatsApp messanger link here.', 'we-make-content-crm' ),
+					'type'					=> 'url',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'social-email',
+					'label'					=> __( 'Email', 'we-make-content-crm' ),
+					'description'		=> __( 'Email address for instant support.', 'we-make-content-crm' ),
+					'type'					=> 'email',
+					'default'				=> ''
+				],
+				[
+					'id' 						=> 'social-contactus',
+					'label'					=> __( 'Contact Us', 'we-make-content-crm' ),
+					'description'		=> __( 'Place the Contact Us page link here.', 'we-make-content-crm' ),
+					'type'					=> 'url',
+					'default'				=> ''
+				],
+			]
+		];
 		$args['signature'] 		= [
 			'title'							=> __( 'E-Signature', 'we-make-content-crm' ),
 			'description'				=> __( 'Setup e-signature plugin some customize settings from here. Four tags for Contract is given below.', 'we-make-content-crm' ) . $this->contractTags( ['{client_name}','{client_address}','{todays_date}','{retainer_amount}'] ),
@@ -582,29 +668,6 @@ class Menus {
 			]
 		];
 		return $args;
-	}
-	/**
-	 * Supply necessry tags that could be replace on frontend.
-	 * 
-	 * @return string
-	 * @return array
-	 */
-	public function commontags( $html = false ) {
-		$arg = [];$tags = [
-			'username', 'sitename', 
-		];
-		if( $html === false ) {return $tags;}
-		foreach( $tags as $tag ) {
-			$arg[] = sprintf( "%s{$tag}%s", '<code>{', '}</code>' );
-		}
-		return implode( ', ', $arg );
-	}
-	public function contractTags( $tags ) {
-		$arg = [];
-		foreach( $tags as $tag ) {
-			$arg[] = sprintf( "%s{$tag}%s", '<code>{', '}</code>' );
-		}
-		return implode( ', ', $arg );
 	}
 }
 

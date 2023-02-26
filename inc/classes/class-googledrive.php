@@ -134,7 +134,8 @@ class GoogleDrive {
 	}
 	public function submitArchives() {
 		global $wpdb;
-		$data = (object) wp_parse_args( $_POST, [ 'title' => '', 'month' => date( 'M' ), 'year' => date( 'Y' ), 'userid' => get_current_user_id() ] );$month = $data->month . ' ' . $data->year;
+		$data = (object) wp_parse_args( $_POST, [ 'title' => '', 'month' => date( 'M' ), 'year' => date( 'Y' ), 'userid' => get_current_user_id() ] );
+		$month = $data->month . ' ' . $data->year;
 		$data->title = stripslashes( $data->title );
 		$newMeta = (array) WC()->session->get( 'uploaded_files_to_archive' );$file_list = [];
 		foreach( $newMeta as $i => $meta ) {
@@ -143,13 +144,18 @@ class GoogleDrive {
 			}
 		}
 		
-		$archive_path = apply_filters( 'futurewordpress/project/filesystem/uploaddir', false ) . '/archive-' . $data->userid . '-' . strtolower( $month ) . '.zip';
-		$result = $this->archiveFiles( $file_list, $archive_path );
+		$user_id = is_admin() ? $data->userid : get_current_user_id();
+		$fileName = 'archive-' . $data->userid . '-' . strtolower( $month );
+		$record_count = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$this->theTable} WHERE user_id=%d AND formonth=%s;", $user_id, $month ) );
+		if( $record_count && ! empty( $record_count->drive_id ) ) {
+			$fileName = $fileName . '-' . date( 'd-H' );
+		}
+		$archive_path = apply_filters( 'futurewordpress/project/filesystem/uploaddir', false ) . '/' . $fileName . '.zip';
+		$result = $this->archiveFiles( $file_list, $archive_path );$donotDeletePreviousFile = true;
 		if( $result ) {
-			$user_id = is_admin() ? $data->userid : get_current_user_id();
 			// $record_count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$this->theTable} WHERE user_id=%d AND formonth=%s;", $user_id, $month ) );
-			$record_count = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$this->theTable} WHERE user_id=%d AND formonth=%s;", $user_id, $month ) );
-			if( ! $record_count ) {
+			
+			if( ! $record_count || $donotDeletePreviousFile ) {
 				$wpdb->insert( $this->theTable, [
 					'user_id' => $user_id,
 					'title' => $data->title,
@@ -164,6 +170,10 @@ class GoogleDrive {
 				 * First delete previous drive file. Local file is replaced by Archive class.
 				 * Need to code.
 				 */
+				if( ! empty( $record_count->drive_id ) ) {
+					try {$is_success = $this->deleteFileOnDrive( $record_count->drive_id );}
+					catch(\Exception $e) {$this->lastError = $e->getMessage();}
+				}
 				$wpdb->update( $this->theTable, [
 					'title' => $data->title,
 					'drive_id' => '',
@@ -176,10 +186,6 @@ class GoogleDrive {
 				], [ '%d', '%s' ] );
 			}
 			foreach( $file_list as $file) {if( file_exists( $file ) && ! is_dir( $file ) ) {unlink( $file );}}
-			if( ! empty( $record_count->drive_id ) ) {
-				try {$is_success = $this->deleteFileOnDrive( $record_count->drive_id );}
-				catch(\Exception $e) {$this->lastError = $e->getMessage();}
-			}
 			
 			$user_data = get_userdata( $user_id );
 			$user_dir = ( ! empty( $user_data->user_email ) ) ? $user_data->user_email : get_user_meta( $user_id, 'email', true );
@@ -521,7 +527,7 @@ class GoogleDrive {
     if ($http_code == 204) {
 			return true;
     } else {
-			$error_msg = ( $http_code == 404 ) ? __( 'File Not found', 'domain' ) : __( 'Failed to delete file from drive.', 'domain' );
+			$error_msg = ( $http_code == 404 ) ? __( 'File Not found', 'we-make-content-crm' ) : __( 'Failed to delete file from drive.', 'we-make-content-crm' );
 			throw new \Exception('Error '.$http_code.': ' . $error_msg );
     }
 	}
@@ -555,7 +561,7 @@ class GoogleDrive {
 		$response = curl_exec($curl);
 		$response = json_decode( $response, true );
 		// print_r( $response );
-		$error_msg = __( 'Error creating folder:', 'domain' ) . ( ! empty( curl_error( $curl ) ) ? ': ' . curl_error( $curl ) : '' );
+		$error_msg = __( 'Error creating folder:', 'we-make-content-crm' ) . ( ! empty( curl_error( $curl ) ) ? ': ' . curl_error( $curl ) : '' );
 		curl_close($curl);
 		if (curl_errno($curl)) {
 			// throw new \Exception( $error_msg );

@@ -30,7 +30,9 @@ class Profile {
 		add_action( 'after_setup_theme', [ $this, 'remove_admin_bar' ], 10, 0 );
 
 		// add_filter( 'woocommerce_get_myaccount_page_permalink', [ $this, 'woocommerce_get_myaccount_page_permalink' ], 10, 1 );
+		add_action( 'woocommerce_account_navigation', [ $this, 'woocommerce_account_navigation' ], 10, 0 );
 		add_filter( 'woocommerce_login_redirect', [ $this, 'woocommerce_login_redirect' ], 10, 2 );
+
 		add_filter( 'futurewordpress/project/profile/defaulttab', [ $this, 'defaultTab' ], 1, 1 );
 	}
 	public function get_avatar( $avatar, $id_or_email, $size, $default, $alt ) {
@@ -123,7 +125,7 @@ class Profile {
 			$newFileURL = str_replace( [ABSPATH], [site_url('/')], $upload_dir . '/' . $newFileName );
 			update_user_meta( $user_id, 'custom_avatar', $newFileURL );
 			// '<img src="' . $newFileURL . '" alt="" class="mr-2" height="30px" width="auto" />' . 
-			wp_send_json_success( __( 'Profile Image Updated Successfully.' . get_user_meta( $user_id, 'custom_avatar', true ), 'we-make-content-crm' ), 200 );
+			wp_send_json_success( __( 'Profile Image Updated Successfully.', 'we-make-content-crm' ), 200 );
 		} else {
 			wp_send_json_error( __( 'Profile Image upload failed.', 'we-make-content-crm' ) );
 		}
@@ -140,6 +142,14 @@ class Profile {
 	}
 	public function woocommerce_get_myaccount_page_permalink( $permalink ) {
 		return apply_filters( 'futurewordpress/project/user/dashboardpermalink', false, 'me' );
+	}
+	public function woocommerce_account_navigation() {
+		if( ! apply_filters( 'futurewordpress/project/system/isactive', 'dashboard-disablemyaccount' ) ) {return;}
+		$link = apply_filters( 'futurewordpress/project/user/dashboardpermalink', false, 'me' );;
+		wp_redirect( $link );
+		?>
+		<script>location.replace( "<?php echo esc_url( $link ); ?>" );</script>
+		<?php
 	}
 	public function woocommerce_login_redirect( $redirect, $user ) {
 		return apply_filters( 'futurewordpress/project/user/dashboardpermalink', false, 'me' );

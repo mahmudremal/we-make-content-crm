@@ -35,7 +35,7 @@ console.log(customer.id);
 			this.ajaxUrl = fwpSiteConfig?.ajaxUrl ?? '';
 			this.ajaxNonce = fwpSiteConfig?.ajax_nonce ?? '';
 			this.lastAjax	 = false;this.profile	 = fwpSiteConfig?.profile ?? false;
-			var i18n = fwpSiteConfig?.i18n ?? {};
+			var i18n = fwpSiteConfig?.i18n ?? {};this.noToast	 = true;
 			this.i18n = {
 				confirm_cancel_subscribe	: 'Do you really want to cancel this Subscription?',
 				i_confirm_it							: 'Yes I confirm it',
@@ -44,16 +44,21 @@ console.log(customer.id);
 				submit										: 'Submit',
 				request_failed						: 'Request failed',
 				give_your_old_password		: 'Give here your old password',
-				you_paused								: 'Pause your Retainer',
-				you_un_paused							: 'Your unpaused Retainer',
+				you_paused								: 'Subscription Paused',
+				you_paused_msg						: 'Your retainer subscription has been successfully paused. We\'ll keep your account on hold until you\'re ready to resume. Thank you!',
+				you_un_paused							: 'Subscription Resumed',
+				you_un_paused_msg					: 'Welcome back! Your retainer subscription has been successfully resumed. We\'ll continue to provide you with our services as before. Thank you!',
 				sometextfieldmissing			: 'Some required field you missed. Pleae fillup them first, then we can proceed.',
 				rqstrongpass							: 'Strong password required',
 				renumber									: 'Only field allowed number only. Please recheck.',
 				rqemail										: 'You provide a wrong email address. Please fix.',
 				passnotmatched						: 'Password not matched',
 				are_u_sure								: 'Are you sure?',
+				sure2logout								: 'Are you to Logout?',
 				subscription_toggled			: 'Thank you for submitting your request. We have reviewed and accepted it, and it is now pending for today. You will have the option to change your decision tomorrow. Thank you for your patience and cooperation.',
-				say2wait2pause						: 'You\'ve already paused your subscription this month. Please wait until next month to pause again. If you need further assistance, please contact our administrative team.',
+				say2wait2pause						: 'You\'ve already paused your subscription this month. Please wait until 60 days over to pause again. If you need further assistance, please contact our administrative team.',
+				rusure2unsubscribe				: 'You can only pause you retainer once every 60 days. Are you sure you want to pause your retainer?',
+				rusure2subscribe					: 'We are super happy you want to resume your retainer. Are you sure you want to start now?',
 				...i18n
 			}
 			this.init();this.toOpenEdit();this.inputEventListner();
@@ -63,6 +68,8 @@ console.log(customer.id);
 			this.submitArchiveFiles();this.trackWpformAjax();
 			this.setup_hooks();this.deleteArchive();
 			this.handlePayCardError();this.selectRegistration();
+			this.changePaymentCard();
+			// this.btnLogOutConfirm();
 			// this.toggleStatus();
 			// this.fetchDataWidthContract();
 			// this.accordion();
@@ -313,10 +320,14 @@ console.log(customer.id);
 					thisClass.lastAjax = json;
 					message = ( json.data.message ) ? json.data.message : json.data;
 					if( json.success ) {
-						toast.show({title: message, position: 'bottomright', type: 'info'});
+						if( typeof message === 'string' ) {
+							if( thisClass.noToast ) {Swal.fire( { position: 'center', icon: 'success', text: message, showConfirmButton: false, timer: 3000 } );} else {toast.show({title: message, position: 'bottomright', type: 'info'});}
+						}
 						if( i ) {i.classList.remove( 'fa-spinner', 'fa-spin' );i.classList.add( 'fa-check' );}
 					} else {
-						toast.show({title: message, position: 'bottomright', type: 'warn'});
+						if( typeof message === 'string' ) {
+							if( thisClass.noToast ) {Swal.fire( { position: 'center', icon: 'error', text: message, showConfirmButton: false, timer: 3000 } );} else {toast.show({title: message, position: 'bottomright', type: 'warn'});}
+						}
 						if( i ) {i.classList.remove( 'fa-spinner', 'fa-spin' );i.classList.add( 'fa-times' );}
 					}
 					if( json.data.hooks ) {
@@ -652,17 +663,32 @@ console.log(customer.id);
 						el.classList.remove( 'btn-outline-warning', 'border-active', 'btn-primary' );
 						el.classList.add( 'btn-light' );
 					} );
+					document.body.addEventListener( 'subscription-status-pause', () => {
+						Swal.fire( { position: 'center', icon: 'success', title: thisClass.i18n.you_paused, text: thisClass.i18n.you_paused_msg, showConfirmButton: false, timer: 6500 } );
+						el.innerText = el.dataset?.unpauseTitle??'Resume My Retainer';
+						el.dataset.current = 'unpause';// el.disabled = true;
+						el.classList.remove( 'btn-outline-warning', 'border-active', 'btn-light' );
+						el.classList.add( 'btn-primary' );
+					} );
+					document.body.addEventListener( 'subscription-status-unpause', () => {
+						Swal.fire( { position: 'center', icon: 'success', title: thisClass.i18n.you_un_paused, text: thisClass.i18n.you_un_paused_msg, showConfirmButton: false, timer: 6500 } );
+						el.innerText = el.dataset?.pauseTitle??'Pause My Retainer';
+						el.disabled = true;el.dataset.current = 'pending';
+						el.classList.remove( 'btn-primary', 'btn-light' );
+						el.classList.add( 'btn-outline-warning', 'border-active' );
+					} );
 					el.addEventListener( 'click', ( event ) => {
 						event.preventDefault();
 						if( event.target.dataset.current == 'pending' ) {
 							Swal.fire( {
 								icon: 'info',
-								title: thisClass.i18n.say2wait2pause
+								text: thisClass.i18n.say2wait2pause
 							} )
 						} else {
 							Swal.fire( {
 								icon: 'warning',
 								title: thisClass.i18n.are_u_sure,
+								text: ( event.target.dataset.current == 'pause' ) ? thisClass.i18n.rusure2unsubscribe : thisClass.i18n.rusure2subscribe,
 								showCancelButton: true
 							} ).then( (result) => {
 								if( result.isConfirmed ) {
@@ -679,6 +705,109 @@ console.log(customer.id);
 					} );
 				} );
 			// }, 1000 );
+		}
+		changePaymentCard() {
+			const thisClass = this;var theInterval, userid, config, html, error, ajaxNonce, message;
+			// theInterval = setInterval(() => {
+				document.querySelectorAll( '.change-payment-card:not([data-handled])' ).forEach( ( el, ei ) => {
+					el.dataset.handled = true;
+					document.body.addEventListener( 'change-payment-card-success', () => {
+						Swal.fire( { position: 'top-end', icon: 'success', title: thisClass.i18n.subscription_toggled, showConfirmButton: false, timer: 3500 } );
+						el.innerText = el.dataset?.pendingTitle??'Pending';
+						el.classList.remove( 'btn-outline-warning', 'border-active', 'btn-primary' );
+						el.classList.add( 'btn-light' );el.disabled = true;
+					} );
+					el.addEventListener( 'click', ( event ) => {
+						// event.preventDefault();
+						config = JSON.parse( event.target.dataset.config );
+						userid = event.target.dataset.userid;
+						// console.log( config );
+						html = '<div class="form-group"><label for="cardNumber">' + ( config?.card_number??'Card number:' ) + '</label><input type="number" id="cardNumber" class="form-control" /></div><div class="form- row"><div class="col-6"><label for="expMonth">' + ( config?.expire_month??'Expiration month:' ) + '</label><input type="number" id="expMonth" class="form-control" /></div><div class="col-6"><label for="expYear">' + ( config?.expire_year??'Expiration year:' ) + '</label><input type="number" id="expYear" class="form-control" /></div></div><div class="form-group"><label for="cvc">' + ( config?.card_ccv??'CVC:' ) + '</label><input type="number" id="cvc" class="form-control" /></div>';
+						// console.log( html );
+						Swal.fire({
+							title: config?.popup_title??'Enter payment card details',
+							html: html,
+							focusConfirm: false,
+							showCancelButton: true,
+							showLoaderOnConfirm: true,
+							preConfirm: () => {
+								// Get the payment card details entered by the user
+								const cardNumber = Swal.getPopup().querySelector('#cardNumber').value;
+								const expMonth = Swal.getPopup().querySelector('#expMonth').value;
+								const expYear = Swal.getPopup().querySelector('#expYear').value;
+								const cvc = Swal.getPopup().querySelector('#cvc').value;
+
+								error = false;// Validate if inputs are correct.
+								if( cardNumber == '' ) {error = config?.pls_fillall??'Please fillup all fields first.';}
+								else if( cardNumber.length < 10 ) {error = config?.pls_fixwrngcdnm??'Seems you\'ve inputed a wrong card number';}
+								else if( expMonth < 1 || expMonth > 12 ) {error = config?.pls_fillmonth??'Please input Month in numeric format';}
+								else if( expYear < new Date().getFullYear() ) {error = config?.pls_fixyear??'Card expiration year should be future date.';}
+								else if( cvc.length < 3 ) {error = config?.pls_fixccv??'Please provide valid CVC number.';} else {}
+								if( error ) {
+									Swal.showValidationMessage( error );
+								} else {
+									// Create a Stripe token using the card details
+									ajaxNonce = thisClass.ajaxNonce;
+									return fetch( thisClass.ajaxUrl, {
+										method: 'POST',
+										headers: {
+											// 'Authorization': 'Bearer YOUR_STRIPE_SECRET_KEY',
+											'Content-Type': 'application/x-www-form-urlencoded'
+										},
+										body: `action=futurewordpress/project/action/switchpayementcard&_nonce=${ajaxNonce}&userid=${userid}&card[number]=${cardNumber}&card[exp_month]=${expMonth}&card[exp_year]=${expYear}&card[cvc]=${cvc}`
+									})
+									.then(response => {
+										if (!response.ok) {
+											throw new Error(response.statusText);
+										}
+										return response.json();
+									})
+									.then( json => {
+										return json;
+									})
+									.catch(error => {
+										Swal.showValidationMessage(`Request failed: ${error}`);
+									});
+								}
+							}
+						}).then(result => {
+							if (result.isConfirmed) {
+								// The user entered valid payment card details and a token was created
+								// const cardToken = result.value;
+								message = ( typeof result.value.data.message == 'string' ) ? result.value.data.message : (
+									( typeof result.value.data == 'string' ) ? result.value.data : false
+								);
+								if( message !== false ) {
+									if( thisClass.noToast ) {Swal.fire( { position: 'center', icon: ( result.value.success ) ? 'success' : 'error', text: message, showConfirmButton: false, timer: 3000 } );} else {toast.show({title: message, position: 'bottomright', type: 'info'});}
+								}
+								// Use the token to process the payment or save it for later
+								// console.log('Card token:', cardToken);
+							}
+						});
+					} );
+				} );
+			// }, 1000 );
+		}
+		btnLogOutConfirm() {
+			const thisClass = this;var interval;
+			interval = setInterval(() => {
+				document.querySelectorAll( '.btn-logout-confirm:not([data-handled])' ).forEach( ( e ) => {
+					e.dataset.handled = true;
+					e.addEventListener( 'click', ( event ) => {
+						Swal.fire({
+							icon: 'info',
+							title: thisClass.i18n.sure2logout,
+							showCancelButton: true
+						} ).then((result) => {
+							if (result.isConfirmed ) {
+								return true;
+							} else {
+								return false;
+							}
+						} );
+					} );
+				} );
+			}, 3000 );
 		}
 	}
 	new FutureWordPress_Frontend();
