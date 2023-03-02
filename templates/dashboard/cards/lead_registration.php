@@ -7,7 +7,7 @@
 $userInfo = get_user_by( 'id', hex2bin( get_query_var( 'lead_registration' ) ) );
 if( is_user_logged_in() ) {
   $user_slug = apply_filters( 'futurewordpress/project/user/dashboardpermalink', $userInfo->ID, $userInfo->data->user_nicename );
-  wp_redirect( site_url( $user_slug ) );exit;
+  wp_redirect( $user_slug );exit;
 }
 // $_SESSION[ 'current-lead' ] = $userInfo->ID;
 if( get_transient( '_lead_user_registration-' . apply_filters( 'futurewordpress/project/user/visitorip', '' ) ) ) {
@@ -39,6 +39,8 @@ $regLink = apply_filters( 'futurewordpress/project/system/getoption', 'regis-lin
 // if( $regLink && ! empty( $regLink ) ) {$regLink = get_the_permalink( $regLink );}
 
 if( $regLink && ! empty( $regLink ) && ! $needToSelect ) {
+  $regLink = str_replace( [ '{{nonce}}' ], [ time() ], $regLink );
+  // wp_die( esc_url( $regLink ) );
   wp_redirect( esc_url( $regLink ) );exit;
 } else {
   $defaultContract = apply_filters( 'futurewordpress/project/system/getoption', 'signature-defaultcontract', '' );

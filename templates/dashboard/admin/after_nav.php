@@ -1,10 +1,11 @@
+<?php $args = isset( $args ) ? (array) $args : []; ?>
 <div class="iq-navbar-header " style="height: 215px;">
     <div class="container-fluid iq-container">
         <div class="row">
             <div class="col-md-12">
                 <div class="flex-wrap d-flex justify-content-between align-items-center">
                     <div>
-                        <h1><?php echo esc_html( apply_filters( 'futurewordpress/project/admin/title', __( 'Dashboard', 'we-make-content-crm' ) ) ); ?></h1>
+                        <h1><?php echo esc_html( apply_filters( 'futurewordpress/project/admin/title', __( 'Dashboard', 'we-make-content-crm' ), $args ) ); ?></h1>
                         <!-- <p><?php esc_html_e( 'Dashboard', 'we-make-content-crm' ); ?></p> -->
                     </div>
                     <div>

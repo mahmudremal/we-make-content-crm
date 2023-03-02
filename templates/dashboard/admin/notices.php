@@ -6,6 +6,11 @@ $notices = (array) apply_filters( 'futurewordpress/project/notices/manager', 'ge
     <div class="col-12">
       <div class="card card-full-width">
         <div class="card-body">
+          <div class="row mx-1" style="justify-content: end;">
+            <div class="col-sm-6" style="text-align: right;">
+              <button type="button" class="btn btn-outline-link my-2 delete-events-log"><?php esc_html_e( 'Remove All', 'we-make-content-crm' ); ?></button>
+            </div>
+          </div>
           <div class="fancy-table table-responsive border rounded">
             <table class="table table-striped mb-0">
               <thead>

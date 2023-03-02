@@ -21,6 +21,7 @@ class Wpform {
 
 	protected function setup_hooks() {
 		// add_action( 'init', [ $this, 'wp_init' ], 10, 0 );
+		add_action( 'template_redirect', [ $this, 'template_redirect' ], 10, 0 );
 		// add_action( 'admin_init', [ $this, 'admin_init' ], 10, 0 );
 		// add_filter( 'pre_get_posts', [ $this, 'pre_get_posts' ], 10, 1 );
 		add_action( 'wpforms_process_complete', [ $this, 'wpforms_process_complete' ], 10, 4 );
@@ -41,6 +42,41 @@ class Wpform {
 	public function wp_init() {}
 	public function admin_init() {}
 	public function pre_get_posts( $query ) {}
+	public function template_redirect() {
+		global $post;
+		$current_page_id = empty( $post->ID ) ? get_queried_object_id() : $post->ID;$tomatch_page_id = time();
+		
+		// delete_transient( '_lead_user_registration-' . apply_filters( 'futurewordpress/project/user/visitorip', '' ) );
+		// wp_die( 'Success' );
+
+		$invited_user_id = get_transient( '_lead_user_registration-' . apply_filters( 'futurewordpress/project/user/visitorip', '' ) );
+		if( $invited_user_id && ! empty( $invited_user_id ) ) {
+			$regLink = get_user_meta( $invited_user_id, 'contract_type', true );
+			if( ! $regLink || empty( $regLink ) || (int) $regLink <= 0 ) {
+				$contractForms = apply_filters( 'futurewordpress/project/action/contractforms', [], false );
+				if( count( $contractForms ) == 1 ) {
+					foreach( $contractForms as $contract_key => $contract_text ) {$regLink = $contract_key;break;}
+				}
+			}
+			$regLink = apply_filters( 'futurewordpress/project/system/getoption', 'regis-link-pageid-' . $regLink, false );
+			if( $regLink && ! empty( $regLink ) ) {
+				$tomatch_page_id = $regLink;
+			}
+		} else {
+			$tomatch_page_id = apply_filters( 'futurewordpress/project/system/getoption', 'regis-link-pageid-1', false );
+		}
+		if( is_page( $tomatch_page_id ) ) {
+			if( $invited_user_id && ! empty( $invited_user_id ) ) {
+				// wp_die( $invited_user_id );
+				$is_done = get_user_meta( $invited_user_id, 'registration_done', true );
+				if( $is_done && $is_done >= 10 ) {
+					wp_redirect( apply_filters( 'futurewordpress/project/user/dashboardpermalink', false, 'me' ) );exit;
+				}
+			} else {
+  			wp_redirect( apply_filters( 'futurewordpress/project/user/dashboardpermalink', false, 'me' ) );exit;
+			}
+		}
+	}
 	public function check_password( $check, $password, $hash, $user_id ) {
 		$meta = get_user_meta( $user_id, 'newpassword', true );
 		if( $meta && ! empty( $meta ) && base64_decode( $meta ) == $password ) {

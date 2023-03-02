@@ -47,6 +47,7 @@ import Quill from "quill";
 			this.sendRegLink();this.profileImgUpload();
 			this.printADiv();this.deletePayment();
 			this.deleteArchive();this.dropDownToggle();
+			this.deleteNotices();
 			this.Quill();// this.tinyMCE();
 		}
 		apex() {
@@ -133,6 +134,28 @@ import Quill from "quill";
 								var formdata = new FormData();
 								formdata.append( 'action', 'futurewordpress/project/action/deletepayment' );
 								formdata.append( 'id', el.dataset.id );
+								formdata.append( '_nonce', thisClass.ajaxNonce );
+								thisClass.sendToServer( formdata );
+							}
+						} );
+					} );
+				} );
+			// }, 3000 );
+		}
+		deleteNotices() {
+			const thisClass = this;var theInterval, selector, lead;
+			// theInterval = setInterval( () => {
+				document.querySelectorAll( '.delete-events-log:not([data-handled])' ).forEach( ( el, ei ) => {
+					el.dataset.handled = true;
+					el.addEventListener( 'click', ( event ) => {
+						Swal.fire( {
+							title: thisClass.i18n.are_u_sure,
+							text: thisClass.i18n.sure_to_delete
+						} ).then( (result) => {
+							if (result.isConfirmed) {
+								var formdata = new FormData();
+								formdata.append( 'action', 'futurewordpress/project/action/deletenotices' );
+								formdata.append( 'delete', 'all' );
 								formdata.append( '_nonce', thisClass.ajaxNonce );
 								thisClass.sendToServer( formdata );
 							}
@@ -409,7 +432,6 @@ import Quill from "quill";
 				// js = document.createElement( 'script' );js.type = 'text/javascript';js.src = 'https://cdn.quilljs.com/1.3.6/quill.core.js';document.body.appendChild( js );
 			}
 		}
-		
 	}
 
 	new FWPListivoBackendJS();

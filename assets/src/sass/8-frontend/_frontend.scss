@@ -66,10 +66,10 @@ div.wpforms-container-full .wpforms-form .wpforms-field {
     .wpforms-field-row {
       display: block;
       min-width: 100%;
-      .wpforms-field-row-block {
-        // padding: 10px !important;
-        // margin-left: 0 !important;
-      }
+      // .wpforms-field-row-block {
+      //   padding: 10px !important;
+      //   margin-left: 0 !important;
+      // }
     }
   }
 }
@@ -153,9 +153,9 @@ div.wpforms-container-full .wpforms-form .wpforms-field {
           border-color: #008F9C !important;
           background-color: #fff;
         }
-        &.wpforms-field-name .wpforms-field-row .wpforms-field-row-block {
-          // width: 50%;
-        }
+        // &.wpforms-field-name .wpforms-field-row .wpforms-field-row-block {
+        //   width: 50%;
+        // }
       }
       .wpforms-one-half {
         @include mq($from: 600px) {
@@ -323,11 +323,17 @@ div.wpforms-container-full .wpforms-form .wpforms-field {
   }
   &.no-header-bg {
     .content {
+      margin-top: -50px;
       padding: unset;
       background: #ffffff9e;
       .content_inner {
         background: none;
         padding-bottom: 80px;
+        .card-body .btn-logout-confirm {
+          @include mq($until: 550px) {
+            margin-top: 20px;
+          }
+        }
       }
       .main-content {
         .iq-navbar-header {
@@ -411,6 +417,9 @@ div.wpforms-container-full .wpforms-form .wpforms-field {
     @include mq($until: 480px) {
       width: auto;
     }
+  }
+  .swal2-container.swal2-center > .swal2-popup[aria-describedby="swal2-html-container"] {
+    width: auto;
   }
   .swal2-actions {
     .swal2-styled.swal2-confirm {

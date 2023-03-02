@@ -26,6 +26,7 @@ class Core {
 		add_action( 'wp_ajax_futurewordpress/project/action/switchleadstatus', [ $this, 'switchLeadStatus' ], 10, 0 );
 		add_action( 'wp_ajax_futurewordpress/project/action/deleteleadaccount', [ $this, 'deleteLeadAccount' ], 10, 0 );
 		add_action( 'wp_ajax_futurewordpress/project/action/deletepayment', [ $this, 'deletePayment' ], 10, 0 );
+		add_action( 'wp_ajax_futurewordpress/project/action/deletenotices', [ $this, 'deleteNotices' ], 10, 0 );
 		add_action( 'wp_ajax_futurewordpress/project/action/sendregistration', [ $this, 'sendRegistration' ], 10, 0 );
 		add_action( 'wp_ajax_futurewordpress/project/action/sendpasswordreset', [ $this, 'sendPasswordReset' ], 10, 0 );
 		add_action( 'wp_ajax_futurewordpress/project/action/registerexisting', [ $this, 'registerExisting' ], 10, 0 );
@@ -212,6 +213,17 @@ class Core {
 			wp_send_json_error( __( 'Unexpected status requested.', 'we-make-content-crm' ), 200 );
 		}
 	}
+	public function deleteNotices() {
+		if( ! isset( $_POST[ '_nonce' ] ) || ! wp_verify_nonce( $_POST[ '_nonce' ], 'futurewordpress/project/verify/nonce' ) ) {
+			wp_send_json_error( __( 'We\'ve detected you\'re requesting with an invalid security token or something went wrong with you', 'we-make-content-crm' ), 200 );
+		}
+		if( isset( $_POST[ 'delete' ] ) && ! empty( $_POST[ 'delete' ] ) ) {
+			update_option( 'fwp_we_make_content_admin_notice', [] );
+			wp_send_json_success( __( 'All notices deleted successfully.', 'we-make-content-crm' ), 200 );
+		} else {
+			wp_send_json_error( __( 'Unexpected status requested.', 'we-make-content-crm' ), 200 );
+		}
+	}
 	public function rewriteRules( $rules ) {
 		$rules[] = [ 'lead-registration/source-email/([^/]*)/?', 'index.php?lead_registration=$matches[1]', 'top' ];
 		return $rules;
@@ -310,7 +322,7 @@ class Core {
 	public function toggleSubscption( $user_id, $meta_key, $meta_value ) {
 		$userInfo = get_user_by( 'id', $user_id );
 
-		if( false && $meta_value == 'off' && ! apply_filters( 'futurewordpress/project/payment/stripe/allowswitchpause', true, 'pause', $userInfo->ID ) ) {
+		if( $meta_value == 'off' && ! apply_filters( 'futurewordpress/project/payment/stripe/allowswitchpause', true, 'pause', $userInfo->ID ) ) {
 			wp_send_json_success( [ 'message' => __( 'You can\'t change now. You can only pause you retainer once every 60 days. Please wait until it release.', 'we-make-content-crm' ), 'hooks' => [] ], 200 );
 		} else {
 			$status = ( $meta_value == 'off' ) ? 'pause' : 'unpause';

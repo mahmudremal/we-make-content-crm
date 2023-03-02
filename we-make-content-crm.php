@@ -6,7 +6,7 @@
  * Plugin Name:       We Make Content CRM
  * Plugin URI:        https://github.com/mahmudremal/we-make-content-crm/
  * Description:       Client relationship management with Facebook lead generation, Calendly APi, Google APi and subscription system.
- * Version:           1.0.1
+ * Version:           1.0.2
  * Requires at least: 5.2
  * Requires PHP:      7.2
  * Author:            Remal Mahmud
@@ -18,7 +18,7 @@
  * 
  * @package WeMakeContentCMS
  * @author  Remal Mahmud (https://github.com/mahmudremal)
- * @version 1.0.1
+ * @version 1.0.2
  * @link https://github.com/mahmudremal/we-make-content-crm/
  * @category	WooComerce Plugin
  * @copyright	Copyright (c) 2023-25

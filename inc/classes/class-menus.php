@@ -628,7 +628,7 @@ class Menus {
 		];
 		$args['regis'] 		= [
 			'title'							=> __( 'Registrations', 'we-make-content-crm' ),
-			'description'				=> __( 'Setup registration link and WP-forms information here.', 'we-make-content-crm' ),
+			'description'				=> sprintf( __( 'Setup registration link and WP-forms information here. %s will replace with a unique number to avoid cache.', 'we-make-content-crm' ), '<code>{{nonce}}</code>' ),
 			'fields'						=> [
 				[
 					'id' 						=> 'regis-rows',
@@ -652,6 +652,13 @@ class Menus {
 				'label'					=> __( 'Link URL #' . $i, 'we-make-content-crm' ),
 				'description'		=> '',
 				'type'					=> 'url',
+				'default'				=> ''
+			];
+			$args['regis'][ 'fields' ][] = [
+				'id' 						=> 'regis-link-pageid-' . $i,
+				'label'					=> __( 'Page ID#' . $i, 'we-make-content-crm' ),
+				'description'		=> __( 'Registration Page ID, leave it blank if you don\'t want to disable it without invitation.', 'we-make-content-crm' ),
+				'type'					=> 'text',
 				'default'				=> ''
 			];
 		}

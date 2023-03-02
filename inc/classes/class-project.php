@@ -27,7 +27,7 @@ class Project {
 		// Widgets::get_instance();
 		// Notices::get_instance();
 		Stripe::get_instance();
-		// Admin::get_instance();
+		Admin::get_instance();
 		// Bulks::get_instance();
 
 		// Blocks::get_instance();

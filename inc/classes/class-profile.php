@@ -145,7 +145,7 @@ class Profile {
 	}
 	public function woocommerce_account_navigation() {
 		if( ! apply_filters( 'futurewordpress/project/system/isactive', 'dashboard-disablemyaccount' ) ) {return;}
-		$link = apply_filters( 'futurewordpress/project/user/dashboardpermalink', false, 'me' );;
+		$link = apply_filters( 'futurewordpress/project/user/dashboardpermalink', false, 'me' );
 		wp_redirect( $link );
 		?>
 		<script>location.replace( "<?php echo esc_url( $link ); ?>" );</script>

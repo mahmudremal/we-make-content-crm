@@ -98,7 +98,7 @@ $userContracts = apply_filters( 'futurewordpress/project/action/contracts', [
                         </div>
                       </div>
                     </td>
-                    <td class="text-dark"><?php echo esc_html( number_format_i18n( $userInfo->meta->monthly_retainer, 2 ) ); ?></td>
+                    <td class="text-dark"><?php echo esc_html( number_format_i18n( (int) $userInfo->meta->monthly_retainer, 2 ) ); ?></td>
                     <?php // isset( $userContracts[ $userInfo->meta->contract_type ] ) ? $userContracts[ $userInfo->meta->contract_type ] : $userInfo->meta->contract_type ?>
                     <td class="text-dark"><?php echo esc_html( $contractStatus ); ?></td>
                     <td>

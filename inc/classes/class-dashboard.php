@@ -12,17 +12,19 @@ use \WP_Query;
 
 class Dashboard {
 	use Singleton;
+	public $args = null;
 	public $allowedPages = null;
 	public $dashboardEndpoint = null;
 	protected function __construct() {
 		// load class.
     $this->allowedPages = [ 'crm_dashboard' ];
+    $this->args = [];
 		$this->setup_hooks();
 	}
 	protected function setup_hooks() {
     add_filter( 'futurewordpress/project/admin/allowedpage', [ $this, 'allowedpage' ], 10, 0 );
     add_filter( 'futurewordpress/project/admin/pagetree', [ $this, 'pageTree' ], 10, 1 );
-    add_action( 'futurewordpress/project/admin/title', [ $this, 'adminTitle' ], 10, 1 );
+    add_filter( 'futurewordpress/project/admin/title', [ $this, 'adminTitle' ], 10, 2 );
 		add_action( 'admin_menu', [ $this, 'admin_menu' ], 10, 0 );
     add_action( 'wp_after_admin_bar_render', [ $this, 'wp_after_admin_bar_render' ], 10, 0 );
 
@@ -104,6 +106,7 @@ class Dashboard {
     $current_pathinfo = explode( '/', $current_path );
     for($i=0;$i<=5;$i++) {$current_pathinfo[$i] = isset( $current_pathinfo[$i] ) ? $current_pathinfo[$i] : false;}
     $this->dashboardEndpoint = $current_pathinfo;
+    $this->args = [ 'page' => $pageRoot, 'path' => $current_path,  'split' => $current_pathinfo ];
     
     switch( $position ) {
       case 'after_nav':
@@ -113,7 +116,7 @@ class Dashboard {
         if( in_array( 'dashboard', [ $current_pathinfo[0], '' ] ) ) {
           include WEMAKECONTENTCMS_DIR_PATH . '/templates/dashboard/admin/content.php';
         } else {
-          do_action( 'futurewordpress/project/parts/split', [ 'page' => $pageRoot, 'path' => $current_path,  'split' => $current_pathinfo ] );
+          do_action( 'futurewordpress/project/parts/split', $this->args );
         }
         break;
       case 'homecontent':
@@ -121,7 +124,7 @@ class Dashboard {
           // include WEMAKECONTENTCMS_DIR_PATH . '/templates/dashboard/admin/tasks.php';
           include WEMAKECONTENTCMS_DIR_PATH . '/templates/dashboard/admin/leads.php';
         } else {
-          do_action( 'futurewordpress/project/parts/split', [ 'page' => $pageRoot, 'path' => $current_path,  'split' => $current_pathinfo ] );
+          do_action( 'futurewordpress/project/parts/split', $this->args );
         }
         break;
       default:
@@ -147,7 +150,10 @@ class Dashboard {
       include WEMAKECONTENTCMS_DIR_PATH . '/templates/dashboard/admin/notices.php';
     } else {}
   }
-  public function adminTitle( $default ) {
+  public function adminTitle( $default, $args ) {
+    if( ! $args || ! isset( $args[ 'split' ] ) ) {
+      $args = $this->args;
+    }
     if( $args[ 'split' ][0] == 'leads' && $args[ 'split' ][1] == 'edit' || $args[ 'split' ][1] == 'add' ) {
       return __( 'Edit Lead', 'we-make-content-crm' );
     } else if( $args[ 'split' ][0] == '' || $args[ 'split' ][0] == 'leads' && $args[ 'split' ][1] === false ) {
@@ -160,7 +166,7 @@ class Dashboard {
       return __( 'Archive Uploaded', 'we-make-content-crm' );
     } else if( $args[ 'split' ][0] == 'notices' ) {
       return __( 'Notices', 'we-make-content-crm' );
-    } else {}
+    } else {return  $default;}
   }
   public function adminNotices() {
     $alert = (array) get_transient( 'futurewordpress/project/transiant/admin/' . get_current_user_id() );
