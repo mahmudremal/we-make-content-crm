@@ -359,7 +359,7 @@ else :
                     <tbody>
                     <?php if( count( $archives ) <= 0 ) : ?>
                         <tr>
-                          <td colspan="6"><img src="<?php echo esc_url( WEMAKECONTENTCMS_BUILD_URI . '/icons/undraw_file_bundle_re_6q1e.svg' ); ?>" alt="<?php esc_attr_e( 'No Archives',   'we-make-content-crm' ); ?>"></td>
+                          <td colspan="3"><img src="<?php echo esc_url( WEMAKECONTENTCMS_BUILD_URI . '/icons/undraw_file_bundle_re_6q1e.svg' ); ?>" alt="<?php esc_attr_e( 'No Archives',   'we-make-content-crm' ); ?>"></td>
                         </tr>
                       <?php else : ?>
                         <?php foreach( $archives as $i => $archive ) :?>
@@ -484,7 +484,7 @@ else :
                     <tbody>
                       <?php if( count( $payments[ 'data' ] ) <= 0 ) : ?>
                         <tr>
-                          <td colspan="6"><img src="<?php echo esc_url( WEMAKECONTENTCMS_BUILD_URI . '/icons/Card Payment_Monochromatic.svg' ); ?>" alt="<?php esc_attr_e( 'No Payments',   'we-make-content-crm' ); ?>"></td>
+                          <td colspan="7"><img src="<?php echo esc_url( WEMAKECONTENTCMS_BUILD_URI . '/icons/Card Payment_Monochromatic.svg' ); ?>" alt="<?php esc_attr_e( 'No Payments',   'we-make-content-crm' ); ?>"></td>
                         </tr>
                       <?php else : ?>
                         <?php // print_r( $payments[ 'data' ] ); ?>

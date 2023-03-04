@@ -300,6 +300,13 @@ div.wpforms-container-full .wpforms-form .wpforms-field {
       .container.content-inner {
         border-radius: 10px;
         background: none;
+        .row > .col-lg-3 {
+          @include mq($until: 992px) {
+            order: 1;
+            margin-top: 20px;
+            // display: flex;
+          }
+        }
       }
     }
   }
@@ -331,7 +338,9 @@ div.wpforms-container-full .wpforms-form .wpforms-field {
         padding-bottom: 80px;
         .card-body .btn-logout-confirm {
           @include mq($until: 550px) {
-            margin-top: 20px;
+            width: 100%;
+            margin-top: 5px;
+            border-radius: 10px;
           }
         }
       }
@@ -418,9 +427,9 @@ div.wpforms-container-full .wpforms-form .wpforms-field {
       width: auto;
     }
   }
-  .swal2-container.swal2-center > .swal2-popup[aria-describedby="swal2-html-container"] {
-    width: auto;
-  }
+  // .swal2-container.swal2-center > .swal2-popup[aria-describedby="swal2-html-container"] {
+  //   width: auto;
+  // }
   .swal2-actions {
     .swal2-styled.swal2-confirm {
       color: #333;
@@ -478,5 +487,14 @@ Registration Form Design
     opacity: 0;
     visibility: visible;
     display: block;
+  }
+  .nav-pills .nav-item {
+    @include mq($until: 550px) {
+      width: 100%;
+      background: #D3D3D3;
+      margin-right: auto;
+      margin-top: 5px;
+      border-radius: 10px;
+    }
   }
 }
