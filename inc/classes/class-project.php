@@ -39,8 +39,11 @@ class Project {
 		Rewrite::get_instance();
 		Esign::get_instance();
 		// Shortcode::get_instance();
-		// Register_Post_Types::get_instance();
-		// Register_Taxonomies::get_instance();
+		// PostTypes::get_instance();
+		// Taxonomies::get_instance();
+		// Events::get_instance();
+		// Ftp::get_instance();
+		// Gpt3::get_instance();
 
 		$this->setup_hooks();
 	}

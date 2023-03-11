@@ -128,8 +128,8 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 		$uploadDir = $this->theUploadDir;
 		if( $this->theUploadDir === false ) {
 			$uploadDir = wp_get_upload_dir(); // wp_send_json_error( $uploadDir, 200 );
-			$uploadDir[ 'basedir' ] = $uploadDir[ 'basedir' ] . '/futurewordpress';
-			$uploadDir[ 'baseurl' ] = $uploadDir[ 'baseurl' ] . '/futurewordpress';
+			$uploadDir[ 'basedir' ] = $uploadDir[ 'basedir' ] . '/' . apply_filters( 'futurewordpress/project/system/getoption', 'ftp-mediadir', 'futurewordpress' );
+			$uploadDir[ 'baseurl' ] = $uploadDir[ 'baseurl' ] . '/' . apply_filters( 'futurewordpress/project/system/getoption', 'ftp-mediadir', 'futurewordpress' );
 			if( ! is_dir( $uploadDir[ 'basedir' ] ) ) {wp_mkdir_p( $uploadDir[ 'basedir' ] );}
 			$this->theUploadDir = $uploadDir;
 		}

@@ -46,12 +46,12 @@ class Option {
 	 */
 	public function init() {
 		$this->general = (object) wp_parse_args( apply_filters( 'futurewordpress/project/settings/general', [] ), [
-			'page_title'					=> __( 'CRM Configuration.', 'we-make-content-crm' ),
-			'menu_title'					=> __( 'CRM Config', 'we-make-content-crm' ),
+			'page_title'					=> __( 'Configuration.', 'we-make-content-crm' ),
+			'menu_title'					=> __( 'Config', 'we-make-content-crm' ),
 			'role'								=> 'manage_options',
 			'slug'								=> $this->plugin_slug,
-			'page_header'					=> __( 'Activity Schedule customization page.', 'we-make-content-crm' ),
-			'page_subheader'			=> __( 'Your setting panel from where you can control Activity Schedule and customizations.', 'we-make-content-crm' ),
+			'page_header'					=> __( 'customization page.', 'we-make-content-crm' ),
+			'page_subheader'			=> __( 'Your setting panel from where you can control and customize.', 'we-make-content-crm' ),
 			'no_password'					=> __( 'A password is required.', 'we-make-content-crm' ),
 		] );
 		// print_r( $this->general->page_header );wp_die();
@@ -211,7 +211,7 @@ class Option {
 				foreach( $field['options'] as $k => $v ) {
 					$selected = ( $k == $data );
 					if( empty( $data ) && ! $selected && $k == $field[ 'default' ] ) {$selected = true;}
-					$html .= '<option ' . selected( $selected, true, false ) . '>' . $v . '</option>';
+					$html .= '<option ' . selected( $selected, true, false ) . ' value="' . esc_attr( $k ) . '">' . $v . '</option>';
 				}
 				$html .= '</select> ';
 			break;
@@ -223,7 +223,7 @@ class Option {
 					if( in_array( $k, $data ) ) {
 						$selected = true;
 					}
-					$html .= '<option ' . selected( $selected, true, false ) . ' value="' . esc_attr( $k ) . '" />' . $v . '</label> ';
+					$html .= '<option ' . selected( $selected, true, false ) . ' value="' . esc_attr( $k ) . '">' . $v . '</option> ';
 				}
 				$html .= '</select> ';
 			break;
@@ -235,11 +235,11 @@ class Option {
 			case 'checkbox_multi':
 			case 'radio':
 			case 'select_multi':
-				$html .= '<br/><span class="description">' . $field['description'] . '</span>';
+				$html .= apply_filters( 'futurewordpress/project/settings/fields/label', '<br/><span class="description">' . $field['description'] . '</span>', $field );
 			break;
 
 			default:
-				$html .= '<label for="' . esc_attr( $field['id'] ) . '"><span class="description">' . $field['description'] . '</span></label>' . "\n";
+				$html .= apply_filters( 'futurewordpress/project/settings/fields/label', '<label for="' . esc_attr( $field['id'] ) . '"><span class="description">' . $field['description'] . '</span></label>' . "\n", $field );
 			break;
 		}
 

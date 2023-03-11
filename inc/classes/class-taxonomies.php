@@ -9,7 +9,7 @@ namespace WEMAKECONTENTCMS_THEME\Inc;
 
 use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 
-class Register_Taxonomies {
+class Taxonomies {
 	use Singleton;
 
 	protected function __construct() {

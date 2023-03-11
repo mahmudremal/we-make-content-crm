@@ -8,8 +8,8 @@
 namespace WEMAKECONTENTCMS_THEME\Inc;
 
 use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
-
-class Register_Post_Types {
+ 
+class PostTypes {
 	use Singleton;
 
 	protected function __construct() {

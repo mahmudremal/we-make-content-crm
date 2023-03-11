@@ -5,6 +5,7 @@ import './modules/dropzone';
 // import './modules/flatpickr';
 // import './modules/sweetalert2';
 // import './modules/datatables';
+// import './modules/chatgpt';
 
 // Styles
 import '../sass/main.scss';
