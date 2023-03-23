@@ -62,10 +62,10 @@ class Assets {
 	public function register_scripts() {
 		// Register scripts.
 		// wp_register_script( 'slick-js', WEMAKECONTENTCMS_BUILD_LIB_URI . '/js/slick.min.js', ['jquery'], false, true );
-		wp_register_script( 'WeMakeContentCMS', WEMAKECONTENTCMS_BUILD_JS_URI . '/frontend.js', ['jquery'], $this->filemtime( WEMAKECONTENTCMS_BUILD_JS_DIR_PATH . '/frontend.js' ), true );
 		// wp_register_script( 'single-js', WEMAKECONTENTCMS_BUILD_JS_URI . '/single.js', ['jquery', 'slick-js'], $this->filemtime( WEMAKECONTENTCMS_BUILD_JS_DIR_PATH . '/single.js' ), true );
 		// wp_register_script( 'author-js', WEMAKECONTENTCMS_BUILD_JS_URI . '/author.js', ['jquery'], $this->filemtime( WEMAKECONTENTCMS_BUILD_JS_DIR_PATH . '/author.js' ), true );
 		wp_register_script( 'bootstrap', WEMAKECONTENTCMS_BUILD_LIB_URI . '/js/bootstrap.min.js', ['jquery'], false, true );
+		wp_register_script( 'WeMakeContentCMS', WEMAKECONTENTCMS_BUILD_JS_URI . '/frontend.js', ['jquery'], $this->filemtime( WEMAKECONTENTCMS_BUILD_JS_DIR_PATH . '/frontend.js' ), true );
 		// wp_register_script( 'bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js', ['jquery'], false, true );
 		// wp_register_script( 'prismjs', 'https://preview.keenthemes.com/start/assets/plugins/custom/prismjs/prismjs.bundle.js', ['jquery'], false, true );
 		// wp_register_script( 'datatables', 'https://preview.keenthemes.com/start/assets/plugins/custom/datatables/datatables.bundle.js', ['jquery'], false, true );
@@ -76,9 +76,9 @@ class Assets {
 		// Enqueue Scripts.
 		// Both of is_order_received_page() and is_wc_endpoint_url( 'order-received' ) will work to check if you are on the thankyou page in the frontend.
 		// wp_enqueue_script( 'datatables' );
+		wp_enqueue_script( 'bootstrap' );
 		wp_enqueue_script( 'WeMakeContentCMS' );
-		// wp_enqueue_script( 'prismjs' );wp_enqueue_script( 'popperjs' )
-		;wp_enqueue_script( 'bootstrap' );
+		// wp_enqueue_script( 'prismjs' );wp_enqueue_script( 'popperjs' );
 		// if( $this->allow_enqueue() ) {}
 		
 		// wp_enqueue_script( 'bootstrap-js' );

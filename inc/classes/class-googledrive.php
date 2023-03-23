@@ -147,9 +147,7 @@ class GoogleDrive {
 		$user_id = is_admin() ? $data->userid : get_current_user_id();
 		$fileName = 'archive-' . $data->userid . '-' . strtolower( $month );
 		$record_count = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$this->theTable} WHERE user_id=%d AND formonth=%s;", $user_id, $month ) );
-		if( $record_count && ! empty( $record_count->drive_id ) ) {
-			$fileName = $fileName . '-' . date( 'd-H' );
-		}
+		$fileName = ( $record_count && ! empty( $record_count->drive_id ) ) ? $fileName . '-' . date( 'H-i' ) : $fileName . '-' . date( 'H-i' );
 		$archive_path = apply_filters( 'futurewordpress/project/filesystem/uploaddir', false ) . '/' . $fileName . '.zip';
 		$result = $this->archiveFiles( $file_list, $archive_path );$donotDeletePreviousFile = true;
 		if( $result ) {
@@ -206,6 +204,15 @@ class GoogleDrive {
 					'formonth' => $month,
 				] );
 				unlink( $archive_path );
+			} else {
+				$notice = apply_filters( 'futurewordpress/project/notices/manager', 'add', 'cancelSubscription', [
+					'type'						=> 'alert',
+					'message'					=> __( 'Cpanel to Google Drive file transfer failed.<br/>' . json_encode( [$this->lastError] ), 'we-make-content-crm' ),
+					'data'						=> [
+						'time'					=> wp_date( 'Y-M-d H:i:s' ),
+						'user'					=> get_current_user_id()
+					]
+				] );
 			}
 			WC()->session->set( 'uploaded_files_to_archive', [] );
 			wp_send_json_success( [ 'message' => __( 'Archived Successfully.', 'we-make-content-crm' ), 'hooks' => [ 'reload-page' ] ], 200 );
@@ -354,7 +361,7 @@ class GoogleDrive {
 		if( ! isset( $request[ 'code' ] ) ) {return;}
 		update_option( 'fwp_google_auth_code', [
       'auth_code'     => $request[ 'code' ],
-      'time'      => time(),
+      'time'      		=> time(),
 			...$request
     ] );
 		// print_r( get_option( 'fwp_google_auth_code', [] ) );
@@ -495,6 +502,7 @@ class GoogleDrive {
 		$error = curl_error($curl);
 
 		$result = json_decode( $response, true );
+		$this->lastError = $result;
 		// print_r( $result );
 
 		curl_close($curl);

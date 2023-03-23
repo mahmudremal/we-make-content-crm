@@ -493,6 +493,14 @@ console.log(customer.id);
 					href = link.href.split('#');href = ( href[1] ) ? href[1] : href[0];
 					href = href.split('-');href = ( href[1] ) ? href[1] : href[0];
 					thisClass.navigateTo( thisClass.profile.profilePath + '/' + href );
+
+					// If bootstrap tabs function does not works.
+					document.querySelectorAll( '.nav-pills .nav-link.active[role="tab"]' ).forEach( ( el ) => {el.classList.remove( 'active', 'show' );} );
+					link.classList.add( 'active', 'show' );tab = document.querySelector( link.getAttribute( 'href' ) );
+					if( tab ) {
+						document.querySelectorAll( '.tab-content.iq-tab-fade-up .tab-pane.fade.active.show' ).forEach( ( el ) => {el.classList.remove( 'active', 'show' );} );
+						tab.classList.add( 'active', 'show' );
+					}
 				} );
 			} );
 			setTimeout(() => {

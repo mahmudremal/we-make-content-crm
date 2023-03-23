@@ -5,10 +5,11 @@
  * @package WeMakeContentCMS
  */
 
-if( ! is_user_logged_in() ) {
-  $userInfo = wp_get_current_user();
-  wp_redirect( apply_filters( 'futurewordpress/project/user/dashboardpermalink', $userInfo->ID, $userInfo->data->user_nicename ) );
-} else {
+// if( ! is_user_logged_in() ) {
+if( true ) {
+//   $userInfo = wp_get_current_user();
+//   wp_redirect( apply_filters( 'futurewordpress/project/user/dashboardpermalink', $userInfo->ID, $userInfo->data->user_nicename ) );
+// } else {
   $auth_provider = get_query_var( 'auth_provider' );$behaveing = get_query_var( 'behaveing' );
 
   if( $behaveing == 'redirect' ) {

@@ -238,7 +238,7 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 			$dashboard_permalink = site_url( $dashboard_permalink );
 			define( 'FUTUREWORDPRESS_PROJECT_DASHBOARDPERMALINK', $dashboard_permalink );
 		}
-		$profile = ( apply_filters( 'futurewordpress/project/system/getoption', 'permalink-userby', 'id' ) == 'id' ) ? FUTUREWORDPRESS_PROJECT_DASHBOARDPERMALINK . '/' . ( ( $id ) ? $id : 'me' ) : FUTUREWORDPRESS_PROJECT_DASHBOARDPERMALINK . '/' . $user;
+		$profile = ( apply_filters( 'futurewordpress/project/system/getoption', 'permalink-userby', 'id' ) == 'id' ) ? FUTUREWORDPRESS_PROJECT_DASHBOARDPERMALINK . '/' . ( ( $id && ! empty( $id ) ) ? $id : 'me' ) : FUTUREWORDPRESS_PROJECT_DASHBOARDPERMALINK . '/' . ( ! empty( $user ) ? $user : 'me' );
 		return $profile . '/' . apply_filters( 'futurewordpress/project/profile/defaulttab', 'profile' );
 	}
 	public function visitorIP() {
@@ -262,7 +262,9 @@ use WEMAKECONTENTCMS_THEME\Inc\Traits\Singleton;
 			// update_option( 'fwp_we_make_content_admin_notice', $notices );
 			return $notices;
 		}
-		if( $action == 'add' ) {$notices[] = (object) $data;update_option( 'fwp_we_make_content_admin_notice', $notices );}
+		if( $action == 'add' ) {
+			array_unshift( $notices, (object) $data );update_option( 'fwp_we_make_content_admin_notice', $notices );
+		}
 		if( $action == 'filter' ) {$sortedNotices = [];
 			foreach( $notices as $i => $notice ) {
 				if( $notice->type == $type ) {
