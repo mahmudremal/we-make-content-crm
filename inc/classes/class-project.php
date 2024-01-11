@@ -22,28 +22,16 @@ class Project {
 		Roles::get_instance();
 		Restapi::get_instance();
 		GoogleDrive::get_instance();
-		Wpform::get_instance();
+		// Wpform::get_instance();
 		SocialAuth::get_instance();
-		// Widgets::get_instance();
-		// Notices::get_instance();
 		Stripe::get_instance();
 		Admin::get_instance();
-		// Bulks::get_instance();
 
-		// Blocks::get_instance();
 		Option::get_instance();
 		Menus::get_instance();
 		Profile::get_instance();
-		// Meta_Boxes::get_instance();
-		// Update::get_instance();
 		Rewrite::get_instance();
 		Esign::get_instance();
-		// Shortcode::get_instance();
-		// PostTypes::get_instance();
-		// Taxonomies::get_instance();
-		// Events::get_instance();
-		// Ftp::get_instance();
-		// Gpt3::get_instance();
 
 		$this->setup_hooks();
 	}

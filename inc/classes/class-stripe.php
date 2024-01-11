@@ -65,10 +65,12 @@ class Stripe {
     return $query_vars;
 	}
 	public function template_include( $template ) {
-    $pay_retainer = get_query_var( 'pay_retainer' );$payment_status = get_query_var( 'payment_status' );
-		if ( $pay_retainer && ! empty( $pay_retainer ) && ( $file = WEMAKECONTENTCMS_DIR_PATH . '/templates/dashboard/cards/pay_retainer.php' ) && file_exists( $file ) && ! is_dir( $file ) ) {
-      return $file;
-    } else if ( $payment_status && ! empty( $payment_status ) && ( $file = WEMAKECONTENTCMS_DIR_PATH . '/templates/dashboard/cards/payment_status.php' ) && file_exists( $file ) && ! is_dir( $file ) ) {
+		$pay_retainer = get_query_var( 'pay_retainer' );
+		$payment_status = get_query_var( 'payment_status' );
+		$file = WEMAKECONTENTCMS_DIR_PATH . '/templates/dashboard/cards/pay_retainer.php';
+		if( $pay_retainer && ! empty( $pay_retainer ) && file_exists( $file ) && ! is_dir( $file ) ) {
+			return $file;
+		} else if ( $payment_status && ! empty( $payment_status ) && ( $file = WEMAKECONTENTCMS_DIR_PATH . '/templates/dashboard/cards/payment_status.php' ) && file_exists( $file ) && ! is_dir( $file ) ) {
 			return $file;
 		} else {
 			return $template;

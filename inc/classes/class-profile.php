@@ -144,6 +144,7 @@ class Profile {
 		return apply_filters( 'futurewordpress/project/user/dashboardpermalink', false, 'me' );
 	}
 	public function woocommerce_account_navigation() {
+		if( ! is_user_logged_in() ) {return;}
 		if( ! apply_filters( 'futurewordpress/project/system/isactive', 'dashboard-disablemyaccount' ) ) {return;}
 		$link = apply_filters( 'futurewordpress/project/user/dashboardpermalink', false, 'me' );
 		wp_redirect( $link );

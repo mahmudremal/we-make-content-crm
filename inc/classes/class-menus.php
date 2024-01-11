@@ -98,6 +98,7 @@ class Menus {
    * @return array
    */
 	public function general( $args ) {
+		$args[ 'menu_title' ] = __( 'CRM Config', 'we-make-content-crm' );
 		return $args;
 	}
 	public function menus( $args ) {

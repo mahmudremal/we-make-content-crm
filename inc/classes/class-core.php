@@ -229,16 +229,16 @@ class Core {
 		return $rules;
 	}
 	public function template_include( $template ) {
-    $lead_registration = get_query_var( 'lead_registration' );// $order_id = get_query_var( 'order_id' );
+    	$lead_registration = get_query_var( 'lead_registration' );// $order_id = get_query_var( 'order_id' );
 		if ( $lead_registration == false || $lead_registration == '' ) {
-      return $template;
-    } else {
-			$file = WEMAKECONTENTCMS_DIR_PATH . '/templates/dashboard/cards/lead_registration.php';
-			if( file_exists( $file ) && ! is_dir( $file ) ) {
-          return $file;
-        } else {
-          return $template;
-        }
+		return $template;
+		} else {
+				$file = WEMAKECONTENTCMS_DIR_PATH . '/templates/dashboard/cards/lead_registration.php';
+				if( file_exists( $file ) && ! is_dir( $file ) ) {
+			return $file;
+			} else {
+			return $template;
+			}
 		}
 	}
 	public function sendRegistration() {

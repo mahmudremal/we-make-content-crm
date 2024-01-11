@@ -46,16 +46,16 @@ class Rewrite {
     return $query_vars;
 	}
 	public function template_include( $template ) {
-    $user_profile = get_query_var( 'user_profile' );// $order_id = get_query_var( 'order_id' );
+		$user_profile = get_query_var( 'user_profile' );// $order_id = get_query_var( 'order_id' );
 		if ( $user_profile == false || $user_profile == '' ) {
-      return $template;
-    } else {
-			$file = WEMAKECONTENTCMS_DIR_PATH . '/templates/dashboard/index.php';
-			if( file_exists( $file ) && ! is_dir( $file ) ) {
-          return $file;
-        } else {
-          return $template;
-        }
+		return $template;
+		} else {
+				$file = WEMAKECONTENTCMS_DIR_PATH . '/templates/dashboard/index.php';
+				if( file_exists( $file ) && ! is_dir( $file ) ) {
+			return $file;
+			} else {
+			return $template;
+			}
 		}
 	}
 }
